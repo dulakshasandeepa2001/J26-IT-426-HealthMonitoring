@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'taskcreate',
+    
 ]
 
 # Custom User Model
@@ -165,4 +166,4 @@ CORS_ALLOWED_ORIGINS = [
     "https://yuemlsjtzdpgclgnlogg.supabase.co",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
