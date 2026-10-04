@@ -109,6 +109,9 @@ def login_user(request):
             "username": user.username,
             "role": user.role,
             "doctorID": user.doctorID,
+            "lab_name": user.lab_name,
+            "license_id": user.license_id,
+            "lab_address": user.lab_address,
         }, status=200)
 
     except json.JSONDecodeError:

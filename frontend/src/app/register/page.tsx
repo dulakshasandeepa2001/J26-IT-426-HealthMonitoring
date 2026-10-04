@@ -18,7 +18,9 @@ import {
   ShieldCheck, 
   ArrowRight,
   Stethoscope,
-  Building2
+  Building2,
+  FlaskConical,
+  MapPin
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -36,6 +38,9 @@ export default function Register() {
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [otherUniversity, setOtherUniversity] = useState("");
   const [workingHospital, setWorkingHospital] = useState("");
+  const [labName, setLabName] = useState("");
+  const [labAddress, setLabAddress] = useState("");
+  const [licenseId, setLicenseId] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,6 +73,12 @@ export default function Register() {
       return;
     }
 
+    if (role === "lab" && (!labName || !labAddress || !licenseId)) {
+      setError("Please fill in all laboratory details.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const now = new Date().toISOString();
       const uniToSubmit = selectedUniversity === "other" ? otherUniversity : selectedUniversity;
@@ -85,6 +96,9 @@ export default function Register() {
           degrees,
           university: uniToSubmit,
           working_hospital: workingHospital,
+          lab_name: labName,
+          lab_address: labAddress,
+          license_id: licenseId,
           created_at: now,
           updated_at: now,
         }),
@@ -92,6 +106,11 @@ export default function Register() {
 
       if (role === "doctor") {
         setSuccess("Registration submitted for admin approval! You will be notified once reviewed.");
+      } else if (role === "lab") {
+        setSuccess("Laboratory registered successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
       } else {
         setSuccess("Account created successfully! Redirecting to login...");
         setTimeout(() => {
@@ -290,8 +309,63 @@ export default function Register() {
               >
                 <option value="patient">Patient Portal</option>
                 <option value="doctor">Doctor Portal (Requires Approval)</option>
+                <option value="lab">Laboratory Portal</option>
               </select>
             </div>
+
+            {/* Laboratory Specific Additional Fields */}
+            {role === "lab" && (
+              <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-100 space-y-4 animate-in fade-in duration-300 mt-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-teal-700">
+                  <FlaskConical className="w-4 h-4 text-teal-600" />
+                  <span>Laboratory Facility Information</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Laboratory Name *</label>
+                    <div className="relative">
+                      <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={labName}
+                        onChange={(e) => setLabName(e.target.value)}
+                        placeholder="e.g. Asiri Central Lab"
+                        className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">License / Registration ID *</label>
+                    <div className="relative">
+                      <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={licenseId}
+                        onChange={(e) => setLicenseId(e.target.value)}
+                        placeholder="e.g. SLMC-LAB-2026-441"
+                        className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Laboratory Address *</label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <textarea
+                      rows={2}
+                      value={labAddress}
+                      onChange={(e) => setLabAddress(e.target.value)}
+                      placeholder="e.g. No. 114, Norris Canal Road, Colombo 10"
+                      className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:border-teal-600 focus:outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Doctor Specific Additional Fields */}
             {role === "doctor" && (
