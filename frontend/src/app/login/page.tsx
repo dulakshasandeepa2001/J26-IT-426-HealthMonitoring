@@ -24,6 +24,8 @@ export default function Login() {
           router.push("/admin/dashboard");
         } else if (user.role === "doctor") {
           router.push("/doctor/dashboard");
+        } else if (user.role === "lab") {
+          router.push("/lab/dashboard");
         } else {
           router.push("/patient/dashboard");
         }
@@ -57,6 +59,9 @@ export default function Login() {
           username: data.username,
           role: data.role,
           doctorID: data.doctorID,
+          lab_name: data.lab_name,
+          license_id: data.license_id,
+          lab_address: data.lab_address,
         })
       );
 
@@ -64,6 +69,8 @@ export default function Login() {
         router.push("/admin/dashboard");
       } else if (data.role === "doctor") {
         router.push("/doctor/dashboard");
+      } else if (data.role === "lab") {
+        router.push("/lab/dashboard");
       } else {
         router.push("/patient/dashboard");
       }

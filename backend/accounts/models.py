@@ -1,3 +1,4 @@
+from django.contrib.auth import base_user
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -9,6 +10,8 @@ class User(AbstractUser):
     ROLE_CHOICES = (
         ('doctor', 'Doctor'),
         ('patient', 'Patient'),
+        ('lab', 'Lab'),
+        
     )
 
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -20,6 +23,9 @@ class User(AbstractUser):
     working_hospital = models.CharField(max_length=150, blank=True, null=True)
     doctorID = models.CharField(max_length=50, blank=True, null=True)
     is_approved = models.BooleanField(default=False)
+    lab_name = models.CharField(max_length=150, blank=True, null=True)
+    lab_address = models.CharField(max_length=255, blank=True, null=True)
+    license_id = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.username
@@ -66,3 +72,22 @@ class PendingDoctor(models.Model):
     class Meta:
         db_table = 'pending_doctors'
 
+
+class Laborator(models.Model):
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    role = models.CharField(max_length=20, blank=True, null=True, default="lab")
+    email = models.EmailField(max_length=100)
+    phone = models.CharField(max_length=100)
+    NIC_number = models.CharField(max_length=12, unique=True, blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
+    lab_name = models.CharField(max_length=150, blank=True, null=True)
+    lab_address = models.CharField(max_length=255, blank=True, null=True)
+    license_id = models.CharField(max_length=50, blank=True, null=True)
+    def __str__(self):
+        return self.lab_name
+    
+    class Meta:
+        db_table = 'laborator'
+    
+    

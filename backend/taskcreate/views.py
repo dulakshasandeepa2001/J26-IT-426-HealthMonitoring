@@ -57,30 +57,33 @@ def create_task(request):
         )
 
 
-api_view(['POST'])
+@api_view(['GET', 'POST'])
 def get_tasks(request):
-    """Get all tasks for a specific doctor and date using POST method"""
+    """Get all tasks for a specific doctor and optional date using GET or POST method"""
     try:
-        # Parse JSON body
-        data = json.loads(request.body)
-        
-        doctor_id = data.get('doctor_id')
-        task_date = data.get('task_date')
+        doctor_id = None
+        task_date = None
+
+        if request.method == 'GET':
+            doctor_id = request.GET.get('doctor_id')
+            task_date = request.GET.get('task_date')
+        else:
+            if request.body:
+                data = json.loads(request.body)
+                doctor_id = data.get('doctor_id')
+                task_date = data.get('task_date')
 
         print(f"🔍 Fetching tasks for Doctor ID: {doctor_id} on Date: {task_date}")
 
-        # Validate required fields
         if not doctor_id:
             return JsonResponse({'error': 'Doctor ID is required'}, status=400)
-        
-        if not task_date:
-            return JsonResponse({'error': 'Task date is required'}, status=400)
 
         # Query tasks from database
-        tasks = Task.objects.filter(
-            doctor_id=doctor_id,
-            task_date=task_date
-        ).values(
+        query_filters = {'doctor_id': doctor_id}
+        if task_date:
+            query_filters['task_date'] = task_date
+
+        tasks = Task.objects.filter(**query_filters).values(
             'task_id',
             'doctor_id',
             'task_date',
@@ -89,8 +92,9 @@ def get_tasks(request):
             'task_type',
             'start_time',
             'end_time',
-            'priority'
-        ).order_by('start_time')
+            'priority',
+            'is_completed'
+        ).order_by('task_date', 'start_time')
 
         print(f"✅ Found {len(tasks)} tasks")
 

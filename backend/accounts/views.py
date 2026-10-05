@@ -1,16 +1,21 @@
+import _winapi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import JsonResponse
+from django.db.models import Q
 import json
-from accounts.models import PendingDoctor, User, Doctor
+from accounts.models import PendingDoctor, User, Doctor, Laborator  
 
 
 @api_view(['POST'])
 def create_user(request):
     """Create a patient directly, or submit a doctor for admin approval."""
     try:
-        data = json.loads(request.body)
-        role = data.get("role")
+        data = request.data
+        if not data:
+            return JsonResponse({'error': 'Request body is empty. Please check that you are sending raw JSON in Postman.'}, status=400)
+
+        role = str(data.get("role", "")).strip().lower()
 
         if role == "patient":
             user = User(
@@ -20,7 +25,7 @@ def create_user(request):
                 NIC_number=data.get('NIC_number'),
                 birthday=data.get('birthday'),
                 role='patient',
-                is_approved=True,
+                is_approved=True, #patients are auto approved
             )
             user.set_password(data.get('password'))
             user.save()
@@ -44,8 +49,25 @@ def create_user(request):
                 'pending_id': pending.id
             })
 
+        elif role == "lab":
+            user = User(
+                username=data.get('username'),
+                email=data.get('email'),
+                phone=data.get('phone'),
+                NIC_number=data.get('NIC_number'),
+                birthday=data.get('birthday'),
+                lab_name=data.get('lab_name'),
+                lab_address=data.get('lab_address'),
+                license_id=data.get('license_id'),
+                role='lab',
+                is_approved=True,
+            )
+            user.set_password(data.get('password'))
+            user.save()
+            return JsonResponse({'message': 'Laboratory registered successfully.'})
+
         else:
-            return JsonResponse({'error': 'Invalid role. Must be "patient" or "doctor".'}, status=400)
+            return JsonResponse({'error': 'Invalid role. Must be "patient", "doctor", or "lab".'}, status=400)
 
     except Exception as e:
         return JsonResponse({'error': f'Registration failed: {str(e)}'}, status=500)
@@ -53,18 +75,27 @@ def create_user(request):
 
 @api_view(['POST'])
 def login_user(request):
-    """Login with username and password."""
+    """Login with username (or email) and password."""
     try:
         data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
+        username = data.get("username", "").strip()
+        password = data.get("password", "")
 
         if not username or not password:
             return JsonResponse({"error": "Username and password are required"}, status=400)
 
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
+        # Lookup user by username or email (case-insensitive)
+        user = User.objects.filter(
+            Q(username__iexact=username) | Q(email__iexact=username)
+        ).first()
+
+        if not user:
+            # Check if this user is in the pending doctors approval queue
+            is_pending = PendingDoctor.objects.filter(
+                Q(username__iexact=username) | Q(email__iexact=username)
+            ).exists()
+            if is_pending:
+                return JsonResponse({"error": "Your doctor registration is pending administrator review & approval."}, status=403)
             return JsonResponse({"error": "Invalid username or password"}, status=401)
 
         if not user.check_password(password):
@@ -78,6 +109,9 @@ def login_user(request):
             "username": user.username,
             "role": user.role,
             "doctorID": user.doctorID,
+            "lab_name": user.lab_name,
+            "license_id": user.license_id,
+            "lab_address": user.lab_address,
         }, status=200)
 
     except json.JSONDecodeError:
