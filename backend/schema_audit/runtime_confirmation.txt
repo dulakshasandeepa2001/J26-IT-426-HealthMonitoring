@@ -1,0 +1,8 @@
+Read-only observations during this audit:
+Backend listener on port 8000 belongs to this workspace's manage.py runserver process: True
+That process had an established TCP connection to an address resolved from the intended Session pooler, port 5432: True
+Live PostgreSQL health checks succeeded: True
+Diagnostic effective database configuration matches the intended local environment: True
+Diagnostic database/schema: postgres/public
+Diagnostic transaction_read_only: on
+Credentials were not printed. No backend/UI configuration or database records were changed.

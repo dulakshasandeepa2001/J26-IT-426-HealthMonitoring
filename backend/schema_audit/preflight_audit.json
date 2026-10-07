@@ -1,0 +1,1436 @@
+{
+  "intended_configuration_matches": true,
+  "connection": {
+    "backend": "postgresql",
+    "database": "postgres",
+    "schema": "public",
+    "search_path": "\"\\$user\", public, extensions",
+    "transaction_read_only": "on"
+  },
+  "migration_records": [
+    {
+      "app": "accounts",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:40.774008+00:00"
+    },
+    {
+      "app": "accounts",
+      "name": "0002_doctor_pendingdoctor_rename_phone_number_user_phone_and_more",
+      "applied": "2026-08-05T07:12:44.844935+00:00"
+    },
+    {
+      "app": "accounts",
+      "name": "0003_alter_user_role",
+      "applied": "2026-08-05T07:12:45.023697+00:00"
+    },
+    {
+      "app": "admin",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:46.612662+00:00"
+    },
+    {
+      "app": "admin",
+      "name": "0002_logentry_remove_auto_add",
+      "applied": "2026-08-05T07:12:46.788119+00:00"
+    },
+    {
+      "app": "admin",
+      "name": "0003_logentry_add_action_flag_choices",
+      "applied": "2026-08-05T07:12:47.282470+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:32.231728+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0002_alter_permission_name_max_length",
+      "applied": "2026-08-05T07:12:32.696640+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0003_alter_user_email_max_length",
+      "applied": "2026-08-05T07:12:33.033907+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0004_alter_user_username_opts",
+      "applied": "2026-08-05T07:12:33.516480+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0005_alter_user_last_login_null",
+      "applied": "2026-08-05T07:12:33.995977+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0006_require_contenttypes_0002",
+      "applied": "2026-08-05T07:12:34.468383+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0007_alter_validators_add_error_messages",
+      "applied": "2026-08-05T07:12:34.948162+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0008_alter_user_username_max_length",
+      "applied": "2026-08-05T07:12:35.427194+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0009_alter_user_last_name_max_length",
+      "applied": "2026-08-05T07:12:35.905463+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0010_alter_group_name_max_length",
+      "applied": "2026-08-05T07:12:36.703342+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0011_update_proxy_permissions",
+      "applied": "2026-08-05T07:12:37.027952+00:00"
+    },
+    {
+      "app": "auth",
+      "name": "0012_alter_user_first_name_max_length",
+      "applied": "2026-08-05T07:12:37.505727+00:00"
+    },
+    {
+      "app": "contenttypes",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:28.868820+00:00"
+    },
+    {
+      "app": "contenttypes",
+      "name": "0002_remove_content_type_name",
+      "applied": "2026-08-05T07:12:29.660497+00:00"
+    },
+    {
+      "app": "sessions",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:48.552914+00:00"
+    },
+    {
+      "app": "taskcreate",
+      "name": "0001_initial",
+      "applied": "2026-08-05T07:12:49.036138+00:00"
+    }
+  ],
+  "migration_history_consistent": true,
+  "dependencies": [
+    {
+      "app": "contenttypes",
+      "name": "0001_initial",
+      "applied": true,
+      "operations": [
+        "Create model ContentType",
+        "Alter unique_together for contenttype (1 constraint(s))"
+      ]
+    },
+    {
+      "app": "contenttypes",
+      "name": "0002_remove_content_type_name",
+      "applied": true,
+      "operations": [
+        "Change Meta options on contenttype",
+        "Alter field name on contenttype",
+        "Raw Python operation",
+        "Remove field name from contenttype"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0001_initial",
+      "applied": true,
+      "operations": [
+        "Create model Permission",
+        "Create model Group",
+        "Create model User"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0002_alter_permission_name_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field name on permission"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0003_alter_user_email_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field email on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0004_alter_user_username_opts",
+      "applied": true,
+      "operations": [
+        "Alter field username on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0005_alter_user_last_login_null",
+      "applied": true,
+      "operations": [
+        "Alter field last_login on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0006_require_contenttypes_0002",
+      "applied": true,
+      "operations": []
+    },
+    {
+      "app": "auth",
+      "name": "0007_alter_validators_add_error_messages",
+      "applied": true,
+      "operations": [
+        "Alter field username on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0008_alter_user_username_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field username on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0009_alter_user_last_name_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field last_name on user"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0010_alter_group_name_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field name on group"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0011_update_proxy_permissions",
+      "applied": true,
+      "operations": [
+        "Raw Python operation"
+      ]
+    },
+    {
+      "app": "auth",
+      "name": "0012_alter_user_first_name_max_length",
+      "applied": true,
+      "operations": [
+        "Alter field first_name on user"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0001_initial",
+      "applied": true,
+      "operations": [
+        "Create model User"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0002_doctor_pendingdoctor_rename_phone_number_user_phone_and_more",
+      "applied": true,
+      "operations": [
+        "Create model Doctor",
+        "Create model PendingDoctor",
+        "Rename field phone_number on user to phone",
+        "Add field NIC_number to user",
+        "Add field birthday to user",
+        "Add field degrees to user",
+        "Add field doctorID to user",
+        "Add field university to user",
+        "Add field working_hospital to user",
+        "Alter field email on user",
+        "Alter field role on user"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0003_laborator_alter_user_role",
+      "applied": false,
+      "operations": [
+        "Create model Laborator",
+        "Alter field role on user"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0004_rename_lab_email_laborator_email",
+      "applied": false,
+      "operations": [
+        "Rename field lab_email on laborator to email"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0005_laborator_role_alter_laborator_nic_number_and_more",
+      "applied": false,
+      "operations": [
+        "Add field role to laborator",
+        "Alter field NIC_number on laborator",
+        "Alter field birthday on laborator",
+        "Alter field email on laborator",
+        "Alter field password on laborator",
+        "Alter field phone on laborator",
+        "Alter field username on laborator"
+      ]
+    },
+    {
+      "app": "accounts",
+      "name": "0006_user_lab_address_user_lab_name_user_license_id",
+      "applied": false,
+      "operations": [
+        "Add field lab_address to user",
+        "Add field lab_name to user",
+        "Add field license_id to user"
+      ]
+    }
+  ],
+  "pending_plan": [
+    {
+      "app": "accounts",
+      "name": "0003_laborator_alter_user_role",
+      "backwards": false
+    },
+    {
+      "app": "accounts",
+      "name": "0004_rename_lab_email_laborator_email",
+      "backwards": false
+    },
+    {
+      "app": "accounts",
+      "name": "0005_laborator_role_alter_laborator_nic_number_and_more",
+      "backwards": false
+    },
+    {
+      "app": "accounts",
+      "name": "0006_user_lab_address_user_lab_name_user_license_id",
+      "backwards": false
+    }
+  ],
+  "models": [
+    {
+      "model": "User_groups",
+      "table": "accounts_user_groups",
+      "exists": true,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "user_id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "group_id",
+          "type": "integer",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": "d"
+        },
+        {
+          "name": "user_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "group_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "accounts_user_groups_group_id_bd11a704_fk_auth_group_id",
+          "kind": "f",
+          "definition": "FOREIGN KEY (group_id) REFERENCES auth_group(id) DEFERRABLE INITIALLY DEFERRED"
+        },
+        {
+          "name": "accounts_user_groups_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "accounts_user_groups_user_id_52b62117_fk_accounts_user_id",
+          "kind": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES accounts_user(id) DEFERRABLE INITIALLY DEFERRED"
+        },
+        {
+          "name": "accounts_user_groups_user_id_group_id_59c0b32f_uniq",
+          "kind": "u",
+          "definition": "UNIQUE (user_id, group_id)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "accounts_user_groups_group_id_bd11a704",
+          "definition": "CREATE INDEX accounts_user_groups_group_id_bd11a704 ON public.accounts_user_groups USING btree (group_id)"
+        },
+        {
+          "name": "accounts_user_groups_pkey",
+          "definition": "CREATE UNIQUE INDEX accounts_user_groups_pkey ON public.accounts_user_groups USING btree (id)"
+        },
+        {
+          "name": "accounts_user_groups_user_id_52b62117",
+          "definition": "CREATE INDEX accounts_user_groups_user_id_52b62117 ON public.accounts_user_groups USING btree (user_id)"
+        },
+        {
+          "name": "accounts_user_groups_user_id_group_id_59c0b32f_uniq",
+          "definition": "CREATE UNIQUE INDEX accounts_user_groups_user_id_group_id_59c0b32f_uniq ON public.accounts_user_groups USING btree (user_id, group_id)"
+        }
+      ],
+      "row_count": 0,
+      "missing_columns": [],
+      "extra_columns": [],
+      "column_differences": []
+    },
+    {
+      "model": "User_user_permissions",
+      "table": "accounts_user_user_permissions",
+      "exists": true,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "user_id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "permission_id",
+          "type": "integer",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": "d"
+        },
+        {
+          "name": "user_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "permission_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "accounts_user_user_p_permission_id_113bb443_fk_auth_perm",
+          "kind": "f",
+          "definition": "FOREIGN KEY (permission_id) REFERENCES auth_permission(id) DEFERRABLE INITIALLY DEFERRED"
+        },
+        {
+          "name": "accounts_user_user_p_user_id_e4f0a161_fk_accounts_",
+          "kind": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES accounts_user(id) DEFERRABLE INITIALLY DEFERRED"
+        },
+        {
+          "name": "accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq",
+          "kind": "u",
+          "definition": "UNIQUE (user_id, permission_id)"
+        },
+        {
+          "name": "accounts_user_user_permissions_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq",
+          "definition": "CREATE UNIQUE INDEX accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq ON public.accounts_user_user_permissions USING btree (user_id, permission_id)"
+        },
+        {
+          "name": "accounts_user_user_permissions_permission_id_113bb443",
+          "definition": "CREATE INDEX accounts_user_user_permissions_permission_id_113bb443 ON public.accounts_user_user_permissions USING btree (permission_id)"
+        },
+        {
+          "name": "accounts_user_user_permissions_pkey",
+          "definition": "CREATE UNIQUE INDEX accounts_user_user_permissions_pkey ON public.accounts_user_user_permissions USING btree (id)"
+        },
+        {
+          "name": "accounts_user_user_permissions_user_id_e4f0a161",
+          "definition": "CREATE INDEX accounts_user_user_permissions_user_id_e4f0a161 ON public.accounts_user_user_permissions USING btree (user_id)"
+        }
+      ],
+      "row_count": 0,
+      "missing_columns": [],
+      "extra_columns": [],
+      "column_differences": []
+    },
+    {
+      "model": "User",
+      "table": "accounts_user",
+      "exists": true,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "password",
+          "type": "varchar(128)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "last_login",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_superuser",
+          "type": "boolean",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "username",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "first_name",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "last_name",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(254)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_staff",
+          "type": "boolean",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "date_joined",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(15)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "NIC_number",
+          "type": "varchar(12)",
+          "nullable": true,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "role",
+          "type": "varchar(20)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "degrees",
+          "type": "varchar(100)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "university",
+          "type": "varchar(100)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "working_hospital",
+          "type": "varchar(150)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "doctorID",
+          "type": "varchar(50)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_approved",
+          "type": "boolean",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "lab_name",
+          "type": "varchar(150)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "lab_address",
+          "type": "varchar(255)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "license_id",
+          "type": "varchar(50)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": "d"
+        },
+        {
+          "name": "password",
+          "type": "character varying(128)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "last_login",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "is_superuser",
+          "type": "boolean",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "username",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "first_name",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "last_name",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "is_staff",
+          "type": "boolean",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "date_joined",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "role",
+          "type": "character varying(20)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "phone",
+          "type": "character varying(15)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "is_approved",
+          "type": "boolean",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "NIC_number",
+          "type": "character varying(12)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "degrees",
+          "type": "character varying(100)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "doctorID",
+          "type": "character varying(50)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "university",
+          "type": "character varying(100)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "working_hospital",
+          "type": "character varying(150)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "accounts_user_NIC_number_key",
+          "kind": "u",
+          "definition": "UNIQUE (\"NIC_number\")"
+        },
+        {
+          "name": "accounts_user_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "accounts_user_username_key",
+          "kind": "u",
+          "definition": "UNIQUE (username)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "accounts_user_NIC_number_51b0003a_like",
+          "definition": "CREATE INDEX \"accounts_user_NIC_number_51b0003a_like\" ON public.accounts_user USING btree (\"NIC_number\" varchar_pattern_ops)"
+        },
+        {
+          "name": "accounts_user_NIC_number_key",
+          "definition": "CREATE UNIQUE INDEX \"accounts_user_NIC_number_key\" ON public.accounts_user USING btree (\"NIC_number\")"
+        },
+        {
+          "name": "accounts_user_pkey",
+          "definition": "CREATE UNIQUE INDEX accounts_user_pkey ON public.accounts_user USING btree (id)"
+        },
+        {
+          "name": "accounts_user_username_6088629e_like",
+          "definition": "CREATE INDEX accounts_user_username_6088629e_like ON public.accounts_user USING btree (username varchar_pattern_ops)"
+        },
+        {
+          "name": "accounts_user_username_key",
+          "definition": "CREATE UNIQUE INDEX accounts_user_username_key ON public.accounts_user USING btree (username)"
+        }
+      ],
+      "row_count": 6,
+      "missing_columns": [
+        "lab_address",
+        "lab_name",
+        "license_id"
+      ],
+      "extra_columns": [],
+      "column_differences": []
+    },
+    {
+      "model": "Doctor",
+      "table": "register_DoctorID",
+      "exists": true,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "doctor_id",
+          "type": "varchar(50)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "register_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "doctor_nicnumber",
+          "type": "varchar(20)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "doctors_name",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "dob",
+          "type": "date",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "degrees",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "university",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "working_hospital",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": "d"
+        },
+        {
+          "name": "doctor_id",
+          "type": "character varying(50)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "register_id",
+          "type": "character varying(100)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "doctor_nicnumber",
+          "type": "character varying(20)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "doctors_name",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "dob",
+          "type": "date",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "degrees",
+          "type": "character varying(100)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "university",
+          "type": "character varying(100)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "working_hospital",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "register_DoctorID_doctor_id_key",
+          "kind": "u",
+          "definition": "UNIQUE (doctor_id)"
+        },
+        {
+          "name": "register_DoctorID_doctor_nicnumber_key",
+          "kind": "u",
+          "definition": "UNIQUE (doctor_nicnumber)"
+        },
+        {
+          "name": "register_DoctorID_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "register_DoctorID_register_id_key",
+          "kind": "u",
+          "definition": "UNIQUE (register_id)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "register_DoctorID_doctor_id_676e79bc_like",
+          "definition": "CREATE INDEX \"register_DoctorID_doctor_id_676e79bc_like\" ON public.\"register_DoctorID\" USING btree (doctor_id varchar_pattern_ops)"
+        },
+        {
+          "name": "register_DoctorID_doctor_id_key",
+          "definition": "CREATE UNIQUE INDEX \"register_DoctorID_doctor_id_key\" ON public.\"register_DoctorID\" USING btree (doctor_id)"
+        },
+        {
+          "name": "register_DoctorID_doctor_nicnumber_1b5ddcb9_like",
+          "definition": "CREATE INDEX \"register_DoctorID_doctor_nicnumber_1b5ddcb9_like\" ON public.\"register_DoctorID\" USING btree (doctor_nicnumber varchar_pattern_ops)"
+        },
+        {
+          "name": "register_DoctorID_doctor_nicnumber_key",
+          "definition": "CREATE UNIQUE INDEX \"register_DoctorID_doctor_nicnumber_key\" ON public.\"register_DoctorID\" USING btree (doctor_nicnumber)"
+        },
+        {
+          "name": "register_DoctorID_pkey",
+          "definition": "CREATE UNIQUE INDEX \"register_DoctorID_pkey\" ON public.\"register_DoctorID\" USING btree (id)"
+        },
+        {
+          "name": "register_DoctorID_register_id_f75aa463_like",
+          "definition": "CREATE INDEX \"register_DoctorID_register_id_f75aa463_like\" ON public.\"register_DoctorID\" USING btree (register_id varchar_pattern_ops)"
+        },
+        {
+          "name": "register_DoctorID_register_id_key",
+          "definition": "CREATE UNIQUE INDEX \"register_DoctorID_register_id_key\" ON public.\"register_DoctorID\" USING btree (register_id)"
+        }
+      ],
+      "row_count": 0,
+      "missing_columns": [],
+      "extra_columns": [],
+      "column_differences": []
+    },
+    {
+      "model": "PendingDoctor",
+      "table": "pending_doctors",
+      "exists": true,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "username",
+          "type": "varchar(150)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(254)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "password",
+          "type": "varchar(128)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(15)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "NIC_number",
+          "type": "varchar(12)",
+          "nullable": false,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "degrees",
+          "type": "varchar(100)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "university",
+          "type": "varchar(100)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "working_hospital",
+          "type": "varchar(150)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": null,
+          "identity": "d"
+        },
+        {
+          "name": "username",
+          "type": "character varying(150)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "password",
+          "type": "character varying(128)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "phone",
+          "type": "character varying(15)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "NIC_number",
+          "type": "character varying(12)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "degrees",
+          "type": "character varying(100)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "university",
+          "type": "character varying(100)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "working_hospital",
+          "type": "character varying(150)",
+          "nullable": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(20)",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "pending_doctors_NIC_number_key",
+          "kind": "u",
+          "definition": "UNIQUE (\"NIC_number\")"
+        },
+        {
+          "name": "pending_doctors_email_key",
+          "kind": "u",
+          "definition": "UNIQUE (email)"
+        },
+        {
+          "name": "pending_doctors_pkey",
+          "kind": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "pending_doctors_username_key",
+          "kind": "u",
+          "definition": "UNIQUE (username)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "pending_doctors_NIC_number_66a1e74e_like",
+          "definition": "CREATE INDEX \"pending_doctors_NIC_number_66a1e74e_like\" ON public.pending_doctors USING btree (\"NIC_number\" varchar_pattern_ops)"
+        },
+        {
+          "name": "pending_doctors_NIC_number_key",
+          "definition": "CREATE UNIQUE INDEX \"pending_doctors_NIC_number_key\" ON public.pending_doctors USING btree (\"NIC_number\")"
+        },
+        {
+          "name": "pending_doctors_email_f13ace14_like",
+          "definition": "CREATE INDEX pending_doctors_email_f13ace14_like ON public.pending_doctors USING btree (email varchar_pattern_ops)"
+        },
+        {
+          "name": "pending_doctors_email_key",
+          "definition": "CREATE UNIQUE INDEX pending_doctors_email_key ON public.pending_doctors USING btree (email)"
+        },
+        {
+          "name": "pending_doctors_pkey",
+          "definition": "CREATE UNIQUE INDEX pending_doctors_pkey ON public.pending_doctors USING btree (id)"
+        },
+        {
+          "name": "pending_doctors_username_2145d861_like",
+          "definition": "CREATE INDEX pending_doctors_username_2145d861_like ON public.pending_doctors USING btree (username varchar_pattern_ops)"
+        },
+        {
+          "name": "pending_doctors_username_key",
+          "definition": "CREATE UNIQUE INDEX pending_doctors_username_key ON public.pending_doctors USING btree (username)"
+        }
+      ],
+      "row_count": 3,
+      "missing_columns": [],
+      "extra_columns": [],
+      "column_differences": []
+    },
+    {
+      "model": "Laborator",
+      "table": "laborator",
+      "exists": false,
+      "expected_columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "unique": true,
+          "primary_key": true
+        },
+        {
+          "name": "username",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "password",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "role",
+          "type": "varchar(20)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "NIC_number",
+          "type": "varchar(12)",
+          "nullable": true,
+          "unique": true,
+          "primary_key": false
+        },
+        {
+          "name": "birthday",
+          "type": "date",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "lab_name",
+          "type": "varchar(150)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "lab_address",
+          "type": "varchar(255)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        },
+        {
+          "name": "license_id",
+          "type": "varchar(50)",
+          "nullable": true,
+          "unique": false,
+          "primary_key": false
+        }
+      ],
+      "actual_columns": [],
+      "constraints": [],
+      "missing_columns": [
+        "NIC_number",
+        "birthday",
+        "email",
+        "id",
+        "lab_address",
+        "lab_name",
+        "license_id",
+        "password",
+        "phone",
+        "role",
+        "username"
+      ],
+      "extra_columns": [],
+      "column_differences": []
+    }
+  ],
+  "admins": [
+    {
+      "username": "admin",
+      "role": "admin",
+      "is_staff": true,
+      "is_superuser": true,
+      "is_approved": true,
+      "is_active": true
+    }
+  ],
+  "current_user_matches_latest_migration_fields": true,
+  "admin_role_in_model_choices": false,
+  "generated_sql": {
+    "0003_laborator_alter_user_role": "BEGIN;\n--\n-- Create model Laborator\n--\nCREATE TABLE \"laborator\" (\"id\" bigint NOT NULL PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY, \"username\" varchar NOT NULL, \"password\" varchar NOT NULL, \"lab_email\" varchar(254) NOT NULL, \"phone\" varchar NOT NULL, \"NIC_number\" varchar NOT NULL, \"birthday\" date NOT NULL, \"lab_name\" varchar(150) NULL, \"lab_address\" varchar(255) NULL, \"license_id\" varchar(50) NULL);\n--\n-- Alter field role on user\n--\n-- (no-op)\nCOMMIT;\n",
+    "0004_rename_lab_email_laborator_email": "BEGIN;\n--\n-- Rename field lab_email on laborator to email\n--\nALTER TABLE \"laborator\" RENAME COLUMN \"lab_email\" TO \"email\";\nCOMMIT;\n",
+    "0005_laborator_role_alter_laborator_nic_number_and_more": "BEGIN;\n--\n-- Add field role to laborator\n--\nALTER TABLE \"laborator\" ADD COLUMN \"role\" varchar(20) DEFAULT 'lab' NULL;\nALTER TABLE \"laborator\" ALTER COLUMN \"role\" DROP DEFAULT;\n--\n-- Alter field NIC_number on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"NIC_number\" TYPE varchar(12), ALTER COLUMN \"NIC_number\" DROP NOT NULL;\nALTER TABLE \"laborator\" ADD CONSTRAINT \"laborator_NIC_number_507fcef7_uniq\" UNIQUE (\"NIC_number\");\nCREATE INDEX \"laborator_NIC_number_507fcef7_like\" ON \"laborator\" (\"NIC_number\" varchar_pattern_ops);\n--\n-- Alter field birthday on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"birthday\" DROP NOT NULL;\n--\n-- Alter field email on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"email\" TYPE varchar(100);\n--\n-- Alter field password on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"password\" TYPE varchar(100);\n--\n-- Alter field phone on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"phone\" TYPE varchar(100);\n--\n-- Alter field username on laborator\n--\nALTER TABLE \"laborator\" ALTER COLUMN \"username\" TYPE varchar(100);\nCOMMIT;\n",
+    "0006_user_lab_address_user_lab_name_user_license_id": "BEGIN;\n--\n-- Add field lab_address to user\n--\nALTER TABLE \"accounts_user\" ADD COLUMN \"lab_address\" varchar(255) NULL;\n--\n-- Add field lab_name to user\n--\nALTER TABLE \"accounts_user\" ADD COLUMN \"lab_name\" varchar(150) NULL;\n--\n-- Add field license_id to user\n--\nALTER TABLE \"accounts_user\" ADD COLUMN \"license_id\" varchar(50) NULL;\nCOMMIT;\n"
+  }
+}

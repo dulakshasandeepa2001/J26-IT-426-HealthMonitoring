@@ -1,8 +1,13 @@
 from django.http import JsonResponse
+from django.db import DatabaseError, connection
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from medicare_project.database import database_error_message
 from taskcreate.models import Task
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(['POST'])
@@ -117,8 +122,19 @@ def get_tasks(request):
 
 @api_view(['GET'])
 def health_check(request):
-    """Simple health check endpoint"""
-    return Response({'status': 'Server is running', 'message': 'Welcome to Medicare API with Supabase!'})
+    """Report the result of a real, read-only database query."""
+    database = {'backend': connection.vendor, 'status': 'connected'}
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+    except DatabaseError as error:
+        message = database_error_message(error)
+        logger.error('Database health check failed (%s): %s', connection.vendor, message)
+        database.update(status='unavailable', message=message)
+        return Response({'status': 'unhealthy', 'database': database}, status=503)
+
+    return Response({'status': 'healthy', 'database': database})
 
 @api_view(['DELETE'])
 def delete_task(request, task_id):

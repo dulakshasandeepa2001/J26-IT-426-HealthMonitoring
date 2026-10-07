@@ -105,4 +105,9 @@ For ideas, issues, or collaboration, open a GitHub issue or contact the maintain
 Contributors are welcome !!
 
 # start the project
-.\backend\Venv\Scripts\activate
+Configure the backend database first using [backend/DATABASE.md](backend/DATABASE.md).
+
+```powershell
+.\.venv\Scripts\python.exe backend\dbtest.py
+.\.venv\Scripts\python.exe backend\manage.py runserver
+```

@@ -1,0 +1,18 @@
+{
+  "transaction_read_only": true,
+  "full_user_model_load_succeeded": true,
+  "user_count": 6,
+  "new_fields_null_on_existing_users": true,
+  "full_laborator_model_load_succeeded": true,
+  "laborator_count": 0,
+  "admin": {
+    "username": "admin",
+    "role": "admin",
+    "is_staff": true,
+    "is_superuser": true,
+    "is_approved": true,
+    "is_active": true
+  },
+  "login_with_random_incorrect_password_status": 401,
+  "real_password_tested": false
+}

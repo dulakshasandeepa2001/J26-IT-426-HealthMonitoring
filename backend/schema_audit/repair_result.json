@@ -1,0 +1,73 @@
+{
+  "completed_at": "2026-10-07T23:11:19.826930+05:30",
+  "intended_supabase_configuration_matches": true,
+  "migration_command": ".\\.venv\\Scripts\\python.exe -X utf8 backend\\manage.py migrate accounts 0006_user_lab_address_user_lab_name_user_license_id --database default",
+  "applied_reviewed_migrations": [
+    "0003_laborator_alter_user_role",
+    "0004_rename_lab_email_laborator_email",
+    "0005_laborator_role_alter_laborator_nic_number_and_more",
+    "0006_user_lab_address_user_lab_name_user_license_id"
+  ],
+  "pending_target_plan": [],
+  "orphan_migration_record_preserved": true,
+  "private_backup": {
+    "path": "C:\\Users\\USER\\AppData\\Local\\MediTrack\\Backups\\supabase-before-accounts-0006-20261007-230628.dump.dpapi",
+    "encryption": "Windows CurrentUser DPAPI",
+    "source_table_count": 52,
+    "archive_complete_parse_verified": true,
+    "encrypted_file_round_trip_verified": true,
+    "actual_restore_rehearsed": false
+  },
+  "data_preservation": {
+    "original_rows_and_columns_sha256_comparison_passed": true,
+    "source_table_count": 52,
+    "existing_account_passwords_roles_and_flags_unchanged": true,
+    "expected_framework_metadata_additions_allowed": true
+  },
+  "model_and_login_check": {
+    "transaction_read_only": true,
+    "full_user_model_load_succeeded": true,
+    "user_count": 6,
+    "new_fields_null_on_existing_users": true,
+    "full_laborator_model_load_succeeded": true,
+    "laborator_count": 0,
+    "admin": {
+      "username": "admin",
+      "role": "admin",
+      "is_staff": true,
+      "is_superuser": true,
+      "is_approved": true,
+      "is_active": true
+    },
+    "login_with_random_incorrect_password_status": 401,
+    "real_password_tested": false
+  },
+  "schema_matches_all_accounts_models": true,
+  "runtime": {
+    "backend_health": {
+      "url": "http://127.0.0.1:8000/health-check/",
+      "http_status": 200,
+      "body": {
+        "status": "healthy",
+        "database": {
+          "backend": "postgresql",
+          "status": "connected"
+        }
+      }
+    },
+    "frontend": {
+      "url": "http://127.0.0.1:3000/",
+      "http_status": 200
+    },
+    "django_admin_login": {
+      "url": "http://127.0.0.1:8000/admin/login/",
+      "http_status": 200
+    }
+  },
+  "remaining_issue": "The existing admin role is absent from User.ROLE_CHOICES. This affects model/form validation; the custom login view does not validate these choices.",
+  "credentials_printed": false,
+  "accounts_created": false,
+  "passwords_reset": false,
+  "fake_migrations_used": false,
+  "commit_or_push_performed": false
+}

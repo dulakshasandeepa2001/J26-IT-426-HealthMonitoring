@@ -1,0 +1,21 @@
+{
+  "backend_health": {
+    "url": "http://127.0.0.1:8000/health-check/",
+    "http_status": 200,
+    "body": {
+      "status": "healthy",
+      "database": {
+        "backend": "postgresql",
+        "status": "connected"
+      }
+    }
+  },
+  "frontend": {
+    "url": "http://127.0.0.1:3000/",
+    "http_status": 200
+  },
+  "django_admin_login": {
+    "url": "http://127.0.0.1:8000/admin/login/",
+    "http_status": 200
+  }
+}

@@ -1,20 +1,15 @@
-import psycopg2
-host = "db.yuemlsjtzdpgclgnlogg.supabase.co"
+"""Run the read-only database check using Django's actual configuration."""
 
-for port in (6543, 5432):  # pooled first, then direct
+import os
+import sys
+
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management import execute_from_command_line
+
+
+if __name__ == '__main__':
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medicare_project.settings')
     try:
-        conn = psycopg2.connect(
-            host=host,
-            port=port,
-            user="postgres",
-            password="Ddugiborn@2001",  # use your current DB password
-            dbname="postgres",
-            sslmode="require",
-            connect_timeout=5,
-        )
-        with conn.cursor() as cur:
-            cur.execute("SELECT version()")
-            print(port, "OK:", cur.fetchone()[0])
-        conn.close()
-    except Exception as e:
-        print(port, "ERROR:", e)
+        execute_from_command_line([sys.argv[0], 'check_database', *sys.argv[1:]])
+    except ImproperlyConfigured as error:
+        raise SystemExit(f'Database configuration error: {error}') from None
