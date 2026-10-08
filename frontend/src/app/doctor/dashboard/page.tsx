@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import React, { useCallback, useEffect, useState } from "react";
+import { apiRequest } from "@/lib/api";
+import { useDoctor } from "@/features/doctor-dashboard/DoctorContext";
+import PrescriptionHistory from "@/features/doctor-dashboard/PrescriptionHistory";
 import { 
-  Stethoscope, 
-  LogOut, 
-  Settings, 
   User, 
   Mic, 
   MicOff, 
@@ -15,22 +13,13 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle, 
-  FileText, 
-  Send, 
-  Pill, 
   Activity, 
   Users, 
   Sparkles,
   ChevronRight,
-  Printer,
   HeartPulse,
   ClipboardList,
-  History,
   Calendar,
-  Search,
-  ExternalLink,
-  ShieldAlert,
-  ArrowRight,
   RefreshCw,
   X
 } from "lucide-react";
@@ -48,245 +37,17 @@ interface Task {
   is_completed?: boolean;
 }
 
-interface PastMedication {
-  name: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-}
-
-interface PastPrescription {
-  id: string;
-  date: string;
-  doctor: string;
-  clinic: string;
-  diagnosis: string;
-  medicines: PastMedication[];
-  notes?: string;
-  receiptNumber: string;
-}
-
-interface Patient {
-  id: string;
-  token: string;
-  name: string;
-  age: number;
-  gender: string;
-  bloodGroup: string;
-  allergies: string[];
-  complaint: string;
-  labHistory: string[];
-  time: string;
-  pastPrescriptions: PastPrescription[];
-}
-
-const SAMPLE_QUEUE: Patient[] = [
-  {
-    id: "PAT-101",
-    token: "#01",
-    name: "Kasun Perera",
-    age: 34,
-    gender: "Male",
-    bloodGroup: "O+",
-    allergies: ["Penicillin", "Aspirin"],
-    complaint: "High fever (>38.5°C), persistent dry cough, body aches for 3 days.",
-    labHistory: ["FBC (Platelets: 165,000 /μL - Borderline)", "Dengue NS1 Antigen: Negative (Day 2)", "CRP: 18 mg/L"],
-    time: "09:15 AM",
-    pastPrescriptions: [
-      {
-        id: "RX-2026-881",
-        receiptNumber: "REC-0881",
-        date: "14 Aug 2026",
-        doctor: "Dr. Nimal Silva",
-        clinic: "MediTrack Outpatient Clinic",
-        diagnosis: "Acute Bronchitis",
-        medicines: [
-          { name: "Azithromycin 500mg", dosage: "1 Tablet", frequency: "OD (Once daily)", duration: "3 Days" },
-          { name: "Salbutamol Inhaler 100mcg", dosage: "2 Puffs", frequency: "PRN (When needed)", duration: "As required" },
-          { name: "Cetirizine 10mg", dosage: "1 Tablet", frequency: "Nocte (At bedtime)", duration: "5 Days" }
-        ],
-        notes: "Advised chest X-ray if persistent coughing exceeds 10 days. Ensure oral rehydration."
-      },
-      {
-        id: "RX-2026-412",
-        receiptNumber: "REC-0412",
-        date: "02 May 2026",
-        doctor: "Dr. K. Perera",
-        clinic: "General Medical OPD",
-        diagnosis: "Viral Pharyngitis",
-        medicines: [
-          { name: "Paracetamol 500mg", dosage: "2 Tablets", frequency: "TDS (Every 8h)", duration: "3 Days" },
-          { name: "Chlorpheniramine 4mg", dosage: "1 Tablet", frequency: "BD (Twice daily)", duration: "3 Days" }
-        ],
-        notes: "Warm saline gargle 3 times a day. Rest recommended."
-      },
-      {
-        id: "RX-2026-105",
-        receiptNumber: "REC-0105",
-        date: "10 Jan 2026",
-        doctor: "Dr. S. Jayasinghe",
-        clinic: "ENT Specialized Unit",
-        diagnosis: "Seasonal Allergic Rhinitis",
-        medicines: [
-          { name: "Montelukast 10mg", dosage: "1 Tablet", frequency: "Nocte", duration: "14 Days" },
-          { name: "Fluticasone Nasal Spray", dosage: "1 Spray/nostril", frequency: "BD", duration: "1 Month" }
-        ],
-        notes: "Avoid dust allergens and air conditioner draft."
-      }
-    ]
-  },
-  {
-    id: "PAT-102",
-    token: "#02",
-    name: "Nimali Fernando",
-    age: 28,
-    gender: "Female",
-    bloodGroup: "A+",
-    allergies: ["Sulfa Drugs"],
-    complaint: "Throbbing frontal headache, sinus pressure, nasal congestion.",
-    labHistory: ["Past Blood Pressure: 118/76 mmHg", "No chronic conditions recorded"],
-    time: "09:30 AM",
-    pastPrescriptions: [
-      {
-        id: "RX-2026-620",
-        receiptNumber: "REC-0620",
-        date: "20 Jul 2026",
-        doctor: "Dr. R. Silva",
-        clinic: "MediTrack General Clinic",
-        diagnosis: "Acute Frontal Sinusitis",
-        medicines: [
-          { name: "Amoxicillin-Clavulanate 625mg", dosage: "1 Tablet", frequency: "BD (Twice daily)", duration: "5 Days" },
-          { name: "Pseudoephedrine 30mg", dosage: "1 Tablet", frequency: "TDS", duration: "4 Days" }
-        ],
-        notes: "Steam inhalation recommended twice daily."
-      },
-      {
-        id: "RX-2026-190",
-        receiptNumber: "REC-0190",
-        date: "15 Feb 2026",
-        doctor: "Dr. W.G. Dulaksha",
-        clinic: "MediTrack Outpatient Clinic",
-        diagnosis: "Tension Headache",
-        medicines: [
-          { name: "Paracetamol 500mg", dosage: "1-2 Tablets", frequency: "PRN (As needed)", duration: "3 Days" },
-          { name: "Vitamin B-Complex", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
-        ],
-        notes: "Improve sleep hygiene and reduce screen exposure."
-      }
-    ]
-  },
-  {
-    id: "PAT-103",
-    token: "#03",
-    name: "Mohamed Rizwan",
-    age: 52,
-    gender: "Male",
-    bloodGroup: "B+",
-    allergies: ["None known"],
-    complaint: "Routine Type-2 Diabetes follow up, mild peripheral numbness.",
-    labHistory: ["HbA1c: 7.2% (Last month)", "FBS: 138 mg/dL", "Serum Creatinine: 1.0 mg/dL"],
-    time: "09:45 AM",
-    pastPrescriptions: [
-      {
-        id: "RX-2026-904",
-        receiptNumber: "REC-0904",
-        date: "28 Aug 2026",
-        doctor: "Dr. C. Fernando",
-        clinic: "Endocrine & Diabetes Care Center",
-        diagnosis: "T2DM Regular Review",
-        medicines: [
-          { name: "Metformin 500mg", dosage: "1 Tablet", frequency: "BD (After meals)", duration: "3 Months" },
-          { name: "Glimepiride 1mg", dosage: "1 Tablet", frequency: "Mane (Morning)", duration: "3 Months" }
-        ],
-        notes: "Strict dietary carbohydrate moderation. Fasting lipid profile due next visit."
-      },
-      {
-        id: "RX-2026-550",
-        receiptNumber: "REC-0550",
-        date: "12 Jun 2026",
-        doctor: "Dr. W.G. Dulaksha",
-        clinic: "MediTrack OPD",
-        diagnosis: "Diabetic Neuropathy Early Signs",
-        medicines: [
-          { name: "Pregabalin 50mg", dosage: "1 Capsule", frequency: "Nocte (Night)", duration: "1 Month" },
-          { name: "Methylcobalamin 500mcg", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
-        ],
-        notes: "Foot care examination performed. No active ulcers."
-      }
-    ]
-  },
-  {
-    id: "PAT-104",
-    token: "#04",
-    name: "Anusha Kumari",
-    age: 41,
-    gender: "Female",
-    bloodGroup: "AB+",
-    allergies: ["Ibuprofen"],
-    complaint: "Joint stiffness and knee inflammation, worsens in the morning.",
-    labHistory: ["ESR: 32 mm/hr", "Uric Acid: 5.4 mg/dL"],
-    time: "10:00 AM",
-    pastPrescriptions: [
-      {
-        id: "RX-2026-912",
-        receiptNumber: "REC-0912",
-        date: "05 Sep 2026",
-        doctor: "Dr. D. Liyanage",
-        clinic: "Rheumatology & Joint Care",
-        diagnosis: "Osteoarthritis (Bilateral Knees)",
-        medicines: [
-          { name: "Paracetamol 1000mg", dosage: "2 Tablets", frequency: "TDS PRN", duration: "7 Days" },
-          { name: "Glucosamine Sulfate 1500mg", dosage: "1 Sachet", frequency: "OD with water", duration: "2 Months" },
-          { name: "Topical Diclofenac Gel", dosage: "Apply thin layer", frequency: "TDS", duration: "1 Tube" }
-        ],
-        notes: "Avoid high-impact exercises. Daily gentle quadriceps stretches advised."
-      },
-      {
-        id: "RX-2026-380",
-        receiptNumber: "REC-0380",
-        date: "18 Apr 2026",
-        doctor: "Dr. Nimal Silva",
-        clinic: "MediTrack General OPD",
-        diagnosis: "Hyperuricemia Check",
-        medicines: [
-          { name: "Colchicine 0.5mg", dosage: "1 Tablet", frequency: "BD", duration: "3 Days" },
-          { name: "Allopurinol 100mg", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
-        ],
-        notes: "Increase water intake to at least 2.5 Liters daily. Reduce red meat."
-      }
-    ]
-  }
-];
-
 export default function DoctorDashboard() {
-  const router = useRouter();
-
-  // Doctor session state
-  const [doctorName, setDoctorName] = useState("Dr. W.G. Dulaksha");
-  const [hospital, setHospital] = useState("MediTrack General Hospital");
-
-  // Patient Queue & Active Patient State
-  const [queue, setQueue] = useState<Patient[]>(SAMPLE_QUEUE);
-  const [currentPatientIndex, setCurrentPatientIndex] = useState(0);
-  const currentPatient = queue[currentPatientIndex] || null;
-
-  // Search filter for past prescription history
-  const [historySearch, setHistorySearch] = useState("");
-
-  // Selected past receipt for detailed view modal
-  const [selectedReceipt, setSelectedReceipt] = useState<PastPrescription | null>(null);
-
-  // AI Voice Consultation State
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState(
-    "Patient reports acute onset of high fever and productive cough. Lung auscultation reveals mild bilateral wheezing. Advised paracetamol and hydration."
-  );
+  const {
+    doctorId, queue, currentPatientIndex, setCurrentPatientIndex, currentPatient,
+    isListening, setIsListening, transcript, setTranscript,
+    setHistorySearch, setSelectedReceipt,
+  } = useDoctor();
 
   // Sidebar tab switcher: Queue vs Tasks
   const [sidebarTab, setSidebarTab] = useState<"queue" | "tasks">("queue");
 
   // Doctor Tasks state (get_tasks)
-  const [doctorId, setDoctorId] = useState("DOC-0001");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [tasksError, setTasksError] = useState("");
@@ -308,7 +69,7 @@ export default function DoctorDashboard() {
   const [creatingTask, setCreatingTask] = useState(false);
 
   // Core getTasks function to retrieve scheduled tasks from backend /get-tasks/
-  const getTasks = async (customDate?: string, customDocId?: string) => {
+  const getTasks = useCallback(async (customDate?: string, customDocId?: string) => {
     const targetDate = customDate || selectedTaskDate;
     const targetDocId = customDocId || doctorId || "DOC-0001";
 
@@ -339,7 +100,7 @@ export default function DoctorDashboard() {
     } finally {
       setTasksLoading(false);
     }
-  };
+  }, [selectedTaskDate, doctorId]);
 
   // Create Task Function
   const handleCreateTask = async (e: React.FormEvent) => {
@@ -384,41 +145,11 @@ export default function DoctorDashboard() {
     }
   };
 
-  // Initialize doctor session
+  // Keep the existing schedule API synchronized with the doctor and chosen date.
   useEffect(() => {
-    let currentDocId = "DOC-0001";
-    const stored = localStorage.getItem("meditrack_user");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.username) {
-          const raw = parsed.username.replace(/^dr[._\s]*/i, "");
-          const cleanName = raw.charAt(0).toUpperCase() + raw.slice(1);
-          setDoctorName(`Dr. ${cleanName}`);
-        }
-        if (parsed.doctorID) {
-          currentDocId = parsed.doctorID;
-          setDoctorId(parsed.doctorID);
-        }
-      } catch (e) {
-        // use default
-      }
-    }
-    getTasks(selectedTaskDate, currentDocId);
-  }, []);
-
-  // Reload tasks when selectedTaskDate changes
-  useEffect(() => {
-    if (selectedTaskDate) {
-      getTasks(selectedTaskDate);
-    }
-  }, [selectedTaskDate]);
-
-  // Handle Logout
-  const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
-    router.push("/login");
-  };
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching the schedule is synchronization with the existing backend.
+    void getTasks();
+  }, [getTasks]);
 
   // Next Patient Action
   const handleNextPatient = () => {
@@ -445,72 +176,17 @@ export default function DoctorDashboard() {
     }
   };
 
-  // Filter past prescriptions based on search input
-  const filteredPastPrescriptions = (currentPatient?.pastPrescriptions || []).filter((rx) =>
-    rx.diagnosis.toLowerCase().includes(historySearch.toLowerCase()) ||
-    rx.doctor.toLowerCase().includes(historySearch.toLowerCase()) ||
-    rx.medicines.some((m) => m.name.toLowerCase().includes(historySearch.toLowerCase()))
-  );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="flex flex-1 flex-col text-slate-900">
       
-      {/* ========================================================================= */}
-      {/* 1. TOP HEADER: Site Logo (Left), Doctor Info, Settings, Logout (Right)    */}
-      {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shadow-sm">
-        
-        {/* Site Logo */}
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-purple-600 text-white font-black text-lg flex items-center justify-center shadow-md shadow-purple-600/25">
-            M
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight text-slate-900">
-                MediTrack
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">
-                Clinical Console
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium">Physician Diagnostic & Prescription Workspace</p>
-          </div>
-        </div>
-
-        {/* Right Section: Doctor Badge, Settings, Logout */}
-        <div className="flex items-center gap-4">
-          
-          {/* Doctor Profile Pill */}
-          <div className="flex items-center gap-3 bg-slate-100/80 border border-slate-200 py-1.5 px-3 rounded-2xl">
-            <div className="w-8 h-8 rounded-xl bg-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-              DR
-            </div>
-            <div className="text-left hidden sm:block">
-              <div className="text-xs font-bold text-slate-900 leading-tight">{doctorName}</div>
-              <div className="text-[10px] text-slate-500">{hospital}</div>
-            </div>
-          </div>
-
-          {/* Settings Icon */}
-          <button 
-            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 hover:text-purple-600 transition-all cursor-pointer"
-            title="Console Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-
-          {/* Logout Icon */}
-          <button
-            onClick={handleLogout}
-            className="p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 text-rose-600 transition-all cursor-pointer"
-            title="Log Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
-
-      </header>
+      <div className="mx-auto w-full max-w-[1700px] px-4 pt-6 sm:px-6">
+        <h1 className="text-2xl font-extrabold tracking-tight">Doctor Dashboard</h1>
+        <p className="mt-1 text-xs text-slate-500">Patient details, consultation notes, prescription history and clinical schedule.</p>
+        <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
+          <strong>Sample patient overview.</strong> Queue, patient details, notes and past prescriptions use the existing demonstration data. Voice input is a simulation. The schedule uses the existing backend.
+        </p>
+      </div>
 
       {/* ========================================================================= */}
       {/* MAIN BODY: 3 COLUMNS                                                      */}
@@ -518,13 +194,13 @@ export default function DoctorDashboard() {
       {/* Column 2 (5/12): Current Patient & Central Voice Mic                      */}
       {/* Column 3 (4/12): Patient Reception & Past Prescription History (Right)   */}
       {/* ========================================================================= */}
-      <main className="flex-grow max-w-[1700px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main className="flex-grow max-w-[1700px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-12 gap-6">
 
         {/* ======================================================================= */}
         {/* ======================================================================= */}
         {/* COLUMN 1: "Next Patient" Queue OR Doctor Scheduled Tasks (get_tasks)    */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="xl:col-span-1 2xl:col-span-3 space-y-4">
 
           {/* Tab Switcher: Queue vs Tasks */}
           <div className="flex p-1 bg-slate-200/80 rounded-2xl border border-slate-300/60">
@@ -581,13 +257,15 @@ export default function DoctorDashboard() {
                     const isCompleted = idx < currentPatientIndex;
 
                     return (
-                      <div
+                      <button
+                        type="button"
+                        aria-label={`Select sample patient ${p.name}`}
                         key={p.id}
                         onClick={() => {
                           setCurrentPatientIndex(idx);
                           setSelectedReceipt(null);
                         }}
-                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex w-full items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 ${
                           isActive
                             ? "bg-purple-50/80 border-purple-300 shadow-sm"
                             : isCompleted
@@ -627,7 +305,7 @@ export default function DoctorDashboard() {
                             </span>
                           )}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -674,6 +352,7 @@ export default function DoctorDashboard() {
                 </span>
                 <input
                   type="date"
+                  aria-label="Schedule date"
                   value={selectedTaskDate}
                   onChange={(e) => setSelectedTaskDate(e.target.value)}
                   className="px-2 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600 cursor-pointer"
@@ -777,7 +456,7 @@ export default function DoctorDashboard() {
         {/* ======================================================================= */}
         {/* COLUMN 2: Current Patient Details + Central Voice Mic (5 / 12 Cols)     */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="xl:col-span-1 2xl:col-span-5 space-y-6">
 
           {/* --------------------------------------------------------------------- */}
           {/* A. CURRENT PATIENT DETAILS BANNER                                    */}
@@ -793,7 +472,7 @@ export default function DoctorDashboard() {
                       <User className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-extrabold text-slate-900">{currentPatient.name}</h2>
                         <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">
                           Token {currentPatient.token}
@@ -928,6 +607,7 @@ export default function DoctorDashboard() {
                 )}
               </div>
               <textarea
+                aria-label="Consultation notes"
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
                 rows={2}
@@ -943,124 +623,9 @@ export default function DoctorDashboard() {
         {/* ======================================================================= */}
         {/* COLUMN 3 (RIGHT): PATIENT PAST PRESCRIPTION & RECEPTION HISTORY (4/12) */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="xl:col-span-2 2xl:col-span-4 space-y-4">
           
-          <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4 flex flex-col justify-between min-h-[640px]">
-            
-            <div className="space-y-4">
-              {/* Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
-                    <History className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
-                      Prescription History
-                    </h3>
-                    <p className="text-[10px] text-slate-500">
-                      Past receipts & medications for {currentPatient?.name}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200">
-                  {currentPatient?.pastPrescriptions.length || 0} Records
-                </span>
-              </div>
-
-              {/* Search in Past Prescriptions */}
-              <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search past medicine, diagnosis..."
-                  value={historySearch}
-                  onChange={(e) => setHistorySearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-600"
-                />
-              </div>
-
-              {/* Past Prescriptions Timeline / Receipt List */}
-              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                {filteredPastPrescriptions.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400 text-xs">
-                    <History className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                    <p className="font-semibold text-slate-500">No past prescription history found.</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Previous treatment records will appear here.</p>
-                  </div>
-                ) : (
-                  filteredPastPrescriptions.map((rx) => {
-                    const isSelected = selectedReceipt?.id === rx.id;
-
-                    return (
-                      <div
-                        key={rx.id}
-                        onClick={() => setSelectedReceipt(isSelected ? null : rx)}
-                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-2.5 ${
-                          isSelected
-                            ? "bg-purple-50/70 border-purple-300 shadow-sm"
-                            : "bg-slate-50/70 hover:bg-slate-100/70 border-slate-200"
-                        }`}
-                      >
-                        {/* Receipt Top: Date, Receipt ID, Diagnosis Badge */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3 h-3 text-purple-600" />
-                              <span className="text-xs font-bold text-slate-900">{rx.date}</span>
-                              <span className="text-[10px] font-mono text-slate-400">({rx.receiptNumber})</span>
-                            </div>
-                            <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
-                              {rx.doctor} &bull; {rx.clinic}
-                            </span>
-                          </div>
-
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 uppercase tracking-wide shrink-0">
-                            {rx.diagnosis}
-                          </span>
-                        </div>
-
-                        {/* Prescribed Medicines List */}
-                        <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
-                          {rx.medicines.map((med, mIdx) => (
-                            <div key={mIdx} className="flex justify-between items-center text-xs bg-white p-2 rounded-xl border border-slate-200/50">
-                              <div className="flex items-center gap-1.5">
-                                <Pill className="w-3 h-3 text-purple-600 shrink-0" />
-                                <span className="font-bold text-slate-800 text-[11px]">{med.name}</span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[10px] text-slate-600 font-mono font-semibold block">{med.dosage}</span>
-                                <span className="text-[9px] text-slate-400 block">{med.frequency}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Doctor's Past Notes if present */}
-                        {rx.notes && (
-                          <p className="text-[10px] text-slate-600 italic bg-white/80 p-2 rounded-xl border border-slate-200/40">
-                            &ldquo;{rx.notes}&rdquo;
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-            </div>
-
-            {/* Quick Practice Tip Box */}
-            <div className="pt-3 border-t border-slate-100">
-              <div className="p-3 bg-purple-50/60 border border-purple-100 rounded-2xl flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  <strong>Clinical Safety Note:</strong> Verify patient antibiotic sensitivity against previous responses prior to prescribing.
-                </p>
-              </div>
-            </div>
-
-          </div>
+          <PrescriptionHistory />
 
         </div>
 
@@ -1081,6 +646,7 @@ export default function DoctorDashboard() {
                 </div>
               </div>
               <button
+                aria-label="Close new task form"
                 onClick={() => setShowNewTaskModal(false)}
                 className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
@@ -1187,13 +753,6 @@ export default function DoctorDashboard() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-3 mt-auto">
-        <div className="max-w-[1700px] mx-auto px-6 flex justify-between items-center text-xs text-slate-500">
-          <span>&copy; {new Date().getFullYear()} MediTrack Clinical Decision Support System.</span>
-          <span>Doctor Diagnostic & Patient Prescription History Console.</span>
-        </div>
-      </footer>
 
     </div>
   );
