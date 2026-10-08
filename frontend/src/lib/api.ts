@@ -28,7 +28,6 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {/
 
     return data;
   } catch (error) {
-    console.error(`API Error in ${endpoint}:`, error);
     throw error;
   }
 }

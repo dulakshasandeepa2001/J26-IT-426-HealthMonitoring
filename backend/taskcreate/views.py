@@ -116,6 +116,16 @@ def get_tasks(request):
         )
 
 @api_view(['GET'])
+def api_root(request):
+    """Describe the available API and confirm that the server is running."""
+    return Response({
+        'status': 'Server is running',
+        'message': 'Welcome to Medicare API!',
+        'health_check': '/health-check/',
+    })
+
+
+@api_view(['GET'])
 def health_check(request):
     """Simple health check endpoint"""
     return Response({'status': 'Server is running', 'message': 'Welcome to Medicare API with Supabase!'})

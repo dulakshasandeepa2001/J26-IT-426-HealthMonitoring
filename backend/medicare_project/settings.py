@@ -4,7 +4,6 @@ Django settings for medicare_project project.
 
 from pathlib import Path
 from decouple import config
-import socket
 
 # -----------------------------------------
 # BASE DIRECTORY
@@ -76,30 +75,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'medicare_project.wsgi.application'
 
 # -----------------------------------------
-# DATABASE CONFIGURATION WITH FALLBACK
+# DATABASE CONFIGURATION
 # -----------------------------------------
-def is_supabase_reachable():
-    try:
-        socket.gethostbyname('db.wixgbvdcwteghicynwvz.supabase.co')
-        return True
-    except socket.gaierror:
-        return False
+USE_SUPABASE = config('USE_SUPABASE', default=False, cast=bool)
 
-if is_supabase_reachable():
+if USE_SUPABASE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres',
-            'USER': 'postgres',
+            'NAME': config('SUPABASE_DB_NAME', default='postgres'),
+            'USER': config('SUPABASE_DB_USER', default='postgres'),
             'PASSWORD': config('SUPABASE_DB_PASSWORD', default=''),
-            'HOST': 'db.wixgbvdcwteghicynwvz.supabase.co',
-            'PORT': '5432',
+            'HOST': config(
+                'SUPABASE_DB_HOST',
+                default='db.wixgbvdcwteghicynwvz.supabase.co',
+            ),
+            'PORT': config('SUPABASE_DB_PORT', default='5432'),
             'OPTIONS': {
                 'sslmode': 'require',
             },
         }
     }
-    print("[INFO] Connected to Supabase PostgreSQL Database!")
+    print("[INFO] Supabase PostgreSQL database selected.")
 else:
     DATABASES = {
         'default': {
@@ -107,7 +104,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    print("[INFO] Offline/Sandbox mode: Falling back to local SQLite Database!")
+    print("[INFO] Local SQLite database selected.")
 
 # -----------------------------------------
 # PASSWORD VALIDATION
