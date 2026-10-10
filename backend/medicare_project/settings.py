@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'taskcreate',
-    
+    'prescription_context',
 ]
 
 # Custom User Model

@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  ArrowUpDown, BookOpen, Check, ClipboardCheck, FilePenLine, FileText,
-  ListChecks, Mic, Pencil, Pill, Send, ShieldCheck, Sparkles, Stethoscope, X,
+  AlertTriangle, ArrowUpDown, BookOpen, Check, ChevronDown, ClipboardCheck,
+  FilePenLine, FileText, ListChecks, Loader2, Mic, Pencil,
+  Pill, RefreshCw, Send, ShieldAlert, ShieldCheck, Sparkles, Stethoscope, X,
 } from "lucide-react";
-import PatientAccess from "./PatientAccess";
+import { usePrescription } from "./usePrescription";
 import { buttonStyle, controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
-// No structured voice-result, generation or decision service is connected.
-// The overview's simulated transcript and sample prescriptions cannot supply them.
+// ─── Workflow steps shown at the top ─────────────────────────────────────────
 const workflowSteps = [
   "Encounter and voice analysis",
   "Confirm diagnosis context",
@@ -17,122 +17,474 @@ const workflowSteps = [
   "Publish approved version",
 ];
 
+// ─── Small helpers ────────────────────────────────────────────────────────────
+function Badge({ label, variant }: { label: string; variant: "green" | "amber" | "rose" | "slate" }) {
+  const colours = {
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    rose: "bg-rose-50 text-rose-700 border-rose-200",
+    slate: "bg-slate-100 text-slate-600 border-slate-200",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-lg border px-2 py-0.5 text-[11px] font-semibold ${colours[variant]}`}>
+      {label}
+    </span>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function PrescriptionWorkspace() {
+  const rx = usePrescription();
+
+  // Derived flags
+  const hasConsultation = !!rx.activeConsultation;
+  const hasAnalysis = !!rx.activeAnalysis;
+  const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
+  const canGenerate = hasConsultation && rx.diagnosisConfirmed;
+  const hasDraft = canGenerate; // placeholder until AI service is wired
+  const canApprove = hasDraft && rx.approvalStatus === "idle";
+  const isApproved = rx.approvalStatus === "approved";
+  const isRejected = rx.approvalStatus === "rejected";
+
   return (
     <PageFrame
       title="Prescription Workspace"
       description="Generate a prescription recommendation draft from the encounter-linked voice-analysis result and clinician-confirmed diagnosis, then review, correct and explicitly approve the prescription version."
     >
+      {/* ── Workflow progress ── */}
       <ol aria-label="Prescription workflow" className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-5">
-        {workflowSteps.map((step, index) => (
-          <li key={step} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-600">
-            <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-purple-50 font-bold text-purple-700">{index + 1}</span>
-            <span className="pt-0.5 font-semibold">{step}</span>
-          </li>
-        ))}
+        {workflowSteps.map((step, index) => {
+          const active = index <= rx.step;
+          return (
+            <li key={step} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-600">
+              <span
+                aria-hidden="true"
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg font-bold ${
+                  active ? "bg-purple-600 text-white" : "bg-purple-50 text-purple-400"
+                }`}
+              >
+                {index + 1}
+              </span>
+              <span className={`pt-0.5 font-semibold ${active ? "text-slate-900" : "text-slate-400"}`}>
+                {step}
+              </span>
+            </li>
+          );
+        })}
       </ol>
 
-      <PatientAccess sampleMode={false} allowSamplePreview={false} />
+      {/* ── Global error banner ── */}
+      {rx.error && (
+        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div>
+            <p className="font-bold">Backend error</p>
+            <p className="mt-0.5">{rx.error}</p>
+          </div>
+          <button type="button" onClick={rx.loadAll} className="ml-auto inline-flex items-center gap-1 font-bold hover:underline">
+            <RefreshCw className="h-3.5 w-3.5" /> Retry
+          </button>
+        </div>
+      )}
+
+      {/* ── Loading overlay ── */}
+      {rx.loading && (
+        <div className="flex items-center gap-2 text-xs text-purple-600">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Loading prescription data…
+        </div>
+      )}
+
+      {/* ── Step 1 · Encounter / consultation selector ── */}
+      <Section title="Patient and encounter" icon={Stethoscope}>
+        {rx.consultations.length === 0 && !rx.loading ? (
+          <Unavailable title="No consultations found">
+            No consultations were returned by the backend. Ensure patients have active consultations or run the seed command.
+          </Unavailable>
+        ) : (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label htmlFor="consultation-select" className="text-xs font-semibold text-slate-700">
+                Active encounter / consultation
+              </label>
+              <div className="relative">
+                <select
+                  id="consultation-select"
+                  className={controlStyle + " appearance-none pr-8"}
+                  value={rx.activeConsultation?.id ?? ""}
+                  onChange={(e) => rx.selectConsultation(e.target.value)}
+                  disabled={rx.loading}
+                >
+                  {rx.consultations.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.id.slice(0, 8)}… · {c.reason} · {new Date(c.started_at).toLocaleDateString()}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
+              </div>
+            </div>
+
+            {rx.activePatientContext && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Patient context (from backend)</p>
+                <div className="grid gap-2 text-xs sm:grid-cols-2">
+                  <div>
+                    <span className="font-semibold text-slate-700">Allergy status: </span>
+                    <Badge
+                      label={rx.activePatientContext.allergy_status}
+                      variant={rx.activePatientContext.allergy_status === "confirmed" ? "rose" : "slate"}
+                    />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">Allergies: </span>
+                    {rx.activePatientContext.allergies.length > 0
+                      ? rx.activePatientContext.allergies.join(", ")
+                      : <span className="text-slate-400">None recorded</span>
+                    }
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">Medicine status: </span>
+                    <Badge
+                      label={rx.activePatientContext.medicine_status}
+                      variant={rx.activePatientContext.medicine_status === "confirmed" ? "green" : "slate"}
+                    />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">Current medicines: </span>
+                    {rx.activePatientContext.current_medicines.length > 0
+                      ? rx.activePatientContext.current_medicines.join(", ")
+                      : <span className="text-slate-400">None recorded</span>
+                    }
+                  </div>
+                  {rx.activePatientContext.date_of_birth && (
+                    <div>
+                      <span className="font-semibold text-slate-700">DOB: </span>
+                      {rx.activePatientContext.date_of_birth}
+                    </div>
+                  )}
+                  {rx.activePatientContext.weight && (
+                    <div>
+                      <span className="font-semibold text-slate-700">Weight: </span>
+                      {rx.activePatientContext.weight} {rx.activePatientContext.weight_unit ?? "kg"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Section>
 
       <div className="grid items-start gap-6 xl:grid-cols-2">
+        {/* ── Step 1 · Voice analysis result ── */}
         <Section title="Structured voice-analysis result" icon={Mic}>
-          <Unavailable title="Structured voice-analysis result unavailable">
-            The voice-analysis result service is not connected. The structured result must be linked to the selected authorized patient encounter before its diagnosis context can be reviewed.
-          </Unavailable>
-          <dl className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
-            <div><dt className="font-semibold text-slate-600">Analysis result reference</dt><dd className="mt-1 text-slate-500">Unavailable</dd></div>
-            <div><dt className="font-semibold text-slate-600">Patient / encounter linkage</dt><dd className="mt-1 text-slate-500">Awaiting authorized encounter and structured result</dd></div>
-          </dl>
-          <p className="mt-4 text-[11px] leading-relaxed text-slate-500">The overview&apos;s simulated voice transcript cannot establish an encounter-linked structured analysis result.</p>
+          {hasAnalysis ? (
+            <dl className="grid gap-4 text-xs sm:grid-cols-2">
+              <div>
+                <dt className="font-semibold text-slate-600">Analysis reference</dt>
+                <dd className="mt-1 font-mono text-slate-800">{rx.activeAnalysis!.analysis_reference}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Imported at</dt>
+                <dd className="mt-1 text-slate-800">{new Date(rx.activeAnalysis!.imported_at).toLocaleString()}</dd>
+              </div>
+              <div className="sm:col-span-2">
+                <dt className="mb-1 font-semibold text-slate-600">Payload summary</dt>
+                <dd className="rounded-xl bg-slate-50 p-3 font-mono text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {JSON.stringify(rx.activeAnalysis!.payload, null, 2).slice(0, 400)}
+                  {JSON.stringify(rx.activeAnalysis!.payload).length > 400 ? "…" : ""}
+                </dd>
+              </div>
+            </dl>
+          ) : (
+            <>
+              <Unavailable title="Structured voice-analysis result unavailable">
+                {hasConsultation
+                  ? "No analysis has been linked to this consultation yet."
+                  : "Select a consultation to load the encounter-linked analysis result."}
+              </Unavailable>
+              <dl className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
+                <div><dt className="font-semibold text-slate-600">Analysis result reference</dt><dd className="mt-1 text-slate-400">Unavailable</dd></div>
+                <div><dt className="font-semibold text-slate-600">Patient / encounter linkage</dt><dd className="mt-1 text-slate-400">Awaiting authorized encounter and structured result</dd></div>
+              </dl>
+            </>
+          )}
         </Section>
+
+        {/* ── Step 2 · Clinician diagnosis confirmation ── */}
         <Section title="Clinician diagnosis confirmation" icon={Stethoscope}>
-          <fieldset disabled aria-describedby="diagnosis-confirmation-help" className="space-y-4">
+          <fieldset aria-describedby="diagnosis-confirmation-help" className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="diagnosis-context" className="text-xs font-semibold text-slate-700">Diagnosis context</label>
-              <input id="diagnosis-context" readOnly placeholder="Awaiting the encounter-linked structured analysis" className={controlStyle} />
+              <label htmlFor="diagnosis-context" className="text-xs font-semibold text-slate-700">
+                Diagnosis context
+                {rx.diagnosisConfirmed && <Badge label="Confirmed" variant="green" />}
+              </label>
+              <input
+                id="diagnosis-context"
+                placeholder={hasConsultation ? "Enter diagnosis (e.g. Influenza A – Confirmed)" : "Awaiting encounter selection"}
+                className={controlStyle}
+                disabled={!hasConsultation || rx.diagnosisConfirmed}
+                value={rx.diagnosisContext}
+                onChange={(e) => rx.setField("diagnosisContext", e.target.value)}
+              />
             </div>
             <label className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700">
-              <input type="checkbox" className="mt-0.5 h-4 w-4 accent-purple-600" />
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-purple-600"
+                checked={rx.diagnosisConfirmed}
+                disabled={!canConfirm}
+                onChange={() => {
+                  if (canConfirm) rx.confirmDiagnosis();
+                }}
+              />
               I confirm the diagnosis context for this authorized patient encounter.
             </label>
+            {canConfirm && (
+              <button
+                type="button"
+                onClick={rx.confirmDiagnosis}
+                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-purple-700 disabled:opacity-50"
+                disabled={rx.loading}
+              >
+                {rx.loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                Confirm Diagnosis
+              </button>
+            )}
           </fieldset>
-          <p id="diagnosis-confirmation-help" className="mt-4 text-xs leading-relaxed text-slate-500">Review and correct the structured diagnosis context, then confirm it before generation. Confirmation awaits a result linked to the authorized encounter. A changed diagnosis requires renewed confirmation.</p>
-          <p className="mt-3 text-[11px] text-slate-500">Initial prescription pilot: influenza and chickenpox.</p>
+          <p id="diagnosis-confirmation-help" className="mt-4 text-xs leading-relaxed text-slate-500">
+            Review and correct the structured diagnosis context, then confirm it before generation.
+            A changed diagnosis requires renewed confirmation. Initial pilot: influenza and chickenpox.
+          </p>
         </Section>
       </div>
 
+      {/* ── Step 3 · Generate prescription draft ── */}
       <Section title="Generate a prescription recommendation draft" icon={Sparkles}>
-        <p className="text-sm leading-relaxed text-slate-600">Use the confirmed diagnosis, authorized patient context and reviewed medicine knowledge to generate candidates. Normalize medicines and apply deterministic safety checks before ranking eligible candidates.</p>
-        <div id="generation-blockers" className="mt-4">
-          <Unavailable title="Prescription generation unavailable">
-            Authorized encounter access, the encounter-linked structured result, clinician diagnosis confirmation, reviewed knowledge and the generation / safety / ranking services are unavailable. No prescription draft has been generated.
-          </Unavailable>
-        </div>
-        <button type="button" disabled aria-describedby="generation-blockers" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-bold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
-          <Sparkles aria-hidden="true" className="h-4 w-4" />Generate Prescription Draft
+        <p className="text-sm leading-relaxed text-slate-600">
+          Use the confirmed diagnosis, authorized patient context and reviewed medicine knowledge to generate candidates.
+          Normalize medicines and apply deterministic safety checks before ranking eligible candidates.
+        </p>
+
+        {!canGenerate && (
+          <div id="generation-blockers" className="mt-4">
+            <Unavailable title="Prescription generation unavailable">
+              {!hasConsultation
+                ? "Select an active consultation first."
+                : "Confirm the diagnosis context before generating candidates."}
+            </Unavailable>
+          </div>
+        )}
+
+        {canGenerate && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+            <p className="font-bold">⚠ AI generation service not yet connected</p>
+            <p className="mt-1">The diagnosis has been confirmed. The ranking and safety-check engine will be wired in the next phase (XAI service). Below you can review and approve a manually-entered draft in the meantime.</p>
+          </div>
+        )}
+
+        <button
+          type="button"
+          disabled={!canGenerate || rx.loading}
+          aria-describedby="generation-blockers"
+          className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-bold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Sparkles aria-hidden="true" className="h-4 w-4" />
+          Generate Prescription Draft
         </button>
       </Section>
 
       <div className="grid items-start gap-6 xl:grid-cols-2">
         <div className="space-y-6">
+          {/* ── Generated draft ── */}
           <Section title="Generated prescription draft" icon={FileText}>
-            <Unavailable title="No generated draft available">
-              The system-generated recommendation draft and its version will appear here after generation, ready for clinician review.
-            </Unavailable>
-            <p className="mt-4 text-xs leading-relaxed text-slate-500">Automatic dose selection is outside scope. The doctor supplies the proposed dose. Request clinician input when reviewed regimen information or required patient context is unavailable.</p>
+            {hasDraft ? (
+              <div className="space-y-3 text-xs text-slate-700">
+                <p className="font-semibold text-slate-500">Draft placeholder — AI engine not yet connected.</p>
+                <p>Diagnosis confirmed: <strong>{rx.diagnosisContext}</strong></p>
+                {rx.activePatientContext?.allergies && rx.activePatientContext.allergies.length > 0 && (
+                  <p className="text-rose-700">
+                    <ShieldAlert className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
+                    Allergy flags: {rx.activePatientContext.allergies.join(", ")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Unavailable title="No generated draft available">
+                The system-generated recommendation draft will appear here after generation.
+              </Unavailable>
+            )}
+            <p className="mt-4 text-xs leading-relaxed text-slate-500">Automatic dose selection is outside scope. The doctor supplies the proposed dose.</p>
           </Section>
+
+          {/* ── Missing information ── */}
           <Section title="Missing information and clinician input" icon={ListChecks}>
-            <Unavailable title="Required inputs cannot be assessed yet">
-              No authorized encounter context, structured analysis or reviewed regimen information has been loaded. No patient-specific missing fields have been inferred.
-            </Unavailable>
-            <ul className="mt-4 list-disc space-y-2 pl-4 text-xs leading-relaxed text-slate-600">
-              <li>Request the clinician-proposed dose and input for unsupported or unavailable regimen information.</li>
-              <li>Request context required by applicable rules. Weight is required only when an applicable validation rule needs it.</li>
-              <li>Show unresolved requirements and block affected checks and candidate eligibility until resolved.</li>
-            </ul>
+            {rx.activePatientContext ? (
+              <ul className="space-y-1.5 text-xs text-slate-700">
+                {!rx.activePatientContext.date_of_birth && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Date of birth missing — required for age-based dosing.</li>
+                )}
+                {!rx.activePatientContext.weight && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Weight missing — required for weight-based dosing rules.</li>
+                )}
+                {rx.activePatientContext.allergy_status !== "confirmed" && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Allergy status not confirmed.</li>
+                )}
+                {rx.activePatientContext.date_of_birth && rx.activePatientContext.weight && rx.activePatientContext.allergy_status === "confirmed" && (
+                  <li className="flex items-center gap-2 text-emerald-700"><Check className="h-3.5 w-3.5" /> All required context fields present.</li>
+                )}
+              </ul>
+            ) : (
+              <Unavailable title="Required inputs cannot be assessed yet">
+                No patient context loaded. Select a consultation to infer missing fields.
+              </Unavailable>
+            )}
           </Section>
+
+          {/* ── Clinician review and corrections ── */}
           <Section title="Clinician review and corrections" icon={FilePenLine}>
-            <Unavailable title="Review awaits a generated draft">
-              Review the generated medicines, evidence, findings and ranking explanations. Manual entry and editing are clinician corrections to that generated draft.
-            </Unavailable>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button type="button" disabled aria-describedby="correction-help" className={buttonStyle}><Pencil aria-hidden="true" className="h-3.5 w-3.5" />Edit draft</button>
-              <button type="button" disabled aria-describedby="decision-help" className={buttonStyle}><X aria-hidden="true" className="h-3.5 w-3.5" />Reject</button>
-              <button type="button" disabled aria-describedby="decision-help" className={buttonStyle}><Check aria-hidden="true" className="h-3.5 w-3.5" />Approve</button>
-            </div>
-            <p id="correction-help" className="mt-4 text-xs leading-relaxed text-slate-500">Every edit creates a corrected version requiring revalidation and renewed ranking of eligible candidates. Previous validation and approval cannot authorize the edited version.</p>
-            <details className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <summary className="cursor-pointer rounded-lg text-xs font-semibold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600">Correction controls — available after generation</summary>
-              <fieldset disabled aria-describedby="correction-help" className="mt-4 space-y-4">
-                <div className="space-y-1.5"><label htmlFor="medicine-correction" className="text-xs font-semibold text-slate-700">Medicine correction</label><input id="medicine-correction" placeholder="Awaiting a generated medicine" className={controlStyle} /></div>
-                <div className="space-y-1.5"><label htmlFor="proposed-dose" className="text-xs font-semibold text-slate-700">Doctor-proposed dose</label><input id="proposed-dose" placeholder="Clinician enters the amount and unit" className={controlStyle} /></div>
-                <div className="space-y-1.5"><label htmlFor="regimen-correction" className="text-xs font-semibold text-slate-700">Regimen corrections</label><textarea id="regimen-correction" rows={2} placeholder="Clinician corrections to route, frequency or duration" className={controlStyle} /></div>
-                <div className="space-y-1.5"><label htmlFor="correction-reason" className="text-xs font-semibold text-slate-700">Correction reason</label><textarea id="correction-reason" rows={2} className={controlStyle} /></div>
-              </fieldset>
-            </details>
-            <button type="button" disabled aria-describedby="correction-help" className={buttonStyle + " mt-4"}><ListChecks aria-hidden="true" className="h-4 w-4" />Revalidate edited version</button>
+            {!hasDraft ? (
+              <Unavailable title="Review awaits a generated draft">
+                Review the generated medicines, evidence, findings and ranking explanations once a draft is available.
+              </Unavailable>
+            ) : (
+              <>
+                {isApproved && (
+                  <div className="mb-3 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                    <Check className="h-4 w-4" /> This prescription version is approved.
+                  </div>
+                )}
+                {isRejected && (
+                  <div className="mb-3 flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">
+                    <X className="h-4 w-4" /> This draft was rejected. Reason: {rx.rejectionReason || "Not specified."}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" disabled={!canApprove} onClick={() => rx.setField("approvalStatus", "idle")} className={buttonStyle}><Pencil className="h-3.5 w-3.5" />Edit draft</button>
+                  <button type="button" disabled={!canApprove} onClick={rx.rejectPrescription} className={buttonStyle}><X className="h-3.5 w-3.5" />Reject</button>
+                  <button type="button" disabled={!canApprove} onClick={rx.approvePrescription} className={buttonStyle + " border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}><Check className="h-3.5 w-3.5" />Approve</button>
+                </div>
+              </>
+            )}
+
+            {hasDraft && !isApproved && (
+              <details className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <summary className="cursor-pointer rounded-lg text-xs font-semibold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600">
+                  Correction controls
+                </summary>
+                <fieldset className="mt-4 space-y-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="medicine-correction" className="text-xs font-semibold text-slate-700">Medicine correction</label>
+                    <input id="medicine-correction" placeholder="Enter corrected medicine name" className={controlStyle} value={rx.medicineCorrection} onChange={(e) => rx.setField("medicineCorrection", e.target.value)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="proposed-dose" className="text-xs font-semibold text-slate-700">Doctor-proposed dose</label>
+                    <input id="proposed-dose" placeholder="e.g. 75 mg once daily for 5 days" className={controlStyle} value={rx.proposedDose} onChange={(e) => rx.setField("proposedDose", e.target.value)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="regimen-correction" className="text-xs font-semibold text-slate-700">Regimen corrections</label>
+                    <textarea id="regimen-correction" rows={2} placeholder="Clinician corrections to route, frequency or duration" className={controlStyle} value={rx.regimenCorrection} onChange={(e) => rx.setField("regimenCorrection", e.target.value)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="correction-reason" className="text-xs font-semibold text-slate-700">Correction reason</label>
+                    <textarea id="correction-reason" rows={2} className={controlStyle} value={rx.correctionReason} onChange={(e) => rx.setField("correctionReason", e.target.value)} />
+                  </div>
+                  {isRejected && (
+                    <div className="space-y-1.5">
+                      <label htmlFor="rejection-reason" className="text-xs font-semibold text-slate-700">Rejection reason</label>
+                      <textarea id="rejection-reason" rows={2} className={controlStyle} value={rx.rejectionReason} onChange={(e) => rx.setField("rejectionReason", e.target.value)} />
+                    </div>
+                  )}
+                </fieldset>
+                <button type="button" className={buttonStyle + " mt-4"}><ListChecks className="h-4 w-4" />Revalidate edited version</button>
+              </details>
+            )}
           </Section>
+
+          {/* ── Approved version and publication ── */}
           <Section title="Approved version and publication" icon={ClipboardCheck}>
-            <Unavailable title="Approval and publication unavailable">
-              Version storage, clinician-decision recording and publication services are not connected. No approved version is available to publish.
-            </Unavailable>
-            <p id="decision-help" className="mt-4 text-xs leading-relaxed text-slate-500">Approval requires completed validation and resolution of required information for that version. Publish only the version explicitly approved by the clinician for the authorized encounter. Any subsequent edit requires revalidation and new approval.</p>
-            <button type="button" disabled aria-describedby="decision-help" className={buttonStyle + " mt-4"}><Send aria-hidden="true" className="h-4 w-4" />Publish Approved Version</button>
+            {isApproved ? (
+              <div className="space-y-3 text-xs">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-800">
+                  <p className="font-bold">Ready to publish</p>
+                  <p className="mt-1">Diagnosis: {rx.diagnosisContext}</p>
+                  {rx.proposedDose && <p>Proposed dose: {rx.proposedDose}</p>}
+                </div>
+                <button type="button" className={buttonStyle + " border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}>
+                  <Send className="h-4 w-4" />Publish Approved Version
+                </button>
+              </div>
+            ) : (
+              <>
+                <Unavailable title="Approval and publication unavailable">
+                  Approve a generated and reviewed draft first. Unapproved recommendations cannot become medication instructions.
+                </Unavailable>
+                <button type="button" disabled aria-describedby="decision-help" className={buttonStyle + " mt-4"}>
+                  <Send className="h-4 w-4" />Publish Approved Version
+                </button>
+              </>
+            )}
           </Section>
         </div>
+
         <div className="space-y-6">
+          {/* ── Medicine normalization ── */}
           <Section title="Medicine normalization" icon={Pill}>
-            <Unavailable title="Normalization unavailable">No reviewed catalogue service is connected. Generated candidates must be linked to standard medicine identifiers for safety and evidence review.</Unavailable>
+            <Unavailable title="Normalization unavailable">
+              RxNorm normalization service not yet connected. Generated candidates must be linked to standard medicine identifiers.
+            </Unavailable>
+            {rx.activePatientContext?.current_medicines && rx.activePatientContext.current_medicines.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-semibold text-slate-600">Current medicines on record:</p>
+                <ul className="flex flex-wrap gap-2">
+                  {rx.activePatientContext.current_medicines.map((med) => (
+                    <li key={med} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700">{med}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Section>
+
+          {/* ── Safety validation ── */}
           <Section title="Deterministic safety-validation findings" icon={ShieldCheck}>
-            <Unavailable title="Safety checks have not run">No safety-validation service or reviewed rules are connected. Deterministic checks must precede ranking. Candidates with blocking findings or unresolved required information remain ineligible.</Unavailable>
-            <p className="mt-4 text-xs leading-relaxed text-slate-500">Findings, rule references and missing-information states belong to the specific candidate and prescription version. Clinician dose input is needed for applicable regimen checks.</p>
+            {rx.activePatientContext ? (
+              <div className="space-y-2 text-xs">
+                {rx.activePatientContext.allergies.length > 0 && (
+                  <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-800">
+                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <div><p className="font-bold">Allergy check required</p><p className="mt-0.5">Patient has recorded allergies: {rx.activePatientContext.allergies.join(", ")}. All candidates must be screened.</p></div>
+                  </div>
+                )}
+                <p className="text-slate-500">Full deterministic rules (interaction, contraindication, dose-range) will run once the safety engine is connected.</p>
+              </div>
+            ) : (
+              <Unavailable title="Safety checks have not run">
+                No patient context loaded. Safety rules cannot be applied without patient allergy and medicine data.
+              </Unavailable>
+            )}
           </Section>
+
+          {/* ── Candidate ranking ── */}
           <Section title="Eligible candidate ranking and explanations" icon={ArrowUpDown}>
-            <Unavailable title="No eligible candidate ranking available">Rank candidates eligible after deterministic safety checks. No candidates, ranks, scores or ranking explanations have been returned by a service.</Unavailable>
+            <Unavailable title="No eligible candidate ranking available">
+              Rank candidates eligible after deterministic safety checks. The ranking and XAI explanation engine will be connected in the next phase.
+            </Unavailable>
           </Section>
+
+          {/* ── Evidence ── */}
           <Section title="Evidence and reviewed medicine knowledge" icon={BookOpen}>
-            <Unavailable title="Reviewed evidence unavailable">No reviewed knowledge or evidence-reference service is connected. Generated recommendations must expose their evidence references and knowledge review status.</Unavailable>
+            <Unavailable title="Reviewed evidence unavailable">
+              DailyMed / openFDA evidence-reference service not yet connected. Generated recommendations must expose their evidence references.
+            </Unavailable>
+            {rx.activeAnalysis?.payload && (
+              <div className="mt-4">
+                <p className="mb-1 text-xs font-semibold text-slate-600">Analysis payload (raw):</p>
+                <pre className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-700 overflow-auto max-h-40">
+                  {JSON.stringify(rx.activeAnalysis.payload, null, 2)}
+                </pre>
+              </div>
+            )}
           </Section>
         </div>
       </div>

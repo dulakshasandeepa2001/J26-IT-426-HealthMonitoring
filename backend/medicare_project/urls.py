@@ -2,7 +2,7 @@
 URL configuration for medicare_project project.
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from accounts.views import (
     create_user, get_users, get_doctor, login_user,
     get_pending_doctors, approve_doctor, reject_doctor)
@@ -21,7 +21,5 @@ urlpatterns = [
     path("pending-doctors/", get_pending_doctors),
     path("approve-doctor/<int:pk>/", approve_doctor),
     path("reject-doctor/<int:pk>/", reject_doctor),
-    
-    
-
+    path("api/prescription/", include("prescription_context.urls")),
 ]

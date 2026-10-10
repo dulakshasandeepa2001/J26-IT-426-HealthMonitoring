@@ -9,11 +9,11 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'consultations', ConsultationViewSet)
-router.register(r'analyses', ConsultationAnalysisViewSet)
-router.register(r'patient-contexts', PatientContextViewSet)
-router.register(r'revisions', ContextRevisionViewSet)
-router.register(r'diagnoses', DiagnosisConfirmationViewSet)
+router.register(r'consultations', ConsultationViewSet, basename='consultation')
+router.register(r'analyses', ConsultationAnalysisViewSet, basename='consultationanalysis')
+router.register(r'patient-contexts', PatientContextViewSet, basename='patientcontext')
+router.register(r'revisions', ContextRevisionViewSet, basename='contextrevision')
+router.register(r'diagnoses', DiagnosisConfirmationViewSet, basename='diagnosisconfirmation')
 
 urlpatterns = [
     path('', include(router.urls)),
