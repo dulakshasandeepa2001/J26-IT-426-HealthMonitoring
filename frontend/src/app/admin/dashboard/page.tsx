@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, getSession, logoutUser } from "@/lib/api";
+import ConsultationAssignments from "@/features/admin-dashboard/ConsultationAssignments";
 import {
   ShieldAlert,
   CheckCircle,
@@ -49,27 +50,26 @@ export default function AdminDashboard() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [sessionError, setSessionError] = useState("");
+  const [directoryVersion, setDirectoryVersion] = useState(0);
 
   // Load pending doctors on page load & route protection check
   useEffect(() => {
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (!storedUser) {
-      router.push("/login");
-      return;
-    }
-
-    try {
-      const user = JSON.parse(storedUser);
-      if (user.role !== "admin") {
-        router.push("/login");
+    let active = true;
+    getSession().then(({ user }) => {
+      if (!active) return;
+      if (!user || user.role !== "admin") {
+        router.replace("/login");
         return;
       }
-    } catch {
-      router.push("/login");
-      return;
-    }
-
-    fetchPendingDoctors();
+      localStorage.setItem("meditrack_user", JSON.stringify(user));
+      setAuthorized(true);
+      void fetchPendingDoctors();
+    }).catch(() => {
+      if (active) setSessionError("Unable to verify your admin session. Check that the backend is running, then refresh this page.");
+    });
+    return () => { active = false; };
   }, [router]);
 
   async function fetchPendingDoctors() {
@@ -93,6 +93,7 @@ export default function AdminDashboard() {
       setMessage("");
       await apiRequest(`/approve-doctor/${id}/`, { method: "POST" });
       setPendingDoctors((prev) => prev.filter((d) => d.id !== id));
+      setDirectoryVersion((version) => version + 1);
       setMessage("Doctor approved successfully! Account is now active.");
       setTimeout(() => setMessage(""), 3000);
     } catch (err: unknown) {
@@ -121,9 +122,19 @@ export default function AdminDashboard() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem("meditrack_user");
-    router.push("/login");
+  async function handleLogout() {
+    try {
+      await logoutUser();
+      router.push("/login");
+    } catch {
+      window.alert("Logout failed. Please try again.");
+    }
+  }
+
+  if (!authorized) {
+    return <main className="flex min-h-screen items-center justify-center p-6 text-sm text-slate-600">
+      {sessionError ? <p role="alert">{sessionError}</p> : <p role="status">Checking admin session…</p>}
+    </main>;
   }
 
   return (
@@ -144,7 +155,7 @@ export default function AdminDashboard() {
                   Admin Panel
                 </span>
               </div>
-              <p className="text-[11px] font-medium text-slate-500">Doctor Registration & Approval System</p>
+              <p className="text-[11px] font-medium text-slate-500">Doctor Approvals & Patient Consultations</p>
             </div>
           </Link>
 
@@ -215,6 +226,8 @@ export default function AdminDashboard() {
             <span>{error}</span>
           </div>
         )}
+
+        <ConsultationAssignments refreshVersion={directoryVersion} />
 
         {/* Pending Table */}
         <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-xl shadow-blue-600/5">

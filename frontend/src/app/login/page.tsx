@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, getSession } from "@/lib/api";
 import { Lock, User, AlertCircle, ArrowLeft, Plus, ShieldCheck, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -15,24 +15,18 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        if (user.role === "admin") {
-          router.push("/admin/dashboard");
-        } else if (user.role === "doctor") {
-          router.push("/doctor/dashboard");
-        } else if (user.role === "lab") {
-          router.push("/lab/dashboard");
-        } else {
-          router.push("/patient/dashboard");
-        }
-      } catch {
+    let active = true;
+    getSession().then(({ user }) => {
+      if (!active) return;
+      if (!user) {
         localStorage.removeItem("meditrack_user");
+        return;
       }
-    }
+      localStorage.setItem("meditrack_user", JSON.stringify(user));
+      const role = ["admin", "doctor", "lab"].includes(user.role) ? user.role : "patient";
+      router.replace(`/${role}/dashboard`);
+    }).catch(() => { /* Keep login available if the backend is temporarily offline. */ });
+    return () => { active = false; };
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -56,6 +50,7 @@ export default function Login() {
       localStorage.setItem(
         "meditrack_user",
         JSON.stringify({
+          id: data.id,
           username: data.username,
           role: data.role,
           doctorID: data.doctorID,
@@ -199,7 +194,7 @@ export default function Login() {
 
           {/* Card Footer Link */}
           <div className="text-center mt-8 pt-6 border-t border-slate-100 text-xs text-slate-500 font-medium">
-            Don't have an account yet?{" "}
+            Don&apos;t have an account yet?{" "}
             <Link href="/register" className="text-blue-600 hover:underline font-bold ml-1">
               Create Account
             </Link>

@@ -1,45 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ApiError, getSession } from "@/lib/api";
 import {
-  fetchConsultations,
-  fetchDiagnoses,
-  fetchAnalyses,
-  fetchPatientContexts,
-  createConsultation,
-  createDiagnosis,
-  type Consultation,
-  type DiagnosisConfirmation,
-  type ConsultationAnalysis,
-  type PatientContext,
+  fetchPatients, fetchConsultations, fetchDiagnoses, fetchAnalyses, fetchPatientContexts,
+  createConsultation, createDiagnosis, savePatientContext,
+  type RegisteredPatient, type Consultation, type DiagnosisConfirmation,
+  type ConsultationAnalysis, type PatientContext, type PatientContextReview,
 } from "./prescriptionApi";
 
 export type WorkflowStep = 0 | 1 | 2 | 3 | 4;
 
 export interface PrescriptionState {
-  // Loading / error
   loading: boolean;
   error: string | null;
-
-  // Backend data
+  accessDenied: boolean;
+  patients: RegisteredPatient[];
   consultations: Consultation[];
   diagnoses: DiagnosisConfirmation[];
   analyses: ConsultationAnalysis[];
   patientContexts: PatientContext[];
-
-  // Active selection
+  activePatient: RegisteredPatient | null;
   activeConsultation: Consultation | null;
   activeAnalysis: ConsultationAnalysis | null;
   activePatientContext: PatientContext | null;
-
-  // Workflow
   step: WorkflowStep;
-
-  // Diagnosis form
   diagnosisContext: string;
   diagnosisConfirmed: boolean;
-
-  // Review / approval
   approvalStatus: "idle" | "approved" | "rejected";
   rejectionReason: string;
   medicineCorrection: string;
@@ -48,104 +35,143 @@ export interface PrescriptionState {
   correctionReason: string;
 }
 
-export function usePrescription() {
-  const [state, setState] = useState<PrescriptionState>({
-    loading: false,
-    error: null,
-    consultations: [],
-    diagnoses: [],
-    analyses: [],
-    patientContexts: [],
-    activeConsultation: null,
-    activeAnalysis: null,
-    activePatientContext: null,
-    step: 0,
-    diagnosisContext: "",
-    diagnosisConfirmed: false,
-    approvalStatus: "idle",
-    rejectionReason: "",
-    medicineCorrection: "",
-    proposedDose: "",
-    regimenCorrection: "",
-    correctionReason: "",
-  });
+const emptyReview = {
+  step: 0 as WorkflowStep,
+  diagnosisContext: "",
+  diagnosisConfirmed: false,
+  approvalStatus: "idle" as const,
+  rejectionReason: "",
+  medicineCorrection: "",
+  proposedDose: "",
+  regimenCorrection: "",
+  correctionReason: "",
+};
 
-  // ── Load all data from backend ───────────────────────────────────────────
+const initialState: PrescriptionState = {
+  ...emptyReview,
+  loading: true,
+  error: null,
+  accessDenied: false,
+  patients: [],
+  consultations: [],
+  diagnoses: [],
+  analyses: [],
+  patientContexts: [],
+  activePatient: null,
+  activeConsultation: null,
+  activeAnalysis: null,
+  activePatientContext: null,
+};
+
+function selectEncounter(
+  state: PrescriptionState, patient: RegisteredPatient | null, encounter: Consultation | null
+): PrescriptionState {
+  const diagnosis = state.diagnoses.find((item) => item.consultation === encounter?.id);
+  return {
+    ...state, ...emptyReview,
+    activePatient: patient,
+    activeConsultation: encounter,
+    activeAnalysis: state.analyses.find((item) => item.consultation === encounter?.id) ?? null,
+    activePatientContext: state.patientContexts.find((item) => item.patient === patient?.id) ?? null,
+    diagnosisContext: diagnosis?.condition_label ?? "",
+    diagnosisConfirmed: !!diagnosis,
+  };
+}
+
+export function usePrescription() {
+  const [state, setState] = useState<PrescriptionState>(initialState);
+  const selectionKey = useRef<string | null>(null);
+  const saving = useRef(false);
+  const loadSequence = useRef(0);
+
+  const rememberEncounter = useCallback((encounter: Consultation | null) => {
+    if (!selectionKey.current) return;
+    if (encounter) sessionStorage.setItem(selectionKey.current, encounter.id);
+    else sessionStorage.removeItem(selectionKey.current);
+  }, []);
+
   const loadAll = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
-      const [consultations, diagnoses, analyses, patientContexts] = await Promise.all([
-        fetchConsultations(),
-        fetchDiagnoses(),
-        fetchAnalyses(),
-        fetchPatientContexts(),
+      const { user } = await getSession();
+      if (sequence !== loadSequence.current) return;
+      if (user) localStorage.setItem("meditrack_user", JSON.stringify(user));
+      else localStorage.removeItem("meditrack_user");
+      window.dispatchEvent(new Event("storage"));
+      if (!user) throw new ApiError("Sign in with your approved doctor account to open patient encounters.", 401);
+      if (user.role !== "doctor") throw new ApiError("This workspace requires an approved doctor account.", 403);
+      selectionKey.current = "meditrack_active_encounter_" + user.id;
+      const [patients, consultations, diagnoses, analyses, patientContexts] = await Promise.all([
+        fetchPatients(), fetchConsultations(), fetchDiagnoses(), fetchAnalyses(), fetchPatientContexts(),
       ]);
-
-      // Auto-select the latest consultation
-      const latest = consultations.length > 0 ? consultations[0] : null;
-      const linkedAnalysis = latest
-        ? analyses.find((a) => a.consultation === latest.id) ?? null
-        : null;
-      const linkedContext = latest
-        ? patientContexts.find((c) => c.patient === latest.patient) ?? null
-        : null;
-
-      setState((s) => ({
-        ...s,
-        loading: false,
-        consultations,
-        diagnoses,
-        analyses,
-        patientContexts,
-        activeConsultation: latest,
-        activeAnalysis: linkedAnalysis,
-        activePatientContext: linkedContext,
-        // Pre-fill diagnosis if already confirmed for this consultation
-        diagnosisContext:
-          diagnoses.find((d) => d.consultation === latest?.id)?.condition_label ?? "",
-        diagnosisConfirmed: diagnoses.some((d) => d.consultation === latest?.id),
-      }));
+      if (sequence !== loadSequence.current) return;
+      const savedId = sessionStorage.getItem(selectionKey.current);
+      const encounter = consultations.find((item) => item.id === savedId) ?? null;
+      const patient = patients.find((item) => item.id === encounter?.patient) ?? null;
+      setState(selectEncounter({
+        ...initialState, loading: false, patients, consultations, diagnoses, analyses, patientContexts,
+      }, patient, patient ? encounter : null));
     } catch (err) {
-      setState((s) => ({
-        ...s,
-        loading: false,
+      if (sequence !== loadSequence.current) return;
+      selectionKey.current = null;
+      setState({
+        ...initialState, loading: false,
         error: err instanceof Error ? err.message : "Failed to load prescription data.",
-      }));
+        accessDenied: err instanceof ApiError && [401, 403].includes(err.status),
+      });
     }
   }, []);
 
+  const invalidateLoads = useCallback(() => { ++loadSequence.current; }, []);
+
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    void loadAll();
+    return invalidateLoads;
+  }, [loadAll, invalidateLoads]);
 
-  // ── Select a consultation ────────────────────────────────────────────────
-  const selectConsultation = useCallback(
-    (id: string) => {
-      const found = state.consultations.find((c) => c.id === id) ?? null;
-      const linkedAnalysis = found
-        ? state.analyses.find((a) => a.consultation === found.id) ?? null
-        : null;
-      const linkedContext = found
-        ? state.patientContexts.find((c) => c.patient === found.patient) ?? null
-        : null;
+  const selectPatient = useCallback((id: number) => {
+    if (state.loading) return;
+    const patient = state.patients.find((item) => item.id === id) ?? null;
+    const encounter = state.consultations.find((item) => item.patient === patient?.id) ?? null;
+    rememberEncounter(encounter);
+    setState((s) => selectEncounter({ ...s, error: null }, patient, encounter));
+  }, [state.loading, state.patients, state.consultations, rememberEncounter]);
+
+  const selectConsultation = useCallback((id: string) => {
+    if (state.loading) return;
+    const encounter = state.consultations.find(
+      (item) => item.id === id && item.patient === state.activePatient?.id
+    ) ?? null;
+    rememberEncounter(encounter);
+    setState((s) => selectEncounter({ ...s, error: null }, s.activePatient, encounter));
+  }, [state.loading, state.activePatient, state.consultations, rememberEncounter]);
+
+  const startConsultation = useCallback(async (reason: string): Promise<boolean> => {
+    if (!state.activePatient || !reason.trim() || saving.current) return false;
+    saving.current = true;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    try {
+      const saved = await createConsultation({ patient: state.activePatient.id, reason: reason.trim() });
+      rememberEncounter(saved);
+      setState((s) => selectEncounter({
+        ...s, loading: false, consultations: [saved, ...s.consultations],
+      }, s.activePatient, saved));
+      return true;
+    } catch (err) {
+      const accessDenied = err instanceof ApiError && [401, 403].includes(err.status);
       setState((s) => ({
-        ...s,
-        activeConsultation: found,
-        activeAnalysis: linkedAnalysis,
-        activePatientContext: linkedContext,
-        diagnosisContext:
-          state.diagnoses.find((d) => d.consultation === found?.id)?.condition_label ?? "",
-        diagnosisConfirmed: state.diagnoses.some((d) => d.consultation === found?.id),
-        approvalStatus: "idle",
-        step: 0,
+        ...(accessDenied ? initialState : s), loading: false, accessDenied,
+        error: err instanceof Error ? err.message : "Failed to save the new visit. Please retry.",
       }));
-    },
-    [state.consultations, state.analyses, state.patientContexts, state.diagnoses]
-  );
+      return false;
+    } finally {
+      saving.current = false;
+    }
+  }, [state.activePatient, rememberEncounter]);
 
-  // ── Confirm diagnosis ────────────────────────────────────────────────────
   const confirmDiagnosis = useCallback(async () => {
-    if (!state.activeConsultation || !state.diagnosisContext.trim()) return;
+    if (!state.activeConsultation || !state.diagnosisContext.trim() || state.loading) return;
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const saved = await createDiagnosis({
@@ -156,47 +182,60 @@ export function usePrescription() {
         analysis_reference: state.activeAnalysis?.analysis_reference ?? null,
       });
       setState((s) => ({
-        ...s,
-        loading: false,
-        diagnoses: [...s.diagnoses, saved],
-        diagnosisConfirmed: true,
-        step: 2,
+        ...s, loading: false, diagnoses: [saved, ...s.diagnoses],
+        diagnosisConfirmed: true, step: 1,
       }));
     } catch (err) {
+      const accessDenied = err instanceof ApiError && [401, 403].includes(err.status);
       setState((s) => ({
-        ...s,
-        loading: false,
+        ...(accessDenied ? initialState : s), loading: false, accessDenied,
         error: err instanceof Error ? err.message : "Failed to confirm diagnosis.",
       }));
     }
-  }, [state.activeConsultation, state.diagnosisContext, state.activeAnalysis]);
+  }, [state.activeConsultation, state.diagnosisContext, state.activeAnalysis, state.loading]);
 
-  // ── Approve prescription ─────────────────────────────────────────────────
-  const approvePrescription = useCallback(() => {
-    setState((s) => ({ ...s, approvalStatus: "approved", step: 4 }));
-  }, []);
+  const reviewPatientContext = useCallback(async (data: PatientContextReview): Promise<boolean> => {
+    if (!state.activeConsultation || state.loading || saving.current) return false;
+    saving.current = true;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    try {
+      const saved = await savePatientContext(state.activeConsultation.id, data);
+      setState((s) => ({
+        ...s, loading: false, activePatientContext: saved,
+        activePatient: s.activePatient ? {
+          ...s.activePatient, birthday: saved.date_of_birth, age_years: saved.age_years, dob_status: saved.dob_status,
+        } : null,
+        patients: s.patients.map((patient) => patient.id === saved.patient ? {
+          ...patient, birthday: saved.date_of_birth, age_years: saved.age_years, dob_status: saved.dob_status,
+        } : patient),
+        patientContexts: [...s.patientContexts.filter((item) => item.patient !== saved.patient), saved],
+        approvalStatus: "idle", medicineCorrection: "", proposedDose: "", regimenCorrection: "", correctionReason: "",
+      }));
+      return true;
+    } catch (err) {
+      const accessDenied = err instanceof ApiError && [401, 403].includes(err.status);
+      setState((s) => ({
+        ...(accessDenied ? initialState : s), loading: false, accessDenied,
+        error: err instanceof Error ? err.message : "Unable to save patient information.",
+      }));
+      return false;
+    } finally {
+      saving.current = false;
+    }
+  }, [state.activeConsultation, state.loading]);
 
-  // ── Reject prescription ──────────────────────────────────────────────────
-  const rejectPrescription = useCallback(() => {
-    setState((s) => ({ ...s, approvalStatus: "rejected" }));
-  }, []);
-
-  // ── Generic field setter ─────────────────────────────────────────────────
+  // Draft generation and persisted approval will be added in later steps.
+  const approvePrescription = useCallback(() => {}, []);
+  const rejectPrescription = useCallback(() => {}, []);
   const setField = useCallback(
     <K extends keyof PrescriptionState>(key: K, value: PrescriptionState[K]) => {
       setState((s) => ({ ...s, [key]: value }));
-    },
-    []
+    }, []
   );
 
   return {
-    ...state,
-    loadAll,
-    selectConsultation,
-    confirmDiagnosis,
-    approvePrescription,
-    rejectPrescription,
-    setField,
+    ...state, loadAll, selectPatient, selectConsultation, startConsultation,
+    confirmDiagnosis, reviewPatientContext, approvePrescription, rejectPrescription, setField,
   };
 }
 

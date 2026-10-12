@@ -4,21 +4,59 @@
 
 import { apiRequest } from "@/lib/api";
 
+export interface RegisteredPatient {
+  id: number;
+  username: string;
+  display_name: string;
+  birthday: string | null;
+  age_years: number | null;
+  dob_status: "valid" | "missing" | "future";
+}
+
+export async function fetchPatients(): Promise<RegisteredPatient[]> {
+  return apiRequest("/api/prescription/patients/");
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface PatientContext {
   id: number;
   patient: number;
   date_of_birth: string | null;
+  age_years: number | null;
+  dob_status: "valid" | "missing" | "future";
   weight: string | null;
   weight_unit: string | null;
   allergy_status: string;          // "confirmed" | "unknown" | "none"
   allergies: string[];
   medicine_status: string;         // "confirmed" | "unknown" | "none"
   current_medicines: string[];
-  provenance: Record<string, unknown>;
+  provenance: Record<string, unknown> & {
+    last_reviewed_consultation?: string;
+    last_reviewed_by?: number;
+    last_reviewed_at?: string;
+  };
   updated_at: string;
   updated_by: number;
+}
+
+export type ContextStatus = "confirmed" | "none" | "unknown";
+
+export interface PatientContextReview {
+  allergy_status: ContextStatus;
+  allergies: string[];
+  medicine_status: ContextStatus;
+  current_medicines: string[];
+  reviewed: boolean;
+  expected_updated_at: string | null;
+}
+
+export async function savePatientContext(
+  consultationId: string, data: PatientContextReview
+): Promise<PatientContext> {
+  return apiRequest(`/api/prescription/consultations/${consultationId}/patient-context/`, {
+    method: "POST", body: JSON.stringify(data),
+  });
 }
 
 export interface DiagnosisConfirmation {
@@ -39,6 +77,7 @@ export interface Consultation {
   created_at: string;
   doctor: number;
   patient: number;
+  patient_name: string;
   assigned_by: number | null;
 }
 
@@ -83,7 +122,7 @@ export async function fetchConsultationById(id: string): Promise<Consultation> {
 }
 
 export async function createConsultation(
-  data: Omit<Consultation, "id" | "created_at">
+  data: { patient: number; reason: string }
 ): Promise<Consultation> {
   return apiRequest("/api/prescription/consultations/", {
     method: "POST",

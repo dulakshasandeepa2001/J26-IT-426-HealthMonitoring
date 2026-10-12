@@ -4,7 +4,7 @@ URL configuration for medicare_project project.
 from django.contrib import admin
 from django.urls import path, include
 from accounts.views import (
-    create_user, get_users, get_doctor, login_user,
+    create_user, get_users, get_doctor, login_user, current_session, logout_user,
     get_pending_doctors, approve_doctor, reject_doctor)
 from taskcreate.views import create_task, health_check, get_tasks, delete_task
 
@@ -13,6 +13,8 @@ urlpatterns = [
     path("create-user/", create_user),
     path("get-users/", get_users),
     path("login/", login_user),
+    path("session/", current_session),
+    path("logout/", logout_user),
     path("get-doctor/", get_doctor),
     path("create-task/", create_task),
     path("health-check/", health_check),

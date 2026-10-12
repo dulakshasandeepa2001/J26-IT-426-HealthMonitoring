@@ -1,9 +1,11 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+import uuid
 
 class PrescriptionContextConsultation(models.Model):
-    id = models.UUIDField(primary_key=True)
-    started_at = models.DateTimeField()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    started_at = models.DateTimeField(default=timezone.now)
     reason = models.CharField(max_length=300)
     is_demo = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

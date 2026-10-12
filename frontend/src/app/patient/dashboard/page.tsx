@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, logoutUser } from "@/lib/api";
 import { 
   User, 
   Clock, 
@@ -254,9 +254,13 @@ export default function PatientDashboard() {
     }
   }, [selectedDoctor, availabilityDate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      router.push("/login");
+    } catch {
+      window.alert("Logout failed. Please try again.");
+    }
   };
 
   const filteredDoctors = doctors.filter((doc) =>

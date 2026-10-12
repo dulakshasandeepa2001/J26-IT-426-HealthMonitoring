@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from accounts.models import User
+from .access import assigned_patients
+from .patient_data import patient_age
 from .models import (
     PrescriptionContextConsultation,
     PrescriptionContextConsultationanalysis,
@@ -7,10 +10,73 @@ from .models import (
     PrescriptionContextDiagnosisconfirmation,
 )
 
+class PatientSerializer(serializers.ModelSerializer):
+    display_name = serializers.SerializerMethodField()
+    age_years = serializers.SerializerMethodField()
+    dob_status = serializers.SerializerMethodField()
+
+    def get_display_name(self, obj):
+        return obj.get_full_name().strip() or obj.username
+
+    def get_age_years(self, obj):
+        return patient_age(obj.birthday)[0]
+
+    def get_dob_status(self, obj):
+        return patient_age(obj.birthday)[1]
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'display_name', 'birthday', 'age_years', 'dob_status')
+
+
 class ConsultationSerializer(serializers.ModelSerializer):
+    patient_name = serializers.SerializerMethodField()
+
+    def get_patient_name(self, obj):
+        return obj.patient.get_full_name().strip() or obj.patient.username
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        self.fields['patient'].queryset = (
+            assigned_patients(request.user) if request and request.user else User.objects.none()
+        )
+
     class Meta:
         model = PrescriptionContextConsultation
         fields = '__all__'
+        read_only_fields = ('id', 'doctor', 'assigned_by', 'started_at', 'created_at', 'is_demo')
+
+
+class AssignmentDoctorSerializer(PatientSerializer):
+    class Meta(PatientSerializer.Meta):
+        fields = ('id', 'username', 'display_name', 'doctorID', 'working_hospital')
+
+
+class AdminAssignmentSerializer(serializers.ModelSerializer):
+    doctor = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role='doctor', is_active=True, is_approved=True),
+    )
+    patient = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role='patient', is_active=True, is_approved=True),
+    )
+    doctor_name = serializers.SerializerMethodField()
+    patient_name = serializers.SerializerMethodField()
+    is_demo = serializers.BooleanField(default=True)
+
+    def get_doctor_name(self, obj):
+        return obj.doctor.get_full_name().strip() or obj.doctor.username
+
+    def get_patient_name(self, obj):
+        return obj.patient.get_full_name().strip() or obj.patient.username
+
+    class Meta:
+        model = PrescriptionContextConsultation
+        fields = (
+            'id', 'doctor', 'doctor_name', 'patient', 'patient_name', 'reason',
+            'is_demo', 'assigned_by', 'started_at', 'created_at',
+        )
+        read_only_fields = ('id', 'assigned_by', 'started_at', 'created_at')
 
 class ConsultationAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,9 +84,66 @@ class ConsultationAnalysisSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PatientContextSerializer(serializers.ModelSerializer):
+    date_of_birth = serializers.SerializerMethodField()
+    age_years = serializers.SerializerMethodField()
+    dob_status = serializers.SerializerMethodField()
+
+    def get_date_of_birth(self, obj):
+        birthday = obj.patient.birthday
+        return birthday.isoformat() if birthday else None
+
+    def get_age_years(self, obj):
+        return patient_age(obj.patient.birthday)[0]
+
+    def get_dob_status(self, obj):
+        return patient_age(obj.patient.birthday)[1]
+
     class Meta:
         model = PrescriptionContextPatientcontext
         fields = '__all__'
+
+
+class PatientContextReviewSerializer(serializers.Serializer):
+    allergy_status = serializers.ChoiceField(choices=('confirmed', 'none', 'unknown'))
+    allergies = serializers.ListField(
+        child=serializers.CharField(max_length=200, allow_blank=False), max_length=50,
+    )
+    medicine_status = serializers.ChoiceField(choices=('confirmed', 'none', 'unknown'))
+    current_medicines = serializers.ListField(
+        child=serializers.CharField(max_length=200, allow_blank=False), max_length=50,
+    )
+    reviewed = serializers.BooleanField()
+    expected_updated_at = serializers.DateTimeField(allow_null=True)
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict):
+            unexpected = set(data) - set(self.fields)
+            if unexpected:
+                raise serializers.ValidationError({'non_field_errors': [
+                    'Unsupported fields: ' + ', '.join(sorted(unexpected)),
+                ]})
+        return super().to_internal_value(data)
+
+    def validate(self, data):
+        errors = {}
+        if not data['reviewed']:
+            errors['reviewed'] = 'Review the patient information for this visit before saving.'
+        for status_field, list_field in [('allergy_status', 'allergies'), ('medicine_status', 'current_medicines')]:
+            entries = data[list_field]
+            if data[status_field] == 'confirmed' and not entries:
+                errors[list_field] = 'Enter at least one item when the status is Known.'
+            elif data[status_field] != 'confirmed' and entries:
+                errors[list_field] = 'The list must be empty when the status is None or Unknown.'
+            seen = set()
+            normalized = []
+            for entry in entries:
+                if entry.casefold() not in seen:
+                    normalized.append(entry)
+                    seen.add(entry.casefold())
+            data[list_field] = normalized
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
 
 class ContextRevisionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +151,15 @@ class ContextRevisionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DiagnosisConfirmationSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        self.fields['consultation'].queryset = (
+            PrescriptionContextConsultation.objects.filter(doctor=request.user)
+            if request and request.user else PrescriptionContextConsultation.objects.none()
+        )
+
     class Meta:
         model = PrescriptionContextDiagnosisconfirmation
         fields = '__all__'
+        read_only_fields = ('id', 'doctor', 'confirmed_at')

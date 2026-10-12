@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import {
-  AlertTriangle, ArrowUpDown, BookOpen, Check, ChevronDown, ClipboardCheck,
+  AlertTriangle, ArrowUpDown, BookOpen, Check, ClipboardCheck,
   FilePenLine, FileText, ListChecks, Loader2, Mic, Pencil,
   Pill, RefreshCw, Send, ShieldAlert, ShieldCheck, Sparkles, Stethoscope, X,
 } from "lucide-react";
 import { usePrescription } from "./usePrescription";
+import { EncounterSelector } from "./EncounterSelector";
+import { PatientContextForm } from "./PatientContextForm";
 import { buttonStyle, controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
 // ─── Workflow steps shown at the top ─────────────────────────────────────────
@@ -40,8 +43,8 @@ export default function PrescriptionWorkspace() {
   const hasConsultation = !!rx.activeConsultation;
   const hasAnalysis = !!rx.activeAnalysis;
   const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
-  const canGenerate = hasConsultation && rx.diagnosisConfirmed;
-  const hasDraft = canGenerate; // placeholder until AI service is wired
+  const canGenerate = false; // The generation service is not connected yet.
+  const hasDraft = false;
   const canApprove = hasDraft && rx.approvalStatus === "idle";
   const isApproved = rx.approvalStatus === "approved";
   const isRejected = rx.approvalStatus === "rejected";
@@ -80,6 +83,7 @@ export default function PrescriptionWorkspace() {
           <div>
             <p className="font-bold">Backend error</p>
             <p className="mt-0.5">{rx.error}</p>
+            {rx.accessDenied && <Link href="/login" className="mt-2 inline-block font-bold underline">Sign in as a doctor</Link>}
           </div>
           <button type="button" onClick={rx.loadAll} className="ml-auto inline-flex items-center gap-1 font-bold hover:underline">
             <RefreshCw className="h-3.5 w-3.5" /> Retry
@@ -97,82 +101,14 @@ export default function PrescriptionWorkspace() {
 
       {/* ── Step 1 · Encounter / consultation selector ── */}
       <Section title="Patient and encounter" icon={Stethoscope}>
-        {rx.consultations.length === 0 && !rx.loading ? (
-          <Unavailable title="No consultations found">
-            No consultations were returned by the backend. Ensure patients have active consultations or run the seed command.
-          </Unavailable>
-        ) : (
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label htmlFor="consultation-select" className="text-xs font-semibold text-slate-700">
-                Active encounter / consultation
-              </label>
-              <div className="relative">
-                <select
-                  id="consultation-select"
-                  className={controlStyle + " appearance-none pr-8"}
-                  value={rx.activeConsultation?.id ?? ""}
-                  onChange={(e) => rx.selectConsultation(e.target.value)}
-                  disabled={rx.loading}
-                >
-                  {rx.consultations.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.id.slice(0, 8)}… · {c.reason} · {new Date(c.started_at).toLocaleDateString()}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
-              </div>
-            </div>
+        <EncounterSelector key={rx.activePatient?.id ?? "none"} rx={rx} />
+      </Section>
 
-            {rx.activePatientContext && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Patient context (from backend)</p>
-                <div className="grid gap-2 text-xs sm:grid-cols-2">
-                  <div>
-                    <span className="font-semibold text-slate-700">Allergy status: </span>
-                    <Badge
-                      label={rx.activePatientContext.allergy_status}
-                      variant={rx.activePatientContext.allergy_status === "confirmed" ? "rose" : "slate"}
-                    />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-700">Allergies: </span>
-                    {rx.activePatientContext.allergies.length > 0
-                      ? rx.activePatientContext.allergies.join(", ")
-                      : <span className="text-slate-400">None recorded</span>
-                    }
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-700">Medicine status: </span>
-                    <Badge
-                      label={rx.activePatientContext.medicine_status}
-                      variant={rx.activePatientContext.medicine_status === "confirmed" ? "green" : "slate"}
-                    />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-700">Current medicines: </span>
-                    {rx.activePatientContext.current_medicines.length > 0
-                      ? rx.activePatientContext.current_medicines.join(", ")
-                      : <span className="text-slate-400">None recorded</span>
-                    }
-                  </div>
-                  {rx.activePatientContext.date_of_birth && (
-                    <div>
-                      <span className="font-semibold text-slate-700">DOB: </span>
-                      {rx.activePatientContext.date_of_birth}
-                    </div>
-                  )}
-                  {rx.activePatientContext.weight && (
-                    <div>
-                      <span className="font-semibold text-slate-700">Weight: </span>
-                      {rx.activePatientContext.weight} {rx.activePatientContext.weight_unit ?? "kg"}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+      <Section title="Patient allergies and current medicines" icon={ClipboardCheck}>
+        {hasConsultation && rx.activePatient ? (
+          <PatientContextForm key={`${rx.activeConsultation!.id}:${rx.activePatientContext?.updated_at ?? "new"}`} rx={rx} />
+        ) : (
+          <Unavailable title="Select a patient and visit first">Choose an assigned patient and saved consultation to record allergies and current medicines.</Unavailable>
         )}
       </Section>
 
@@ -272,7 +208,7 @@ export default function PrescriptionWorkspace() {
             <Unavailable title="Prescription generation unavailable">
               {!hasConsultation
                 ? "Select an active consultation first."
-                : "Confirm the diagnosis context before generating candidates."}
+                : "Prescription generation will be connected in a later step."}
             </Unavailable>
           </div>
         )}
@@ -280,7 +216,7 @@ export default function PrescriptionWorkspace() {
         {canGenerate && (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
             <p className="font-bold">⚠ AI generation service not yet connected</p>
-            <p className="mt-1">The diagnosis has been confirmed. The ranking and safety-check engine will be wired in the next phase (XAI service). Below you can review and approve a manually-entered draft in the meantime.</p>
+            <p className="mt-1">The diagnosis has been confirmed. Generation and approval become available after the ranking and safety-check engine is connected.</p>
           </div>
         )}
 
@@ -322,18 +258,16 @@ export default function PrescriptionWorkspace() {
           <Section title="Missing information and clinician input" icon={ListChecks}>
             {rx.activePatientContext ? (
               <ul className="space-y-1.5 text-xs text-slate-700">
-                {!rx.activePatientContext.date_of_birth && (
-                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Date of birth missing — required for age-based dosing.</li>
+                {rx.activePatient?.age_years == null && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> A valid registered date of birth is needed to calculate age.</li>
                 )}
-                {!rx.activePatientContext.weight && (
-                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Weight missing — required for weight-based dosing rules.</li>
+                {rx.activePatientContext.medicine_status === "unknown" && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Current medicines are unknown.</li>
                 )}
-                {rx.activePatientContext.allergy_status !== "confirmed" && (
-                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Allergy status not confirmed.</li>
+                {rx.activePatientContext.allergy_status === "unknown" && (
+                  <li className="flex items-center gap-2 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Allergy status is unknown.</li>
                 )}
-                {rx.activePatientContext.date_of_birth && rx.activePatientContext.weight && rx.activePatientContext.allergy_status === "confirmed" && (
-                  <li className="flex items-center gap-2 text-emerald-700"><Check className="h-3.5 w-3.5" /> All required context fields present.</li>
-                )}
+                <li className="text-slate-500">Clinical safety and dose checks are not connected yet.</li>
               </ul>
             ) : (
               <Unavailable title="Required inputs cannot be assessed yet">

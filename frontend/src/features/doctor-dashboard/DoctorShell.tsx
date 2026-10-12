@@ -8,6 +8,7 @@ import {
   Menu, PanelLeftClose, PanelLeftOpen, Pill, Settings, X,
 } from "lucide-react";
 import { DoctorProvider, useDoctor } from "./DoctorContext";
+import { logoutUser } from "@/lib/api";
 
 const navigation = [
   { label: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
@@ -56,10 +57,14 @@ function Navigation({ compact = false, onNavigate }: { compact?: boolean; onNavi
     );
   }
 
-  function logout() {
-    onNavigate?.();
-    localStorage.removeItem("meditrack_user");
-    router.push("/login");
+  async function logout() {
+    try {
+      await logoutUser();
+      onNavigate?.();
+      router.push("/login");
+    } catch {
+      window.alert("Logout failed. Please try again.");
+    }
   }
 
   return (

@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
+    AdminAssignmentViewSet,
+    PatientViewSet,
     ConsultationViewSet,
     ConsultationAnalysisViewSet,
     PatientContextViewSet,
@@ -9,6 +11,8 @@ from .views import (
 )
 
 router = DefaultRouter()
+router.register(r'admin/assignments', AdminAssignmentViewSet, basename='admin-assignment')
+router.register(r'patients', PatientViewSet, basename='prescription-patient')
 router.register(r'consultations', ConsultationViewSet, basename='consultation')
 router.register(r'analyses', ConsultationAnalysisViewSet, basename='consultationanalysis')
 router.register(r'patient-contexts', PatientContextViewSet, basename='patientcontext')

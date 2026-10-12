@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { logoutUser } from "@/lib/api";
 import {
   FlaskConical,
   Activity,
@@ -199,9 +200,13 @@ export default function LabDashboard() {
     localStorage.setItem("meditrack_lab_records", JSON.stringify(updated));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      router.push("/login");
+    } catch {
+      window.alert("Logout failed. Please try again.");
+    }
   };
 
   const handleCreateTest = (e: React.FormEvent) => {

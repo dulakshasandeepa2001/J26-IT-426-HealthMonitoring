@@ -1,10 +1,15 @@
-import _winapi
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from django.http import JsonResponse
 from django.db.models import Q
+from django.contrib.auth import login, logout
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_GET, require_POST
 import json
 from accounts.models import PendingDoctor, User, Doctor, Laborator  
+from accounts.permissions import IsApprovedAdmin
 
 
 @api_view(['POST'])
@@ -73,13 +78,50 @@ def create_user(request):
         return JsonResponse({'error': f'Registration failed: {str(e)}'}, status=500)
 
 
-@api_view(['POST'])
+def session_user(user):
+    return {
+        "id": user.pk,
+        "username": user.username,
+        "role": user.role,
+        "doctorID": user.doctorID,
+        "lab_name": user.lab_name,
+        "license_id": user.license_id,
+        "lab_address": user.lab_address,
+    }
+
+
+@require_GET
+def current_session(request):
+    user = request.user
+    authenticated = user.is_authenticated and user.is_active and user.is_approved
+    response = JsonResponse({
+        "user": session_user(user) if authenticated else None,
+        "csrfToken": get_token(request),
+    })
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@require_POST
+@csrf_protect
+def logout_user(request):
+    logout(request)
+    return JsonResponse({"message": "Logged out"})
+
+
+@require_POST
+@csrf_protect
 def login_user(request):
     """Login with username (or email) and password."""
     try:
         data = json.loads(request.body)
-        username = data.get("username", "").strip()
+        if not isinstance(data, dict):
+            return JsonResponse({"error": "Expected a JSON object"}, status=400)
+        username = data.get("username", "")
         password = data.get("password", "")
+        if not isinstance(username, str) or not isinstance(password, str):
+            return JsonResponse({"error": "Username and password must be strings"}, status=400)
+        username = username.strip()
 
         if not username or not password:
             return JsonResponse({"error": "Username and password are required"}, status=400)
@@ -101,18 +143,16 @@ def login_user(request):
         if not user.check_password(password):
             return JsonResponse({"error": "Invalid username or password"}, status=401)
 
+        if not user.is_active:
+            return JsonResponse({"error": "This account is inactive."}, status=403)
+
         if not user.is_approved:
             return JsonResponse({"error": "Your account is pending admin approval."}, status=403)
 
-        return JsonResponse({
-            "message": "Login successful",
-            "username": user.username,
-            "role": user.role,
-            "doctorID": user.doctorID,
-            "lab_name": user.lab_name,
-            "license_id": user.license_id,
-            "lab_address": user.lab_address,
-        }, status=200)
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        response = JsonResponse({"message": "Login successful", **session_user(user)})
+        response["Cache-Control"] = "no-store"
+        return response
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -147,6 +187,8 @@ def get_doctor(request):
 
 
 @api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsApprovedAdmin])
 def get_pending_doctors(request):
     """Get all doctors waiting for admin approval."""
     try:
@@ -160,6 +202,8 @@ def get_pending_doctors(request):
 
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsApprovedAdmin])
 def approve_doctor(request, pk): #pk means  
     """Admin approves a pending doctor — creates their User account."""
     try:
@@ -191,6 +235,8 @@ def approve_doctor(request, pk): #pk means
 
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsApprovedAdmin])
 def reject_doctor(request, pk):
     """Admin rejects a pending doctor."""
     try:
