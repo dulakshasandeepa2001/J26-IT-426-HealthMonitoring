@@ -32,8 +32,11 @@ import {
   ShieldAlert,
   ArrowRight,
   RefreshCw,
-  X
+  X,
+  Power,
+  Radio
 } from "lucide-react";
+import { apiRequest } from "@/lib/api";
 
 interface Task {
   task_id: number;
@@ -307,7 +310,82 @@ export default function DoctorDashboard() {
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [creatingTask, setCreatingTask] = useState(false);
 
-  // Core getTasks function to retrieve scheduled tasks from backend /get-tasks/
+  // Live Availability State (Instant 1-Click Availability without needing tasks/schedules)
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [availableUntilTime, setAvailableUntilTime] = useState("13:00");
+  const [availableUntilDisplay, setAvailableUntilDisplay] = useState<string | null>(null);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [isInitialLoginPrompt, setIsInitialLoginPrompt] = useState(false);
+  const [savingAvailability, setSavingAvailability] = useState(false);
+
+  // Helper to add hours/minutes for quick availability presets
+  const getOffsetTime = (hours: number, minutes: number = 0) => {
+    const d = new Date();
+    d.setHours(d.getHours() + hours);
+    d.setMinutes(d.getMinutes() + minutes);
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  // Fetch live availability from backend
+  const getDoctorAvailability = async (customDocId?: string) => {
+    const targetDocId = customDocId || doctorId || "DOC-0001";
+    try {
+      const data = await apiRequest(`/api/doctor/get-availability/?doctor_id=${targetDocId}`, {
+        method: "GET",
+      });
+      if (data) {
+        const avail = Boolean(data.is_available);
+        setIsAvailable(avail);
+        if (data.available_until) {
+          setAvailableUntilDisplay(data.available_until);
+        }
+        // If not available and not yet asked during this session, prompt the doctor
+        const promptKey = `meditrack_prompted_${targetDocId}_${new Date().toISOString().split("T")[0]}`;
+        const alreadyPrompted = sessionStorage.getItem(promptKey);
+        if (!avail && !alreadyPrompted) {
+          setShowAvailabilityModal(true);
+          setIsInitialLoginPrompt(true);
+          sessionStorage.setItem(promptKey, "true");
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load doctor availability:", e);
+    }
+  };
+
+  // Update live availability in backend (Supabase)
+  const handleUpdateAvailability = async (newAvail: boolean, customTime?: string) => {
+    setSavingAvailability(true);
+    const chosenTime = customTime || availableUntilTime || "13:00";
+    try {
+      const data = await apiRequest("/api/doctor/set-availability/", {
+        method: "POST",
+        body: JSON.stringify({
+          doctor_id: doctorId || "DOC-0001",
+          doctor_name: doctorName || "Doctor",
+          is_available: newAvail,
+          available_until: newAvail ? chosenTime : null,
+        }),
+      });
+
+      if (data) {
+        setIsAvailable(Boolean(data.is_available));
+        setAvailableUntilDisplay(data.available_until || null);
+        if (newAvail && chosenTime) {
+          setAvailableUntilTime(chosenTime);
+        }
+        setShowAvailabilityModal(false);
+        setIsInitialLoginPrompt(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update availability";
+      alert("Error: " + msg);
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
   const getTasks = async (customDate?: string, customDocId?: string) => {
     const targetDate = customDate || selectedTaskDate;
     const targetDocId = customDocId || doctorId || "DOC-0001";
@@ -405,6 +483,7 @@ export default function DoctorDashboard() {
       }
     }
     getTasks(selectedTaskDate, currentDocId);
+    getDoctorAvailability(currentDocId);
   }, []);
 
   // Reload tasks when selectedTaskDate changes
@@ -476,6 +555,62 @@ export default function DoctorDashboard() {
             </div>
             <p className="text-[11px] text-slate-500 font-medium">Physician Diagnostic & Prescription Workspace</p>
           </div>
+        </div>
+
+        {/* Center: Live Availability Quick Toggle & Time Adjust Capsule */}
+        <div className="flex items-center">
+          <button
+            onClick={() => {
+              setIsInitialLoginPrompt(false);
+              setShowAvailabilityModal(true);
+            }}
+            className={`group flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+              isAvailable
+                ? "bg-gradient-to-r from-emerald-500/10 via-emerald-50 to-teal-50 border-emerald-300 hover:border-emerald-400"
+                : "bg-slate-100/90 border-slate-300 hover:border-slate-400"
+            }`}
+            title="Click to adjust live availability hours or go offline"
+          >
+            <div className="relative flex items-center justify-center">
+              {isAvailable ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                </>
+              ) : (
+                <span className="inline-flex rounded-full h-3 w-3 bg-slate-400"></span>
+              )}
+            </div>
+
+            <div className="text-left">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-black tracking-wide ${isAvailable ? "text-emerald-900" : "text-slate-700"}`}>
+                  {isAvailable ? "ACCEPTING PATIENTS" : "CURRENTLY OFFLINE"}
+                </span>
+                <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${
+                  isAvailable 
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" 
+                    : "bg-slate-200 text-slate-600 border-slate-300"
+                }`}>
+                  {isAvailable ? "LIVE" : "PAUSED"}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                {isAvailable 
+                  ? `Available Until: ${availableUntilDisplay || availableUntilTime} (Click to edit)`
+                  : "Click here to set available time & accept bookings"}
+              </p>
+            </div>
+
+            <div className={`p-1.5 rounded-xl border transition-all ml-1 ${
+              isAvailable 
+                ? "bg-emerald-100 text-emerald-800 border-emerald-200 group-hover:bg-emerald-200" 
+                : "bg-white text-slate-500 border-slate-200 group-hover:bg-slate-200"
+            }`}>
+              <Power className="w-3.5 h-3.5" />
+            </div>
+          </button>
         </div>
 
         {/* Right Section: Doctor Badge, Settings, Logout */}
@@ -561,6 +696,50 @@ export default function DoctorDashboard() {
                   {currentPatientIndex + 1} of {queue.length}
                 </span>
               </div>
+
+              {/* Doctor Availability Live Alert in Queue */}
+              {!isAvailable ? (
+                <div 
+                  onClick={() => {
+                    setIsInitialLoginPrompt(false);
+                    setShowAvailabilityModal(true);
+                  }}
+                  className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-100/70 transition-all shadow-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-bold text-amber-900">Currently Offline</div>
+                      <div className="text-[10px] text-amber-700">Patients cannot book live queue tokens</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-extrabold bg-amber-600 text-white px-2.5 py-1 rounded-xl shadow-xs hover:bg-amber-700">
+                    Go Live
+                  </span>
+                </div>
+              ) : (
+                <div 
+                  onClick={() => {
+                    setIsInitialLoginPrompt(false);
+                    setShowAvailabilityModal(true);
+                  }}
+                  className="p-3 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-emerald-100/80 transition-all shadow-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                    </span>
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-900">Accepting Appointments</div>
+                      <div className="text-[10px] text-emerald-700">Until {availableUntilDisplay || availableUntilTime} &bull; Click to adjust</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2 py-0.5 rounded-lg shadow-xs">
+                    Adjust
+                  </span>
+                </div>
+              )}
 
               {/* BIG NEXT PATIENT BUTTON */}
               <button
@@ -1183,6 +1362,206 @@ export default function DoctorDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 5. DOCTOR LIVE AVAILABILITY ADJUST MODAL & ON-LOGIN PROMPT                */}
+      {/* ========================================================================= */}
+      {showAvailabilityModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 p-6 text-white relative">
+              <button
+                onClick={() => {
+                  setShowAvailabilityModal(false);
+                  setIsInitialLoginPrompt(false);
+                }}
+                className="absolute top-5 right-5 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
+                  isAvailable 
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" 
+                    : "bg-purple-500/20 text-purple-200 border-purple-400/30"
+                }`}>
+                  {isInitialLoginPrompt ? "Doctor Login Check" : "Live Availability Control"}
+                </span>
+              </div>
+
+              <h3 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-purple-400" />
+                {isInitialLoginPrompt ? `Welcome, ${doctorName}!` : "Adjust Consultation Hours"}
+              </h3>
+              <p className="text-xs text-purple-200/80 mt-1 leading-relaxed">
+                {isInitialLoginPrompt 
+                  ? "Are you currently accepting patient appointments today? Adjust until what time you will be available for queue tokens."
+                  : "Set or adjust your active window. Patients on the mobile app can only book queue numbers while you are live."}
+              </p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              
+              {/* Online / Offline Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Consultation Status
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsAvailable(true)}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                      isAvailable
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-950 shadow-sm ring-2 ring-emerald-500/30"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-xl ${isAvailable ? "bg-emerald-500 text-white shadow-xs" : "bg-slate-200 text-slate-500"}`}>
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold leading-tight">Accept Patients</div>
+                      <div className="text-[10px] opacity-75">Online & Live</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAvailable(false)}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                      !isAvailable
+                        ? "bg-rose-50 border-rose-300 text-rose-950 shadow-sm ring-2 ring-rose-500/30"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-xl ${!isAvailable ? "bg-rose-500 text-white shadow-xs" : "bg-slate-200 text-slate-500"}`}>
+                      <Power className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold leading-tight">Remain Offline</div>
+                      <div className="text-[10px] opacity-75">Pause Bookings</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Working Window / Available Until (if Online is chosen) */}
+              {isAvailable && (
+                <div className="space-y-3 bg-purple-50/50 p-4 rounded-2xl border border-purple-100 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-purple-600" />
+                      Available Until (Consultation End Time):
+                    </label>
+                    <span className="text-xs font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-lg font-mono">
+                      {availableUntilTime}
+                    </span>
+                  </div>
+
+                  {/* 1-Click Quick Time Presets */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Quick Adjust Presets:
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(1, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +1 Hour
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(2, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +2 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(3, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +3 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("13:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 1:00 PM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("15:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 3:00 PM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("17:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 5:00 PM
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Or Manual Custom Time */}
+                  <div className="pt-2 border-t border-purple-100 flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-slate-600">Custom Time Picker:</span>
+                    <input
+                      type="time"
+                      value={availableUntilTime}
+                      onChange={(e) => setAvailableUntilTime(e.target.value)}
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAvailabilityModal(false);
+                    setIsInitialLoginPrompt(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingAvailability}
+                  onClick={() => handleUpdateAvailability(isAvailable, availableUntilTime)}
+                  className={`flex-1 py-2.5 rounded-xl text-white text-xs font-extrabold shadow-md transition-all cursor-pointer disabled:opacity-50 ${
+                    isAvailable
+                      ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                      : "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25"
+                  }`}
+                >
+                  {savingAvailability 
+                    ? "Updating..." 
+                    : isAvailable 
+                      ? "Save & Go Live" 
+                      : "Confirm Offline"}
+                </button>
+              </div>
+
+            </div>
+
           </div>
         </div>
       )}
