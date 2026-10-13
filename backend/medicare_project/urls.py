@@ -24,4 +24,5 @@ urlpatterns = [
     path("approve-doctor/<int:pk>/", approve_doctor),
     path("reject-doctor/<int:pk>/", reject_doctor),
     path("api/prescription/", include("prescription_context.urls")),
+    path("api/prescription/", include("medicine_knowledge.urls")),
 ]

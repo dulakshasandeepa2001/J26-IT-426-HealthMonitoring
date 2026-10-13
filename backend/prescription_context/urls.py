@@ -8,6 +8,7 @@ from .views import (
     PatientContextViewSet,
     ContextRevisionViewSet,
     DiagnosisConfirmationViewSet,
+    Component1ResultView,
 )
 
 router = DefaultRouter()
@@ -20,5 +21,6 @@ router.register(r'revisions', ContextRevisionViewSet, basename='contextrevision'
 router.register(r'diagnoses', DiagnosisConfirmationViewSet, basename='diagnosisconfirmation')
 
 urlpatterns = [
+    path('component-1/results/', Component1ResultView.as_view(), name='component1-result'),
     path('', include(router.urls)),
 ]

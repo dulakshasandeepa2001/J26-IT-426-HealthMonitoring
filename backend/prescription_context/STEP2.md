@@ -93,5 +93,6 @@ and never write real patient data. They cover registered DOB/age, first entry,
 repeat-visit prefill and confirmation, status handling, stale changes, permissions,
 CSRF, audit rollback and desktop/mobile layout. No live migration is required.
 
-Component 1 JSON import, medicine normalization and prescription safety/ranking
-remain later integration steps.
+Component 1 sample JSON and the automatic receiver are now available in
+[Step 4](STEP4.md). Medicine normalization and prescription safety/ranking remain
+later implementation steps.

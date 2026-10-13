@@ -5,6 +5,7 @@ import { ClipboardCheck, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
 import type { ContextStatus } from "./prescriptionApi";
 import { buttonStyle, controlStyle } from "./PageFrame";
+import { MedicineNameCheck } from "./MedicineNameCheck";
 
 function statusOrUnknown(status: string | undefined): ContextStatus {
   return status === "confirmed" || status === "none" ? status : "unknown";
@@ -84,6 +85,7 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
               <textarea id="current-medicine-list" className={controlStyle} rows={4} maxLength={10000} required value={medicineText}
                 onChange={(event) => { setMedicineText(event.target.value); setReviewed(false); }} aria-describedby="medicine-help" />
               <p id="medicine-help" className="text-xs text-slate-500">One medicine per line. Include the strength and schedule if known.</p>
+              <MedicineNameCheck key={medicineText} names={entries(medicineText)} disabled={rx.loading} onAccessDenied={() => { void rx.loadAll(); }} />
             </div>
           )}
         </div>

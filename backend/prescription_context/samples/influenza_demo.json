@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "analysis_reference": "demo-influenza-001",
+  "patient_id": 0,
+  "consultation_id": "00000000-0000-0000-0000-000000000000",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "symptoms": [
+    {
+      "code": "fever",
+      "present": true,
+      "duration_days": 2
+    },
+    {
+      "code": "cough",
+      "present": true,
+      "duration_days": 2
+    },
+    {
+      "code": "body_aches",
+      "present": true,
+      "duration_days": 2
+    }
+  ],
+  "condition_candidates": [
+    {
+      "code": "influenza",
+      "confidence": 0.82
+    }
+  ],
+  "severity": {
+    "level": "moderate",
+    "red_flags": []
+  },
+  "review_status": "unconfirmed",
+  "model_version": "synthetic-demo-v1"
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "analysis_reference": "demo-chickenpox-001",
+  "patient_id": 0,
+  "consultation_id": "00000000-0000-0000-0000-000000000000",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "symptoms": [
+    {
+      "code": "fever",
+      "present": true,
+      "duration_days": 2
+    },
+    {
+      "code": "rash",
+      "present": true,
+      "duration_days": 1
+    },
+    {
+      "code": "itching",
+      "present": true,
+      "duration_days": 1
+    }
+  ],
+  "condition_candidates": [
+    {
+      "code": "chickenpox",
+      "confidence": 0.79
+    }
+  ],
+  "severity": {
+    "level": "moderate",
+    "red_flags": []
+  },
+  "review_status": "unconfirmed",
+  "model_version": "synthetic-demo-v1"
+}

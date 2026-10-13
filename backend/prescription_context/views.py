@@ -2,12 +2,17 @@ from rest_framework import mixins, serializers, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from accounts.models import User
 from accounts.permissions import IsApprovedAdmin
 from django.db import transaction
 from django.utils import timezone
 from .access import IsApprovedDoctor, assigned_patients
 from .patient_data import context_snapshot
+from .analysis_contract import DemoScenarioSerializer
+from .analysis_ingestion import demo_payload, ingest_analysis
+from .component1_auth import Component1Authentication
 from .models import (
     PrescriptionContextConsultation,
     PrescriptionContextConsultationanalysis,
@@ -145,6 +150,26 @@ class ConsultationViewSet(DoctorAccess, mixins.CreateModelMixin, viewsets.ReadOn
             )
         return Response(PatientContextSerializer(context).data)
 
+    @action(detail=True, methods=['post'], url_path='demo-analysis')
+    def load_demo_analysis(self, request, pk=None):
+        consultation = self.get_object()
+        selection = DemoScenarioSerializer(data=request.data)
+        selection.is_valid(raise_exception=True)
+        analysis, created = ingest_analysis(
+            demo_payload(consultation, selection.validated_data['scenario']),
+            request.user, mode='demo',
+        )
+        return Response(ConsultationAnalysisSerializer(analysis).data, status=201 if created else 200)
+
+
+class Component1ResultView(SessionAccess, APIView):
+    authentication_classes = [Component1Authentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        analysis, created = ingest_analysis(request.data, request.user, mode='component_1')
+        return Response(ConsultationAnalysisSerializer(analysis).data, status=201 if created else 200)
+
 
 class ConsultationAnalysisViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):
     serializer_class = ConsultationAnalysisSerializer
@@ -186,4 +211,17 @@ class DiagnosisConfirmationViewSet(DoctorAccess, mixins.CreateModelMixin, viewse
         return filter_query(qs, self.request, 'consultation', 'consultation_id', serializers.UUIDField())
 
     def perform_create(self, serializer):
-        serializer.save(doctor=self.request.user)
+        # Serialize confirmation with analysis ingestion so a late result cannot
+        # change the evidence after the doctor has confirmed the visit.
+        with transaction.atomic():
+            consultation = PrescriptionContextConsultation.objects.select_for_update().get(
+                pk=serializer.validated_data['consultation'].pk, doctor=self.request.user,
+            )
+            if PrescriptionContextDiagnosisconfirmation.objects.filter(consultation=consultation).exists():
+                raise serializers.ValidationError({'consultation': 'A diagnosis is already confirmed for this visit.'})
+            analysis = PrescriptionContextConsultationanalysis.objects.filter(consultation=consultation).first()
+            requested_reference = serializer.validated_data.get('analysis_reference')
+            actual_reference = analysis.analysis_reference if analysis else None
+            if requested_reference != actual_reference:
+                raise serializers.ValidationError({'analysis_reference': 'The analysis has changed or the reference is incorrect. Refresh and review this consultation\'s saved analysis.'})
+            serializer.save(doctor=self.request.user, analysis_reference=actual_reference)

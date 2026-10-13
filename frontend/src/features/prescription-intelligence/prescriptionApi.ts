@@ -3,6 +3,7 @@
 // Base URL resolves from the shared api.ts helper.
 
 import { apiRequest } from "@/lib/api";
+import type { DemoScenario } from "./analysisData";
 
 export interface RegisteredPatient {
   id: number;
@@ -151,6 +152,12 @@ export async function createDiagnosis(
 export async function fetchAnalyses(consultationId?: string): Promise<ConsultationAnalysis[]> {
   const query = consultationId ? `?consultation=${consultationId}` : "";
   return apiRequest(`/api/prescription/analyses/${query}`);
+}
+
+export async function loadDemoAnalysis(consultationId: string, scenario: DemoScenario): Promise<ConsultationAnalysis> {
+  return apiRequest(`/api/prescription/consultations/${consultationId}/demo-analysis/`, {
+    method: "POST", body: JSON.stringify({ scenario }),
+  });
 }
 
 // ─── Revisions ────────────────────────────────────────────────────────────────

@@ -143,7 +143,8 @@ class EncounterAccessTests(TestCase):
             self.assertEqual(self.client.post(self.endpoint(path), {}, format='json').status_code, 405)
 
     def test_diagnosis_create_cannot_impersonate_doctor_or_cross_encounter_boundary(self):
-        payload = {'consultation': str(self.encounter.pk), 'doctor': self.other_doctor.pk, 'condition_code': 'MANUAL', 'condition_label': 'Follow-up diagnosis'}
+        visit = Consultation.objects.create(doctor=self.doctor, patient=self.patient, reason='New diagnosis visit')
+        payload = {'consultation': str(visit.pk), 'doctor': self.other_doctor.pk, 'condition_code': 'MANUAL', 'condition_label': 'Follow-up diagnosis'}
         response = self.client.post(self.endpoint('diagnoses'), payload, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()['doctor'], self.doctor.pk)

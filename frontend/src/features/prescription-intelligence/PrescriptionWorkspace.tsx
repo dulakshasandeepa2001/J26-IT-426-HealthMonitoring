@@ -9,6 +9,7 @@ import {
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm } from "./PatientContextForm";
+import { AnalysisResult } from "./AnalysisResult";
 import { buttonStyle, controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
 // ─── Workflow steps shown at the top ─────────────────────────────────────────
@@ -41,7 +42,6 @@ export default function PrescriptionWorkspace() {
 
   // Derived flags
   const hasConsultation = !!rx.activeConsultation;
-  const hasAnalysis = !!rx.activeAnalysis;
   const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
   const canGenerate = false; // The generation service is not connected yet.
   const hasDraft = false;
@@ -112,40 +112,10 @@ export default function PrescriptionWorkspace() {
         )}
       </Section>
 
-      <div className="grid items-start gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
         {/* ── Step 1 · Voice analysis result ── */}
         <Section title="Structured voice-analysis result" icon={Mic}>
-          {hasAnalysis ? (
-            <dl className="grid gap-4 text-xs sm:grid-cols-2">
-              <div>
-                <dt className="font-semibold text-slate-600">Analysis reference</dt>
-                <dd className="mt-1 font-mono text-slate-800">{rx.activeAnalysis!.analysis_reference}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-slate-600">Imported at</dt>
-                <dd className="mt-1 text-slate-800">{new Date(rx.activeAnalysis!.imported_at).toLocaleString()}</dd>
-              </div>
-              <div className="sm:col-span-2">
-                <dt className="mb-1 font-semibold text-slate-600">Payload summary</dt>
-                <dd className="rounded-xl bg-slate-50 p-3 font-mono text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {JSON.stringify(rx.activeAnalysis!.payload, null, 2).slice(0, 400)}
-                  {JSON.stringify(rx.activeAnalysis!.payload).length > 400 ? "…" : ""}
-                </dd>
-              </div>
-            </dl>
-          ) : (
-            <>
-              <Unavailable title="Structured voice-analysis result unavailable">
-                {hasConsultation
-                  ? "No analysis has been linked to this consultation yet."
-                  : "Select a consultation to load the encounter-linked analysis result."}
-              </Unavailable>
-              <dl className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
-                <div><dt className="font-semibold text-slate-600">Analysis result reference</dt><dd className="mt-1 text-slate-400">Unavailable</dd></div>
-                <div><dt className="font-semibold text-slate-600">Patient / encounter linkage</dt><dd className="mt-1 text-slate-400">Awaiting authorized encounter and structured result</dd></div>
-              </dl>
-            </>
-          )}
+          <AnalysisResult key={rx.activeConsultation?.id ?? "none"} rx={rx} />
         </Section>
 
         {/* ── Step 2 · Clinician diagnosis confirmation ── */}
@@ -158,7 +128,7 @@ export default function PrescriptionWorkspace() {
               </label>
               <input
                 id="diagnosis-context"
-                placeholder={hasConsultation ? "Enter diagnosis (e.g. Influenza A – Confirmed)" : "Awaiting encounter selection"}
+                placeholder={hasConsultation ? "Enter or correct the proposed diagnosis" : "Awaiting encounter selection"}
                 className={controlStyle}
                 disabled={!hasConsultation || rx.diagnosisConfirmed}
                 value={rx.diagnosisContext}
@@ -231,8 +201,8 @@ export default function PrescriptionWorkspace() {
         </button>
       </Section>
 
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
+        <div className="min-w-0 space-y-6">
           {/* ── Generated draft ── */}
           <Section title="Generated prescription draft" icon={FileText}>
             {hasDraft ? (
@@ -362,12 +332,11 @@ export default function PrescriptionWorkspace() {
           </Section>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* ── Medicine normalization ── */}
           <Section title="Medicine normalization" icon={Pill}>
-            <Unavailable title="Normalization unavailable">
-              RxNorm normalization service not yet connected. Generated candidates must be linked to standard medicine identifiers.
-            </Unavailable>
+            <p className="text-xs leading-relaxed text-slate-500">Use <strong>Check medicine names</strong> in the current medicines form to match supported pilot names. Exact product aliases have source-linked RxNorm identifiers; an ingredient name alone needs strength and formulation clarification.</p>
+            <Link href="/doctor/medicine-knowledge" className="mt-3 inline-block text-xs font-semibold text-purple-700 underline">Browse supported medicines and evidence</Link>
             {rx.activePatientContext?.current_medicines && rx.activePatientContext.current_medicines.length > 0 && (
               <div className="mt-4">
                 <p className="mb-2 text-xs font-semibold text-slate-600">Current medicines on record:</p>
@@ -408,17 +377,8 @@ export default function PrescriptionWorkspace() {
 
           {/* ── Evidence ── */}
           <Section title="Evidence and reviewed medicine knowledge" icon={BookOpen}>
-            <Unavailable title="Reviewed evidence unavailable">
-              DailyMed / openFDA evidence-reference service not yet connected. Generated recommendations must expose their evidence references.
-            </Unavailable>
-            {rx.activeAnalysis?.payload && (
-              <div className="mt-4">
-                <p className="mb-1 text-xs font-semibold text-slate-600">Analysis payload (raw):</p>
-                <pre className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-700 overflow-auto max-h-40">
-                  {JSON.stringify(rx.activeAnalysis.payload, null, 2)}
-                </pre>
-              </div>
-            )}
+            <p className="text-xs leading-relaxed text-slate-500">The pilot catalogue includes source references, selected warnings and clinician content reviews. Evidence attached to a generated prescription draft will be available when generation is implemented.</p>
+            <Link href="/doctor/medicine-knowledge" className="mt-3 inline-block text-xs font-semibold text-purple-700 underline">Open Medicine Knowledge</Link>
           </Section>
         </div>
       </div>

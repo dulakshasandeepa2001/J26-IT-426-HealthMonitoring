@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'accounts',
     'taskcreate',
     'prescription_context',
+    'medicine_knowledge',
 ]
 
 # Custom User Model
@@ -146,3 +147,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Component 1 worker receiver. Keep its key in backend/.env, never in the frontend.
+# An existing active approved admin account can be the service identity; no staff
+# privileges are needed. Empty defaults leave server-to-server ingestion disabled.
+COMPONENT1_API_KEY = config('COMPONENT1_API_KEY', default='')
+COMPONENT1_SERVICE_USER_ID = config('COMPONENT1_SERVICE_USER_ID', default=0, cast=int)

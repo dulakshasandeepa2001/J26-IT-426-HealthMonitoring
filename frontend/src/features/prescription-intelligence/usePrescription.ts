@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ApiError, getSession } from "@/lib/api";
+import { conditionLabel, readComponent1Payload, suggestedDiagnosis, type DemoScenario } from "./analysisData";
 import {
   fetchPatients, fetchConsultations, fetchDiagnoses, fetchAnalyses, fetchPatientContexts,
-  createConsultation, createDiagnosis, savePatientContext,
+  createConsultation, createDiagnosis, savePatientContext, loadDemoAnalysis,
   type RegisteredPatient, type Consultation, type DiagnosisConfirmation,
   type ConsultationAnalysis, type PatientContext, type PatientContextReview,
 } from "./prescriptionApi";
@@ -67,13 +68,14 @@ function selectEncounter(
   state: PrescriptionState, patient: RegisteredPatient | null, encounter: Consultation | null
 ): PrescriptionState {
   const diagnosis = state.diagnoses.find((item) => item.consultation === encounter?.id);
+  const analysis = state.analyses.find((item) => item.consultation === encounter?.id) ?? null;
   return {
     ...state, ...emptyReview,
     activePatient: patient,
     activeConsultation: encounter,
-    activeAnalysis: state.analyses.find((item) => item.consultation === encounter?.id) ?? null,
+    activeAnalysis: analysis,
     activePatientContext: state.patientContexts.find((item) => item.patient === patient?.id) ?? null,
-    diagnosisContext: diagnosis?.condition_label ?? "",
+    diagnosisContext: diagnosis?.condition_label ?? (analysis ? suggestedDiagnosis(analysis.payload) : ""),
     diagnosisConfirmed: !!diagnosis,
   };
 }
@@ -130,6 +132,78 @@ export function usePrescription() {
     return invalidateLoads;
   }, [loadAll, invalidateLoads]);
 
+  const receiveAnalysis = useCallback((analysis: ConsultationAnalysis) => {
+    setState((s) => {
+      if (s.activeConsultation?.id !== analysis.consultation || s.activeAnalysis) return s;
+      return {
+        ...s, activeAnalysis: analysis,
+        analyses: [analysis, ...s.analyses.filter((item) => item.consultation !== analysis.consultation)],
+        diagnosisContext: s.diagnosisContext.trim() ? s.diagnosisContext : suggestedDiagnosis(analysis.payload),
+      };
+    });
+  }, []);
+
+  const handleAnalysisError = useCallback((err: unknown) => {
+    if (err instanceof ApiError && [401, 403].includes(err.status)) {
+      setState({ ...initialState, loading: false, accessDenied: true, error: err.message });
+    }
+  }, []);
+
+  const refreshAnalysis = useCallback(async () => {
+    const id = state.activeConsultation?.id;
+    if (!id) return;
+    try {
+      const results = await fetchAnalyses(id);
+      if (results[0]) receiveAnalysis(results[0]);
+    } catch (err) {
+      handleAnalysisError(err);
+      setState((s) => ({ ...s, error: err instanceof Error ? err.message : "Unable to refresh the analysis result." }));
+    }
+  }, [state.activeConsultation?.id, receiveAnalysis, handleAnalysisError]);
+
+  useEffect(() => {
+    const id = state.activeConsultation?.id;
+    if (!id || state.activeAnalysis || state.diagnosisConfirmed) return;
+    let cancelled = false;
+    let pending = false;
+    function check() {
+      if (cancelled || pending || document.hidden) return;
+      pending = true;
+      void fetchAnalyses(id!).then((results) => {
+        if (!cancelled && results[0]) receiveAnalysis(results[0]);
+      }).catch((err: unknown) => {
+        if (!cancelled) handleAnalysisError(err);
+      }).finally(() => { pending = false; });
+    }
+    check();
+    const interval = window.setInterval(check, 5000);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", check);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [state.activeConsultation?.id, state.activeAnalysis, state.diagnosisConfirmed, receiveAnalysis, handleAnalysisError]);
+
+  const loadDemo = useCallback(async (scenario: DemoScenario) => {
+    if (!state.activeConsultation || state.loading || saving.current) return;
+    saving.current = true;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    try {
+      const saved = await loadDemoAnalysis(state.activeConsultation.id, scenario);
+      receiveAnalysis(saved);
+      setState((s) => ({ ...s, loading: false }));
+    } catch (err) {
+      const accessDenied = err instanceof ApiError && [401, 403].includes(err.status);
+      setState((s) => ({
+        ...(accessDenied ? initialState : s), loading: false, accessDenied,
+        error: err instanceof Error ? err.message : "Unable to load the demo result.",
+      }));
+    } finally { saving.current = false; }
+  }, [state.activeConsultation, state.loading, receiveAnalysis]);
+
   const selectPatient = useCallback((id: number) => {
     if (state.loading) return;
     const patient = state.patients.find((item) => item.id === id) ?? null;
@@ -174,10 +248,13 @@ export function usePrescription() {
     if (!state.activeConsultation || !state.diagnosisContext.trim() || state.loading) return;
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
+      const candidate = state.activeAnalysis ? readComponent1Payload(state.activeAnalysis.payload)?.condition_candidates.find(
+        (item) => conditionLabel(item.code).toLowerCase() === state.diagnosisContext.trim().toLowerCase()
+      ) : undefined;
       const saved = await createDiagnosis({
         consultation: state.activeConsultation.id,
         doctor: state.activeConsultation.doctor,
-        condition_code: "MANUAL",
+        condition_code: candidate?.code ?? "MANUAL",
         condition_label: state.diagnosisContext.trim(),
         analysis_reference: state.activeAnalysis?.analysis_reference ?? null,
       });
@@ -235,6 +312,7 @@ export function usePrescription() {
 
   return {
     ...state, loadAll, selectPatient, selectConsultation, startConsultation,
+    loadDemo, refreshAnalysis,
     confirmDiagnosis, reviewPatientContext, approvePrescription, rejectPrescription, setField,
   };
 }
