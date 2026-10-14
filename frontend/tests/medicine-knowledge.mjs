@@ -42,6 +42,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   const send = (json, status = 200) => route.fulfill({ json, status, headers });
   if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
   if (path === '/session/') return send({ user: signedIn ? doctor : null, csrfToken: 'test-csrf-token' });
+  if (path === '/api/prescription/safety-profiles/' || path === '/api/prescription/drafts/') return send([]);
   if (path === '/api/prescription/medicines/') {
     catalogueRequests++;
     return catalogueDenied ? send({ detail: 'Doctor approval revoked.' }, 403) : send(entries);
@@ -126,7 +127,7 @@ try {
   assert.equal(entries.find((row) => row.id === 'oseltamivir-75mg-capsule').review_status, 'pending');
   failedReview = 0;
   await page.getByRole('button', { name: 'Save content review' }).evaluate((button) => { button.click(); button.click(); });
-  await visible(page.getByText('Content review saved. Prescription generation remains a later step.', { exact: true }));
+  await visible(page.getByText('Content review saved. Executable safety rules need a separate current review before screening.', { exact: true }));
   assert.equal(reviewRequests, 2);
   await page.getByRole('button', { name: 'Load review history' }).click();
   await visible(page.getByText('Content reviewed · knowledge_test_doctor', { exact: true }));

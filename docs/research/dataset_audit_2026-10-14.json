@@ -1,0 +1,579 @@
+{
+  "audit_date": "2026-10-14",
+  "purpose": "Influenza/Chickenpox pilot dataset feasibility",
+  "review_method": "Complete specified files, aggregate counts only; dataset presence is not clinical validation.",
+  "drug_reviews": {
+    "tables": [
+      {
+        "file": "drugsComTest_raw.csv",
+        "rows": 53766,
+        "columns": [
+          "uniqueID",
+          "drugName",
+          "condition",
+          "review",
+          "rating",
+          "date",
+          "usefulCount"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 117,
+          "chickenpox": 0
+        },
+        "other_related_labels_not_promoted": {
+          "Swine Flu": 7,
+          "Varicella-Zoste": 2,
+          "Influenza Prophylaxis": 5
+        },
+        "pilot_drug_labels": [
+          {
+            "condition": "influenza",
+            "drug": "Oseltamivir",
+            "rows": 61
+          },
+          {
+            "condition": "influenza",
+            "drug": "Tamiflu",
+            "rows": 53
+          },
+          {
+            "condition": "influenza",
+            "drug": "Zanamivir",
+            "rows": 1
+          },
+          {
+            "condition": "influenza",
+            "drug": "Relenza",
+            "rows": 1
+          },
+          {
+            "condition": "influenza",
+            "drug": "Coricidin HBP Cold & Flu",
+            "rows": 1
+          }
+        ]
+      },
+      {
+        "file": "drugsComTrain_raw.csv",
+        "rows": 161297,
+        "columns": [
+          "uniqueID",
+          "drugName",
+          "condition",
+          "review",
+          "rating",
+          "date",
+          "usefulCount"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 350,
+          "chickenpox": 0
+        },
+        "other_related_labels_not_promoted": {
+          "Influenza Prophylaxis": 30,
+          "Swine Flu": 21,
+          "Avian Influenza": 2,
+          "Varicella-Zoste": 5
+        },
+        "pilot_drug_labels": [
+          {
+            "condition": "influenza",
+            "drug": "Tamiflu",
+            "rows": 174
+          },
+          {
+            "condition": "influenza",
+            "drug": "Oseltamivir",
+            "rows": 172
+          },
+          {
+            "condition": "influenza",
+            "drug": "Acetaminophen / phenyltoloxamine",
+            "rows": 1
+          },
+          {
+            "condition": "influenza",
+            "drug": "Relenza",
+            "rows": 1
+          },
+          {
+            "condition": "influenza",
+            "drug": "Zanamivir",
+            "rows": 1
+          },
+          {
+            "condition": "influenza",
+            "drug": "Acetaminophen / chlorpheniramine",
+            "rows": 1
+          }
+        ]
+      }
+    ],
+    "total_rows": 215063
+  },
+  "druglib": {
+    "tables": [
+      {
+        "file": "drugLibTest_raw.tsv",
+        "rows": 1036,
+        "columns": [
+          "",
+          "urlDrugName",
+          "rating",
+          "effectiveness",
+          "sideEffects",
+          "condition",
+          "benefitsReview",
+          "sideEffectsReview",
+          "commentsReview"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 0,
+          "chickenpox": 0
+        },
+        "other_related_labels_not_promoted": {
+          "the flu": 2,
+          "flu": 1
+        },
+        "pilot_drug_labels": []
+      },
+      {
+        "file": "drugLibTrain_raw.tsv",
+        "rows": 3107,
+        "columns": [
+          "",
+          "urlDrugName",
+          "rating",
+          "effectiveness",
+          "sideEffects",
+          "condition",
+          "benefitsReview",
+          "sideEffectsReview",
+          "commentsReview"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 0,
+          "chickenpox": 0
+        },
+        "other_related_labels_not_promoted": {
+          "swine flu": 2,
+          "cold / flu": 1,
+          "swine flu like illness in a pandemic": 1,
+          "family flu outbreak": 1,
+          "flu": 1,
+          "flu symptoms": 1
+        },
+        "pilot_drug_labels": []
+      }
+    ],
+    "total_rows": 4143
+  },
+  "patient_profile": {
+    "tables": [
+      {
+        "file": "Disease_symptom_and_patient_profile_dataset.csv",
+        "rows": 349,
+        "columns": [
+          "Disease",
+          "Fever",
+          "Cough",
+          "Fatigue",
+          "Difficulty Breathing",
+          "Age",
+          "Gender",
+          "Blood Pressure",
+          "Cholesterol Level",
+          "Outcome Variable"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 8,
+          "chickenpox": 2
+        },
+        "other_related_labels_not_promoted": {},
+        "pilot_drug_labels": []
+      }
+    ],
+    "total_rows": 349
+  },
+  "medicine_catalogue": {
+    "tables": [
+      {
+        "file": "Medicine_Details.csv",
+        "rows": 11825,
+        "columns": [
+          "Medicine Name",
+          "Composition",
+          "Uses",
+          "Side_effects",
+          "Image URL",
+          "Manufacturer",
+          "Excellent Review %",
+          "Average Review %",
+          "Poor Review %"
+        ],
+        "explicit_pilot_rows": {
+          "influenza": 0,
+          "chickenpox": 0
+        },
+        "other_related_labels_not_promoted": {},
+        "pilot_drug_labels": []
+      }
+    ],
+    "total_rows": 11825
+  },
+  "synthea": {
+    "tables": [
+      {
+        "file": "conditions.csv",
+        "rows": 3517,
+        "columns": [
+          "START",
+          "STOP",
+          "PATIENT",
+          "ENCOUNTER",
+          "SYSTEM",
+          "CODE",
+          "DESCRIPTION"
+        ],
+        "related_condition_descriptions": {}
+      },
+      {
+        "file": "medications.csv",
+        "rows": 3850,
+        "columns": [
+          "START",
+          "STOP",
+          "PATIENT",
+          "PAYER",
+          "ENCOUNTER",
+          "CODE",
+          "DESCRIPTION",
+          "BASE_COST",
+          "PAYER_COVERAGE",
+          "DISPENSES",
+          "TOTALCOST",
+          "REASONCODE",
+          "REASONDESCRIPTION"
+        ],
+        "related_condition_descriptions": {}
+      },
+      {
+        "file": "allergies.csv",
+        "rows": 105,
+        "columns": [
+          "START",
+          "STOP",
+          "PATIENT",
+          "ENCOUNTER",
+          "CODE",
+          "SYSTEM",
+          "DESCRIPTION",
+          "TYPE",
+          "CATEGORY",
+          "REACTION1",
+          "DESCRIPTION1",
+          "SEVERITY1",
+          "REACTION2",
+          "DESCRIPTION2",
+          "SEVERITY2"
+        ],
+        "related_condition_descriptions": {}
+      },
+      {
+        "file": "patients.csv",
+        "rows": 108,
+        "columns": [
+          "Id",
+          "BIRTHDATE",
+          "DEATHDATE",
+          "SSN",
+          "DRIVERS",
+          "PASSPORT",
+          "PREFIX",
+          "FIRST",
+          "MIDDLE",
+          "LAST",
+          "SUFFIX",
+          "MAIDEN",
+          "MARITAL",
+          "RACE",
+          "ETHNICITY",
+          "GENDER",
+          "BIRTHPLACE",
+          "ADDRESS",
+          "CITY",
+          "STATE",
+          "COUNTY",
+          "FIPS",
+          "ZIP",
+          "LAT",
+          "LON",
+          "HEALTHCARE_EXPENSES",
+          "HEALTHCARE_COVERAGE",
+          "INCOME"
+        ],
+        "related_condition_descriptions": {}
+      }
+    ]
+  },
+  "mimic_demo": {
+    "patient_rows": 100,
+    "diagnosis_rows": 4506,
+    "patient_columns": [
+      "subject_id",
+      "gender",
+      "anchor_age",
+      "anchor_year",
+      "anchor_year_group",
+      "dod"
+    ],
+    "diagnosis_columns": [
+      "subject_id",
+      "hadm_id",
+      "seq_num",
+      "icd_code",
+      "icd_version"
+    ],
+    "pilot_patients": {
+      "influenza": 1,
+      "chickenpox": 0
+    },
+    "matched_diagnosis_codes": [
+      {
+        "condition": "influenza",
+        "icd_version": "9",
+        "icd_code": "4870",
+        "rows": 1
+      }
+    ],
+    "scope_note": "Complete patient/diagnosis tables only. Prescription and full code dictionary downloads timed out and were not counted."
+  },
+  "eicu_demo": {
+    "tables": [
+      {
+        "file": "patient",
+        "rows": 2520,
+        "columns": [
+          "patientunitstayid",
+          "patienthealthsystemstayid",
+          "gender",
+          "age",
+          "ethnicity",
+          "hospitalid",
+          "wardid",
+          "apacheadmissiondx",
+          "admissionheight",
+          "hospitaladmittime24",
+          "hospitaladmitoffset",
+          "hospitaladmitsource",
+          "hospitaldischargeyear",
+          "hospitaldischargetime24",
+          "hospitaldischargeoffset",
+          "hospitaldischargelocation",
+          "hospitaldischargestatus",
+          "unittype",
+          "unitadmittime24",
+          "unitadmitsource",
+          "unitvisitnumber",
+          "unitstaytype",
+          "admissionweight",
+          "dischargeweight",
+          "unitdischargetime24",
+          "unitdischargeoffset",
+          "unitdischargelocation",
+          "unitdischargestatus",
+          "uniquepid"
+        ]
+      },
+      {
+        "file": "diagnosis",
+        "rows": 24978,
+        "columns": [
+          "diagnosisid",
+          "patientunitstayid",
+          "activeupondischarge",
+          "diagnosisoffset",
+          "diagnosisstring",
+          "icd9code",
+          "diagnosispriority"
+        ]
+      },
+      {
+        "file": "allergy",
+        "rows": 2475,
+        "columns": [
+          "allergyid",
+          "patientunitstayid",
+          "allergyoffset",
+          "allergyenteredoffset",
+          "allergynotetype",
+          "specialtytype",
+          "usertype",
+          "rxincluded",
+          "writtenineicu",
+          "drugname",
+          "allergytype",
+          "allergyname",
+          "drughiclseqno"
+        ]
+      },
+      {
+        "file": "admissiondrug",
+        "rows": 7417,
+        "columns": [
+          "admissiondrugid",
+          "patientunitstayid",
+          "drugoffset",
+          "drugenteredoffset",
+          "drugnotetype",
+          "specialtytype",
+          "usertype",
+          "rxincluded",
+          "writtenineicu",
+          "drugname",
+          "drugdosage",
+          "drugunit",
+          "drugadmitfrequency",
+          "drughiclseqno"
+        ]
+      }
+    ],
+    "pilot_unit_stays": {
+      "influenza": 0,
+      "chickenpox": 0
+    },
+    "matching_descriptions": [],
+    "scope_note": "Complete patient/diagnosis/allergy/admissiondrug tables. The separate medication-orders download was incomplete and was not counted."
+  },
+  "dialmed": {
+    "splits": [
+      {
+        "split": "train",
+        "rows": 9605
+      },
+      {
+        "split": "dev",
+        "rows": 1192
+      },
+      {
+        "split": "test",
+        "rows": 1199
+      }
+    ],
+    "total_dialogues": 11996,
+    "schema": {
+      "label": "list",
+      "disease": "list",
+      "dialog": "list",
+      "original_dialog": "list"
+    },
+    "medication_label_count": 70,
+    "disease_labels": {
+      "皮炎": 2743,
+      "鼻炎": 821,
+      "上呼吸道感染": 2779,
+      "肠炎": 470,
+      "过敏性皮炎": 457,
+      "其他疾病或无确诊": 1479,
+      "脂肪肝": 82,
+      "过敏性鼻炎": 695,
+      "病毒性肝炎": 362,
+      "胃炎": 860,
+      "急性胃肠炎": 742,
+      "肺炎": 230,
+      "食管炎": 90,
+      "肝炎": 41,
+      "脂溢性皮炎": 95,
+      "十二指肠炎": 30,
+      "肝硬化": 20
+    },
+    "explicit_pilot_dialogues": {
+      "influenza": 0,
+      "chickenpox": 0
+    },
+    "pilot_ingredient_label_mentions_across_all_diseases": {
+      "炉甘石洗剂": 557,
+      "奥司他韦": 107,
+      "对乙酰氨基酚": 113,
+      "阿昔洛韦": 154
+    },
+    "leakage_note": "Use the medication-masked dialog field for experiments; original_dialog may reveal recommendation labels."
+  },
+  "file_manifest": [
+    {
+      "file": "kaggle-drug-reviews.zip",
+      "bytes": 42628915,
+      "sha256": "bb510c6d824905efacd52906e9703770dfdc446050355d4a9f579935745381de"
+    },
+    {
+      "file": "druglib-reviews.zip",
+      "bytes": 1133354,
+      "sha256": "3500936fb8473414b731c89d8c4395ab2dd65e2a99e9d79ee998328408a7ddcc"
+    },
+    {
+      "file": "disease-patient-profile.zip",
+      "bytes": 3139,
+      "sha256": "b006c063c0b3bccc14547938fce4ecc44b607935f5bf436c6caf6952163ffc98"
+    },
+    {
+      "file": "medicine-details.zip",
+      "bytes": 781809,
+      "sha256": "fec8fd603dfd0b47b5312c0f3c73b1fb6fcd76eb490e95ca75e345aea0ac4c5f"
+    },
+    {
+      "file": "synthea-sample-csv.zip",
+      "bytes": 5960866,
+      "sha256": "d61417b551e5b0997c33851b339c157421751f0ea68c18ea686ceb1850907c35"
+    },
+    {
+      "file": "mimic-patients.csv.gz",
+      "bytes": 1083,
+      "sha256": "59dcc6cd8450ddf03ad32cc7d76e41caa4c9633541715987f590c74835cf6fae"
+    },
+    {
+      "file": "mimic-diagnoses_icd.csv.gz",
+      "bytes": 24198,
+      "sha256": "958565670c0b3903c0c12825366dc2bae8561d2d55f16feac0c949dd630ed3e4"
+    },
+    {
+      "file": "eicu-patient.csv.gz",
+      "bytes": 136791,
+      "sha256": "15e1eb52169828e3cfff3b67132a087298de4d0365bbb31bb294f6043bffd474"
+    },
+    {
+      "file": "eicu-diagnosis.csv.gz",
+      "bytes": 360548,
+      "sha256": "c99770c25fdeaee1eb34e490f982bd17459bc8902f951a2ae23adef65e7b1b52"
+    },
+    {
+      "file": "eicu-allergy.csv.gz",
+      "bytes": 35475,
+      "sha256": "be890a4cfaf7a194596583f882f491ced515f1714e3d07fc59413a83af5dad31"
+    },
+    {
+      "file": "eicu-admissiondrug.csv.gz",
+      "bytes": 114099,
+      "sha256": "fcf0af0de0efe18ec932199d2fcb308143886df6d50daea869bea48464ea6d68"
+    },
+    {
+      "file": "dialmed-label.json",
+      "bytes": 1607,
+      "sha256": "207329f4024aecadbfba214b5368f4cb35121e768800c27038e7de3a506fcb68"
+    },
+    {
+      "file": "dialmed-train.txt",
+      "bytes": 14430219,
+      "sha256": "04f2553616d6dda5bd9b22c08488a005d10afb7c6fa440914cf73821fce59058"
+    },
+    {
+      "file": "dialmed-dev.txt",
+      "bytes": 1814683,
+      "sha256": "4f240d14720e34da14d692eb6850f496037b6ebe3d8b4e5854b121d5e437c066"
+    },
+    {
+      "file": "dialmed-test.txt",
+      "bytes": 1783995,
+      "sha256": "7f1853dbab171437cf3169c6f6d7be02eeb74835791e3c335deec153acb6840b"
+    }
+  ]
+}

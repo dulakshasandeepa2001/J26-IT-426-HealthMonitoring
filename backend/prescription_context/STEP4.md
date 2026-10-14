@@ -67,6 +67,9 @@ agree to this contract. This step does not implement their prediction model.
 
 ## JSON contract 1.0
 
+The nested Member 1 voice-output **2.0** adapter is documented in [Step 4B](STEP4B.md).
+It uses the same receiver, while the original flat 1.0 contract below remains valid.
+
 The supplied templates define the complete shape. Required fields:
 
 | Field | Rule |
@@ -113,6 +116,7 @@ POST /api/prescription/consultations/<uuid>/demo-analysis/
 
 This route requires the doctor session and CSRF token. The caller does not supply
 patient IDs, paths, scores, source metadata, or the imported-by actor.
+It also accepts `chickenpox` and the bundled `member1_influenza` scenario.
 
 ## Verification
 

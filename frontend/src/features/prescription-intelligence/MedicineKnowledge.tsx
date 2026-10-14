@@ -7,6 +7,7 @@ import { ApiError, getSession } from "@/lib/api";
 import { PageFrame, Section, Unavailable, buttonStyle, controlStyle } from "./PageFrame";
 import { fetchMedicines, fetchMedicineReviews, reviewMedicine, type MedicineEntry, type MedicineReview, type MedicineReviewStatus } from "./medicineApi";
 import { MedicineNameCheck } from "./MedicineNameCheck";
+import { SafetyRuleReview } from "./SafetyRuleReview";
 
 const labels: Record<MedicineReviewStatus, string> = { pending: "Pending review", reviewed: "Content reviewed", rejected: "Rejected" };
 function Status({ status }: { status: MedicineReviewStatus }) {
@@ -57,6 +58,11 @@ function EntryDetail({ entry, onSaved, onAccessDenied }: { entry: MedicineEntry;
   }
 
   return <Section title="Evidence and content review" icon={ShieldCheck}><div className="space-y-5 text-xs leading-relaxed">
+    <nav aria-label="Medicine review steps" className="space-y-2 rounded-xl border border-purple-200 bg-purple-50 p-3">
+      <p className="font-bold text-slate-800">Review both steps for this medicine</p>
+      <div className="flex flex-wrap gap-2"><a href="#medicine-content-review" className={buttonStyle}>1. Content review</a><a href="#medicine-safety-rule-review" className={buttonStyle}>2. Safety rule review</a></div>
+      <p className="text-slate-600">Both reviews must be current before this medicine can be included in a screening draft.</p>
+    </nav>
     <div>
       <div className="flex flex-wrap items-start justify-between gap-2"><h3 className="text-lg font-extrabold text-slate-900">{content.generic_name}</h3><Status status={entry.review_status} /></div>
       <p className="mt-1 text-slate-600">{content.strength} · {content.form} · {content.route}</p>
@@ -80,13 +86,15 @@ function EntryDetail({ entry, onSaved, onAccessDenied }: { entry: MedicineEntry;
       {entry.reviewed_at ? <><p className="mt-1">{entry.reviewer_name} · {date(entry.reviewed_at)}</p><p className="mt-1 whitespace-pre-wrap break-words">{entry.review_notes}</p>{!entry.review_is_current && entry.review_status === "pending" && <p className="mt-1 text-amber-800">A current clinician review is required.</p>}</> : <p className="mt-1">No clinician has reviewed this version.</p>}
       <p className="mt-2 text-slate-500">Catalogue version: {content.catalogue_version}</p>
     </div>
-    <form onSubmit={save} className="space-y-3 border-t border-slate-100 pt-4"><h4 className="font-bold text-slate-800">Record a content review</h4><p className="text-slate-500">Review applies to this catalogue version. Patient-specific medicine eligibility and prescription approval are separate decisions.</p>
+    <form id="medicine-content-review" tabIndex={-1} onSubmit={save} className="scroll-mt-6 space-y-3 border-t border-slate-100 pt-4"><h4 className="font-bold text-slate-800">Record a content review</h4><p className="text-slate-500">Review applies to this catalogue version. Patient-specific medicine eligibility and prescription approval are separate decisions.</p>
       <label className="block space-y-1.5"><span className="font-semibold">Review decision</span><select className={controlStyle} disabled={busy} value={decision} onChange={(event) => setDecision(event.target.value as MedicineReviewStatus)}><option value="reviewed">Content reviewed</option><option value="rejected">Reject content</option><option value="pending">Return to pending</option></select></label>
-      <label className="block space-y-1.5"><span className="font-semibold">Review notes</span><textarea className={controlStyle} rows={3} minLength={10} maxLength={2000} required disabled={busy} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Explain what you checked or what needs correction." /></label>
+      <label className="block space-y-1.5"><span className="font-semibold">Review notes</span><textarea className={controlStyle} rows={3} minLength={10} maxLength={2000} required disabled={busy} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Explain what you checked or what needs correction." aria-describedby="medicine-content-notes-help" /></label>
+      <p id="medicine-content-notes-help" className={notes.trim().length < 10 ? "text-amber-800" : "text-slate-500"}>At least 10 characters required. {notes.trim().length}/2000 characters.</p>
       <label className="flex items-start gap-2"><input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0 accent-purple-600" checked={evidenceChecked} disabled={busy} onChange={(event) => setEvidenceChecked(event.target.checked)} />I reviewed the listed evidence, formulation, warnings and pilot scope for this version.</label>
       <button type="submit" className={buttonStyle} disabled={busy || notes.trim().length < 10 || (decision === "reviewed" && !evidenceChecked)}>{busy && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}Save content review</button>
     </form>
     {error && <p role="alert" className="text-rose-700">{error}</p>}
+    <SafetyRuleReview key={entry.id} medicineId={entry.id} onAccessDenied={onAccessDenied} />
     <div><button type="button" className={buttonStyle} disabled={historyBusy || busy} onClick={loadHistory}>{historyBusy ? "Loading history…" : "Load review history"}</button>{history && <ul className="mt-3 space-y-2">{history.map((review) => <li key={review.id} className="rounded-xl border border-slate-200 p-3"><p className="font-bold">{labels[review.decision]} · {review.reviewer_name}</p><p className="text-slate-500">{date(review.recorded_at)} · Version: {review.catalogue_version}</p><p className="mt-1 whitespace-pre-wrap break-words">{review.notes}</p></li>)}</ul>}</div>
   </div></Section>;
 }
@@ -132,9 +140,9 @@ export default function MedicineKnowledge() {
   const filtered = entries.filter((entry) => (condition === "all" || entry.content.uses.some((use) => use.condition === condition)) && (status === "all" || entry.review_status === status)
     && [entry.content.generic_name, entry.content.strength, ...entry.content.aliases.map((alias) => alias.name), ...entry.content.ingredients.map((item) => item.name)].join(" ").toLowerCase().includes(search.trim().toLowerCase()));
   const active = filtered.find((entry) => entry.id === selected) ?? filtered[0];
-  function saved(entry: MedicineEntry) { setEntries((rows) => rows.map((row) => row.id === entry.id ? entry : row)); setSavedMessage("Content review saved. Prescription generation remains a later step."); }
+  function saved(entry: MedicineEntry) { setEntries((rows) => rows.map((row) => row.id === entry.id ? entry : row)); setSavedMessage("Content review saved. Executable safety rules need a separate current review before screening."); }
 
-  return <PageFrame title="Medicine Knowledge" description="Evidence-backed medicine catalogue for the influenza and chickenpox pilot. Review content before using it in a future prescription draft.">
+  return <PageFrame title="Medicine Knowledge" description="Evidence-backed medicine catalogue for the influenza and chickenpox pilot. Review catalogue content and executable rules before using them in a screening draft.">
     <div className="flex flex-wrap items-center gap-3"><button type="button" className={buttonStyle} onClick={load} disabled={loading}><RefreshCw aria-hidden="true" className="h-4 w-4" />Refresh catalogue</button><Link href="/doctor/prescription-workspace" className="text-xs font-semibold text-purple-700 underline">Prescription Workspace</Link></div>
     {error && <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><p>{error}</p>{denied && <Link href="/login" className="mt-2 inline-block font-bold underline">Sign in</Link>}</div>}
     {savedMessage && <p role="status" className="text-xs text-emerald-800">{savedMessage}</p>}

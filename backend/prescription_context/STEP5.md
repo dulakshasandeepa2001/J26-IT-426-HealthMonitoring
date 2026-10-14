@@ -139,5 +139,7 @@ reviewers, unknown/ambiguous identities, review persistence, failure recovery,
 input changes, and desktop/mobile UI. TypeScript and targeted ESLint checks cover
 the changed frontend files.
 
-Next: connect candidate generation to reviewed knowledge and implement evidence-backed
-patient safety checks before adding ML ranking/explanations and prescription approval.
+Next: [Step 6](STEP6.md) connects reviewed catalogue entries and separately
+reviewed executable rules to saved screening drafts and version history.
+[Step 6C](STEP6C.md) documents the current automatic patient-specific medicine plan.
+ML ranking and prescription approval remain separate later work.

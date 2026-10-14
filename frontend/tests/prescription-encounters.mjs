@@ -111,6 +111,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
     return send(consultations);
   }
   if (path === "/api/prescription/patient-contexts/") return send(contexts);
+  if (path === "/api/prescription/safety-profiles/" || path === "/api/prescription/drafts/") return send([]);
   if (path === "/api/prescription/analyses/") return send(analyses);
   if (path === "/api/prescription/diagnoses/") return send(diagnoses);
   throw new Error("Unmocked backend request: " + request.method() + " " + path);

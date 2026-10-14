@@ -66,6 +66,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   if (path === "/api/prescription/patients/") return send(patients);
   if (path === "/api/prescription/consultations/") return send(consultations);
   if (path === "/api/prescription/patient-contexts/") return send(patientContexts);
+  if (path === "/api/prescription/safety-profiles/" || path === "/api/prescription/drafts/") return send([]);
   if (path === "/api/prescription/analyses/") {
     const id = url.searchParams.get("consultation");
     if (id) analysisQueries.push(id);

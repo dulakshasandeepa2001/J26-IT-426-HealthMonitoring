@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'taskcreate',
     'prescription_context',
     'medicine_knowledge',
+    'prescription_drafts',
 ]
 
 # Custom User Model

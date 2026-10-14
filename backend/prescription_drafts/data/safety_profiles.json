@@ -1,0 +1,137 @@
+{
+  "paracetamol-500mg-tablet": {
+    "schema_version": "1.0",
+    "version": "pp1-rules-2026-10-14-v3",
+    "kind": "paracetamol",
+    "scope": "Label-based oral as-needed symptom relief for registered age 12 years and above, with verified fever/body aches and standard assessed context. Lower ages and individualized dosing require another reviewed product policy.",
+    "source_ids": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "source_sections": {
+      "dailymed-paracetamol": ["Drug Facts: Uses", "Dosage and Administration: aceta-500mg-directions.jpg", "Drug Facts: Warnings (allergy, liver, duplicate products and warfarin); fever/pain review limits"],
+      "fda-acetaminophen-names": ["Avoid duplicate acetaminophen products; ingredient names"]
+    },
+    "allergy_names": [
+      "acetaminophen",
+      "paracetamol",
+      "apap"
+    ],
+    "parameters": {
+      "dose_policy": "oral_prn",
+      "minimum_age_years": 12,
+      "dose_mg": 1000,
+      "interval_hours": 6,
+      "max_doses_per_day": 3,
+      "max_daily_amount_mg": 3000,
+      "symptom_review_days": {"fever": 3, "body_aches": 10},
+      "hepatic_assessment_required": true,
+      "interaction_names": [
+        "warfarin"
+      ],
+      "relevant_symptoms": [
+        "fever",
+        "body_aches"
+      ]
+    }
+  },
+  "oseltamivir-75mg-capsule": {
+    "schema_version": "1.0",
+    "version": "pp1-rules-2026-10-14-v3",
+    "kind": "oseltamivir",
+    "scope": "Uncomplicated influenza treatment screening only. Oral 75 mg capsule identity; renal adjustment, infants and other formulations need separate assessment.",
+    "source_ids": [
+      "dailymed-oseltamivir"
+    ],
+    "source_sections": {
+      "dailymed-oseltamivir": ["2.2 Recommended Dosage for Treatment of Influenza; Table 1", "2.4 Dosage in Patients with Renal Impairment", "4 Contraindications", "7.1 Live Attenuated Influenza Vaccine"]
+    },
+    "allergy_names": [
+      "oseltamivir",
+      "oseltamivir phosphate",
+      "tamiflu"
+    ],
+    "parameters": {
+      "minimum_age_years": 1,
+      "adult_band_age_years": 13,
+      "adult_dose_mg": 75,
+      "doses_per_day": 2,
+      "duration_days": 5,
+      "onset_limit_hours": 48,
+      "weight_bands": [
+        {
+          "max_kg": 15,
+          "dose_mg": 30
+        },
+        {
+          "max_kg": 23,
+          "dose_mg": 45
+        },
+        {
+          "max_kg": 40,
+          "dose_mg": 60
+        },
+        {
+          "max_kg": null,
+          "dose_mg": 75
+        }
+      ],
+      "product_strength_mg": 75
+    }
+  },
+  "acyclovir-800mg-tablet": {
+    "schema_version": "1.0",
+    "version": "pp1-rules-2026-10-14-v3",
+    "kind": "acyclovir",
+    "scope": "Chickenpox oral-product screening with CDC risk-group review. Adult threshold 18 years is a conservative pilot policy; younger patients use the label weight expression. Renal adjustment/specialist cases and other formulations remain outside scope.",
+    "source_ids": [
+      "dailymed-acyclovir",
+      "cdc-varicella-guidance"
+    ],
+    "source_sections": {
+      "dailymed-acyclovir": ["Contraindications", "Precautions: General / Renal function", "Dosage and Administration: Treatment of Chickenpox; renal dose modification"],
+      "cdc-varicella-guidance": ["Acyclovir treatment: risk groups, rash-onset window and uncomplicated healthy children"]
+    },
+    "allergy_names": [
+      "acyclovir",
+      "valacyclovir"
+    ],
+    "parameters": {
+      "minimum_age_years": 2,
+      "adult_policy_age_years": 18,
+      "adult_dose_mg": 800,
+      "pediatric_mg_per_kg": 20,
+      "adult_weight_threshold_kg": 40,
+      "doses_per_day": 4,
+      "duration_days": 5,
+      "onset_limit_hours": 24,
+      "product_strength_mg": 800
+    }
+  },
+  "calamine-zinc-oxide-lotion": {
+    "schema_version": "1.0",
+    "version": "pp1-rules-2026-10-14-v3",
+    "kind": "calamine",
+    "scope": "As-needed topical instructions for clinician-verified itching and assessed external-use context. Minimum age 2 is a conservative pilot scope, not a label age restriction. The label specifies no fixed mass, daily frequency or course duration.",
+    "source_ids": [
+      "dailymed-calamine",
+      "cdc-chickenpox"
+    ],
+    "source_sections": {
+      "dailymed-calamine": ["Drug Facts: Uses / Warnings / Directions"],
+      "cdc-chickenpox": ["Manage symptoms: calamine lotion for itching"]
+    },
+    "allergy_names": [
+      "calamine",
+      "zinc oxide"
+    ],
+    "parameters": {
+      "dose_policy": "topical_prn",
+      "minimum_age_years": 2,
+      "symptom_review_days": {"itching": 7},
+      "relevant_symptoms": [
+        "itching"
+      ]
+    }
+  }
+}

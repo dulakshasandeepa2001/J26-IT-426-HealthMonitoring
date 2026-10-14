@@ -7,6 +7,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from .analysis_contract import Component1PayloadSerializer
+from .member1_adapter import adapt_member1_output
 from .models import (
     PrescriptionContextConsultation as Consultation,
     PrescriptionContextConsultationanalysis as Analysis,
@@ -21,22 +22,31 @@ class AnalysisConflict(APIException):
 
 def demo_payload(consultation, scenario):
     # Fixed choices only: a caller cannot provide a filesystem path.
-    filenames = {'influenza': 'influenza_demo.json', 'chickenpox': 'chickenpox_demo.json'}
+    filenames = {'influenza': 'influenza_demo.json', 'chickenpox': 'chickenpox_demo.json',
+                 'member1_influenza': 'member1_influenza_demo.json'}
     if scenario not in filenames:
-        raise ValidationError({'scenario': 'Choose influenza or chickenpox.'})
+        raise ValidationError({'scenario': 'Choose one of the supported bundled scenarios.'})
     path = Path(__file__).resolve().parent / 'samples' / filenames[scenario]
     with path.open(encoding='utf-8') as sample:
         payload = json.load(sample)
     payload['patient_id'] = consultation.patient_id
     payload['consultation_id'] = str(consultation.pk)
     payload['analysis_reference'] += ':' + str(consultation.pk)
+    if scenario == 'member1_influenza':
+        # Provenance is explicit; a pasted unversioned example never becomes real output.
+        payload.update(schema_version='2.0', source='component_1_sample', is_demo=True,
+                       model_version='synthetic-demo-member1-v1', review_status='unconfirmed',
+                       doctor_id=consultation.doctor_id)
     return payload
 
 
 def ingest_analysis(payload, actor, *, mode):
-    contract = Component1PayloadSerializer(data=payload)
-    contract.is_valid(raise_exception=True)
-    normalized = contract.validated_data
+    if isinstance(payload, dict) and payload.get('schema_version') == '2.0':
+        normalized = adapt_member1_output(payload)
+    else:
+        contract = Component1PayloadSerializer(data=payload)
+        contract.is_valid(raise_exception=True)
+        normalized = contract.validated_data
     with transaction.atomic():
         consultation = get_object_or_404(
             Consultation.objects.select_for_update().select_related('patient', 'doctor'),
@@ -57,6 +67,8 @@ def ingest_analysis(payload, actor, *, mode):
             raise ValidationError({'consultation_id': 'This visit must link an active approved patient and doctor.'})
         if normalized['patient_id'] != consultation.patient_id:
             raise ValidationError({'patient_id': 'Patient ID does not match the consultation.'})
+        if normalized.get('doctor_id', consultation.doctor_id) != consultation.doctor_id:
+            raise ValidationError({'doctor_id': 'Doctor ID does not match the consultation.'})
         if normalized['is_demo'] != consultation.is_demo:
             raise ValidationError({'is_demo': 'Demo results require a demo consultation; real results require a non-demo consultation.'})
         existing = Analysis.objects.filter(consultation=consultation).first()

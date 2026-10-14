@@ -1,0 +1,84 @@
+{
+  "schema_version": "2.0",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "model_version": "synthetic-demo-member1-v1",
+  "review_status": "unconfirmed",
+  "status": "success",
+  "analysis_reference": "VOICE-AI-2026-10-001",
+  "consultation_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "patient_id": 12,
+  "doctor_id": 2,
+  "timestamp": "2026-10-13T23:30:00Z",
+  "payload": {
+    "audio_metadata": {
+      "duration_seconds": 145,
+      "language": "en-US",
+      "audio_quality": "clear"
+    },
+    "transcript_summary": "Patient reports severe high fever for 3 days accompanied by dry cough, sore throat, and muscle aches. No breathing difficulty reported.",
+    "extracted_symptoms": [
+      {
+        "symptom": "High Fever",
+        "duration": "3 days",
+        "severity": "severe",
+        "confidence": 0.96
+      },
+      {
+        "symptom": "Dry Cough",
+        "duration": "3 days",
+        "severity": "moderate",
+        "confidence": 0.92
+      },
+      {
+        "symptom": "Sore Throat",
+        "duration": "2 days",
+        "severity": "mild",
+        "confidence": 0.88
+      },
+      {
+        "symptom": "Myalgia (Body Aches)",
+        "duration": "3 days",
+        "severity": "moderate",
+        "confidence": 0.9
+      }
+    ],
+    "primary_diagnosis": {
+      "condition_code": "INFLUENZA",
+      "condition_label": "Seasonal Influenza (Flu A / H3N2)",
+      "confidence": 0.94,
+      "severity_level": "Moderate",
+      "icd_10_code": "J10.1"
+    },
+    "differential_diagnoses": [
+      {
+        "condition_code": "VIRAL_URTI",
+        "condition_label": "Upper Respiratory Tract Infection",
+        "confidence": 0.78
+      },
+      {
+        "condition_code": "DENGUE_EARLY",
+        "condition_label": "Early Viral Pyrexia / Dengue Suspicion",
+        "confidence": 0.45
+      }
+    ],
+    "extracted_clinical_notes": {
+      "chief_complaint": "High fever and persistent dry cough for 3 days",
+      "patient_reported_allergies": [
+        "Penicillin (Rash)"
+      ],
+      "patient_current_medications": [
+        "Paracetamol 500mg SOS"
+      ],
+      "vital_signs_mentioned": {
+        "temperature": "38.8 °C",
+        "blood_pressure": "120/80 mmHg"
+      }
+    },
+    "suggested_treatment_categories": [
+      "Antipyretics / Analgesics",
+      "Antiviral (Oseltamivir / Tamiflu) if within 48h window",
+      "Oral Rehydration Therapy"
+    ]
+  }
+}

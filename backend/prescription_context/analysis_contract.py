@@ -66,4 +66,4 @@ class Component1PayloadSerializer(StrictSerializer):
 
 
 class DemoScenarioSerializer(StrictSerializer):
-    scenario = serializers.ChoiceField(choices=('influenza', 'chickenpox'))
+    scenario = serializers.ChoiceField(choices=('influenza', 'chickenpox', 'member1_influenza'))

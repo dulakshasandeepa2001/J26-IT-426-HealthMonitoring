@@ -5,12 +5,14 @@ import { FlaskConical, RefreshCw } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
 import { conditionLabel, readComponent1Payload, type DemoScenario } from "./analysisData";
 import { buttonStyle, controlStyle, Unavailable } from "./PageFrame";
+import { Member1Report } from "./Member1Report";
 
 export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> }) {
   const [scenario, setScenario] = useState<DemoScenario | "">("");
   const analysis = rx.activeAnalysis;
   const parsed = analysis ? readComponent1Payload(analysis.payload) : null;
-  const linked = parsed && parsed.patient_id === rx.activePatient?.id && parsed.consultation_id === rx.activeConsultation?.id;
+  const linked = parsed && parsed.patient_id === rx.activePatient?.id && parsed.consultation_id === rx.activeConsultation?.id
+    && (parsed.schema_version === "1.0" || parsed.doctor_id === rx.activeConsultation?.doctor);
 
   async function load(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,6 +31,7 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
             <option value="">Select a demo scenario</option>
             <option value="influenza">Influenza</option>
             <option value="chickenpox">Chickenpox</option>
+            <option value="member1_influenza">Member 1 — Influenza voice JSON</option>
           </select>
           <button type="submit" className={buttonStyle} disabled={rx.loading || rx.diagnosisConfirmed || !scenario}>Load demo analysis</button>
           {rx.diagnosisConfirmed && <p className="text-xs text-amber-900">Diagnosis is already confirmed. Start a new demo visit to load another analysis.</p>}
@@ -61,6 +64,7 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
                     <span>{symptom.duration_days === null ? "Duration not reported" : `${symptom.duration_days} ${symptom.duration_days === 1 ? "day" : "days"}`}</span>
                   </li>)}
                 </ul>
+                {!parsed.symptoms.length && <p className="mt-2 text-xs text-amber-800">No symptoms could be mapped to the pilot codes. Review the producer details and clarification messages.</p>}
               </div>
               <div>
                 <h3 className="text-xs font-bold text-slate-700">Condition candidates — unconfirmed</h3>
@@ -70,6 +74,7 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
                     <span>{parsed.is_demo ? "Sample confidence" : "Reported model score"}: {new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 1 }).format(candidate.confidence)}</span>
                   </li>)}
                 </ul>
+                {!parsed.condition_candidates.length && <p className="mt-2 text-xs text-amber-800">No supported primary condition candidate. Review the reported diagnosis manually.</p>}
               </div>
               <p className="text-xs text-slate-600">Reported severity: <span className="font-semibold capitalize">{parsed.severity.level}</span></p>
               {parsed.severity.red_flags.length > 0 ? (
@@ -77,7 +82,8 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
                   <p className="font-bold">Reported red flags</p>
                   <ul className="mt-1 list-inside list-disc">{parsed.severity.red_flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>
                 </div>
-              ) : <p className="text-xs text-slate-500">No red flags were included in this payload.</p>}
+              ) : <p className="text-xs text-slate-500">{parsed.member1?.red_flag_assessment === "not_assessed" ? "Red flags were not assessed in this output. Clinician assessment is required." : parsed.member1 ? "The producer reported an assessed red-flag list with no items. Clinician review is still required." : "No red flags were included in this payload."}</p>}
+              {parsed.member1 && <Member1Report details={parsed.member1} />}
             </>
           ) : <p className="text-xs text-amber-800">{parsed ? "The payload IDs do not match this patient and visit." : "Saved analysis uses a legacy format. Its original payload is available below."}</p>}
           <details className="rounded-xl border border-slate-200 p-3">
