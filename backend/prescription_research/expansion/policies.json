@@ -1,0 +1,196 @@
+[
+  {
+    "id": "flu-fever-aches",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "purpose": "symptom_relief",
+    "clinical_role": "fever_or_aches_relief",
+    "handler": "paracetamol",
+    "target_symptoms": [
+      "fever",
+      "body_aches"
+    ],
+    "source_ids": [
+      "dailymed-paracetamol"
+    ],
+    "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": []
+  },
+  {
+    "id": "flu-antiviral",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "influenza",
+    "candidate_id": "oseltamivir-75mg-capsule",
+    "purpose": "antiviral",
+    "clinical_role": "influenza_antiviral",
+    "handler": "oseltamivir",
+    "target_symptoms": [],
+    "source_ids": [
+      "dailymed-oseltamivir"
+    ],
+    "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": []
+  },
+  {
+    "id": "varicella-fever",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "chickenpox",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "purpose": "symptom_relief",
+    "clinical_role": "fever_relief",
+    "handler": "paracetamol",
+    "target_symptoms": [
+      "fever"
+    ],
+    "source_ids": [
+      "cdc-chickenpox",
+      "dailymed-paracetamol"
+    ],
+    "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": []
+  },
+  {
+    "id": "varicella-antiviral",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "chickenpox",
+    "candidate_id": "acyclovir-800mg-tablet",
+    "purpose": "antiviral",
+    "clinical_role": "varicella_antiviral",
+    "handler": "acyclovir",
+    "target_symptoms": [],
+    "source_ids": [
+      "dailymed-acyclovir",
+      "cdc-varicella-guidance"
+    ],
+    "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": []
+  },
+  {
+    "id": "varicella-itch",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "purpose": "symptom_relief",
+    "clinical_role": "itching_relief",
+    "handler": "calamine",
+    "target_symptoms": [
+      "itching"
+    ],
+    "source_ids": [
+      "cdc-chickenpox",
+      "dailymed-calamine"
+    ],
+    "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": []
+  },
+  {
+    "id": "measles-fever",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "measles",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "purpose": "symptom_relief",
+    "clinical_role": "fever_relief",
+    "handler": "paracetamol",
+    "target_symptoms": [
+      "fever"
+    ],
+    "source_ids": [
+      "nhs-measles",
+      "dailymed-paracetamol",
+      "cdc-measles-care"
+    ],
+    "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": [
+      "respiratory_concern",
+      "neurological_concern",
+      "hydration_concern"
+    ]
+  },
+  {
+    "id": "mumps-fever-pain",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "mumps",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "purpose": "symptom_relief",
+    "clinical_role": "fever_or_pain_relief",
+    "handler": "paracetamol",
+    "target_symptoms": [
+      "fever",
+      "body_aches",
+      "jaw_pain"
+    ],
+    "source_ids": [
+      "nhs-mumps",
+      "dailymed-paracetamol"
+    ],
+    "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": [
+      "intake_difficulty",
+      "abdominal_pain",
+      "testicular_pain_or_swelling",
+      "neurological_concern",
+      "hydration_concern"
+    ]
+  },
+  {
+    "id": "conjunctivitis-lubrication",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "purpose": "symptom_relief",
+    "clinical_role": "ocular_dryness_or_irritation_relief",
+    "handler": "ophthalmic_lubricant",
+    "target_symptoms": [
+      "ocular_dryness",
+      "ocular_irritation"
+    ],
+    "source_ids": [
+      "cdc-conjunctivitis",
+      "dailymed-cmc-05"
+    ],
+    "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": [
+      "eye_pain",
+      "photophobia",
+      "vision_change",
+      "marked_or_worsening_redness",
+      "contact_lens_use",
+      "suspected_herpetic_eye_disease"
+    ]
+  },
+  {
+    "id": "gastroenteritis-rehydration",
+    "version": "six-condition-knowledge-2026-10-16-v1",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "purpose": "rehydration_support",
+    "clinical_role": "oral_fluid_electrolyte_replacement",
+    "handler": "unresolved_ors",
+    "target_symptoms": [
+      "diarrhoea",
+      "vomiting",
+      "recent_fluid_loss"
+    ],
+    "source_ids": [
+      "niddk-gastroenteritis",
+      "who-ors"
+    ],
+    "scope": "Unresolved exact local product identity, composition and preparation. No executable dose; retain only a rehydration-purpose gap.",
+    "clinical_review_status": "not_reviewed",
+    "concern_fields": [
+      "hydration_concern",
+      "blood_in_stool",
+      "severe_abdominal_pain",
+      "fluid_restriction"
+    ]
+  }
+]

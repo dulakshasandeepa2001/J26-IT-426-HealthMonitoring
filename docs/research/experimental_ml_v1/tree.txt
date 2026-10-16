@@ -1,0 +1,44 @@
+Experimental ML: fitted categorical information-gain tree
+Labels are provisional rule-derived relevance, not clinical prescribing decisions.
+
+prediction=relevant; unique training inputs=85; counts={'not_relevant': 12, 'relevant': 57, 'undetermined': 16}
+  if clinical_role == string:fever_or_aches_relief:
+    prediction=relevant; unique training inputs=17; counts={'not_relevant': 2, 'relevant': 11, 'undetermined': 4}
+      if fever_present == bool:false:
+        prediction=relevant; unique training inputs=6; counts={'not_relevant': 2, 'relevant': 3, 'undetermined': 1}
+          if body_aches_present == bool:false:
+            prediction=not_relevant; unique training inputs=2; counts={'not_relevant': 2}
+          if body_aches_present == bool:true:
+            prediction=relevant; unique training inputs=3; counts={'relevant': 3}
+          if body_aches_present == null:
+            prediction=undetermined; unique training inputs=1; counts={'undetermined': 1}
+      if fever_present == bool:true:
+        prediction=relevant; unique training inputs=6; counts={'relevant': 6}
+      if fever_present == null:
+        prediction=undetermined; unique training inputs=5; counts={'relevant': 2, 'undetermined': 3}
+          if body_aches_present == bool:false:
+            prediction=undetermined; unique training inputs=2; counts={'undetermined': 2}
+          if body_aches_present == bool:true:
+            prediction=relevant; unique training inputs=2; counts={'relevant': 2}
+          if body_aches_present == null:
+            prediction=undetermined; unique training inputs=1; counts={'undetermined': 1}
+  if clinical_role == string:fever_relief:
+    prediction=not_relevant; unique training inputs=17; counts={'not_relevant': 6, 'relevant': 6, 'undetermined': 5}
+      if fever_present == bool:false:
+        prediction=not_relevant; unique training inputs=6; counts={'not_relevant': 6}
+      if fever_present == bool:true:
+        prediction=relevant; unique training inputs=6; counts={'relevant': 6}
+      if fever_present == null:
+        prediction=undetermined; unique training inputs=5; counts={'undetermined': 5}
+  if clinical_role == string:influenza_antiviral:
+    prediction=relevant; unique training inputs=17; counts={'relevant': 17}
+  if clinical_role == string:itching_relief:
+    prediction=undetermined; unique training inputs=17; counts={'not_relevant': 4, 'relevant': 6, 'undetermined': 7}
+      if itching_present == bool:false:
+        prediction=not_relevant; unique training inputs=4; counts={'not_relevant': 4}
+      if itching_present == bool:true:
+        prediction=relevant; unique training inputs=6; counts={'relevant': 6}
+      if itching_present == null:
+        prediction=undetermined; unique training inputs=7; counts={'undetermined': 7}
+  if clinical_role == string:varicella_antiviral:
+    prediction=relevant; unique training inputs=17; counts={'relevant': 17}

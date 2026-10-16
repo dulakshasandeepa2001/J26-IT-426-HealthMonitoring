@@ -1,0 +1,166 @@
+{
+  "manifest_version": "1.0",
+  "dataset_version": "synthetic-prescription-2026-10-14-v1",
+  "schema_version": "1.0",
+  "clinical_review_status": "not_reviewed",
+  "synthetic_only": true,
+  "data_origin": "frozen_researcher_defined_templates_only",
+  "label_method": "rule_derived",
+  "criteria_version": "provisional-relevance-2026-10-14-v1",
+  "template_version": "synthetic-families-2026-10-14-v1",
+  "engine_version": "pp1-screening-2026-10-14-v3",
+  "adapter_version": "static-research-adapter-v1",
+  "context_seed": 20261014,
+  "split_method": "explicit_template_family_holdout_v1",
+  "split_seed": null,
+  "family_splits": {
+    "present_targets": "train",
+    "absent_targets": "train",
+    "unknown_targets": "train",
+    "isolated_targets": "validation",
+    "matching_allergy": "train",
+    "unresolved_allergy": "validation",
+    "duplicate_current_ingredient": "train",
+    "unresolved_current_medicine": "test",
+    "unknown_renal_context": "train",
+    "pediatric_other_formulation": "train",
+    "missing_age_and_weight": "validation",
+    "late_onset": "test",
+    "missing_duration_and_histories": "train",
+    "special_population_review": "train",
+    "organ_and_topical_review": "train",
+    "red_flags": "validation",
+    "partially_unknown_targets": "test",
+    "unsupported_condition": "test"
+  },
+  "feature_allowlist": [
+    "condition",
+    "candidate_id",
+    "purpose",
+    "clinical_role",
+    "fever_present",
+    "body_aches_present",
+    "itching_present"
+  ],
+  "input_sha256": {
+    "backend/medicine_knowledge/data/pilot_catalogue.json": "bdd39e9bdcc3330874555213a7d9a6f4c605f4a919d12ba8433c0f491bfb8804",
+    "backend/prescription_drafts/data/safety_profiles.json": "8a5dcc0b7e62d4eb12f11ef04be3cb4599832a6cce3e0a4bf48c9e8fd476057f",
+    "backend/prescription_drafts/engine.py": "2b338797fb63b37b3247422f0c546dda1a508099335c271e92bc8e69d9810407",
+    "backend/prescription_research/criteria.json": "3dcb2e7b9074948d7a1d194f184e66cba15cf7dc75f13aff43e062a5156546c9",
+    "backend/prescription_research/templates.json": "60d1d52dff1a6287548afaa126131bbe8a06fd00983231f293daf798692025aa",
+    "backend/prescription_research/schema.json": "22fa89c1085afbbc238abe213a955ac85541fa8de975537cb79ef6ebf35a91ec",
+    "backend/prescription_research/dataset.py": "51c5c75bdd10ebfd5990abd790adb1686fc4a4f04aed8e1e2e3fa1ae6d5f88b6"
+  },
+  "batch_sha256": "9263910aad42e1b072f2033f0ec307bc82f31d320efa7ede6b75619f3536d697",
+  "evidence_references": [
+    {
+      "id": "cdc-chickenpox",
+      "title": "How to Treat Chickenpox",
+      "publisher": "CDC",
+      "url": "https://www.cdc.gov/chickenpox/treatment/index.html",
+      "published_date": "2024-04-24",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Over-the-counter medications",
+        "At home care"
+      ]
+    },
+    {
+      "id": "cdc-varicella-guidance",
+      "title": "Clinical Guidance for People at Risk for Severe Varicella",
+      "publisher": "CDC",
+      "url": "https://www.cdc.gov/chickenpox/hcp/clinical-guidance/index.html",
+      "published_date": "2024-04-24",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Acyclovir treatment"
+      ]
+    },
+    {
+      "id": "dailymed-acyclovir",
+      "title": "Acyclovir tablets — 400 mg and 800 mg",
+      "publisher": "DailyMed / NLM",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=05f42300-2a06-45f1-a9b9-6e5c84ae58ec",
+      "published_date": "2026-09-29",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Indications and usage",
+        "Contraindications",
+        "Warnings",
+        "Precautions",
+        "RxNorm"
+      ]
+    },
+    {
+      "id": "dailymed-calamine",
+      "title": "Calamine 8% / zinc oxide 8% lotion — H-E-B",
+      "publisher": "DailyMed / NLM",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4a79259e-64ac-d187-e063-6294a90a78db",
+      "published_date": "2026-06-15",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Active ingredients",
+        "Use",
+        "Warnings",
+        "Stop use",
+        "RxNorm"
+      ]
+    },
+    {
+      "id": "dailymed-oseltamivir",
+      "title": "Tamiflu (oseltamivir phosphate) prescribing information",
+      "publisher": "DailyMed / NLM",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ee3c9555-60f2-4f82-a760-11983c86e97b",
+      "published_date": "2025-12-15",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "1.1 Indications",
+        "2.2 Pediatric dosing",
+        "2.4 Renal impairment",
+        "4 Contraindications",
+        "5 Warnings",
+        "7 Drug interactions",
+        "RxNorm"
+      ]
+    },
+    {
+      "id": "dailymed-paracetamol",
+      "title": "Acetaminophen 500 mg tablet — Rising Pharma",
+      "publisher": "DailyMed / NLM",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f8237772-7656-49fb-b1de-f8fcb5fa55ee",
+      "published_date": "2025-10-28",
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Active ingredient",
+        "Uses",
+        "Warnings",
+        "Do not use",
+        "Ask doctor/pharmacist",
+        "RxNorm"
+      ]
+    },
+    {
+      "id": "fda-acetaminophen-names",
+      "title": "Acetaminophen — names and abbreviations",
+      "publisher": "FDA",
+      "url": "https://www.fda.gov/drugs/safe-use-over-counter-pain-relievers-and-fever-reducers/acetaminophen",
+      "published_date": null,
+      "accessed_date": "2026-10-13",
+      "sections": [
+        "Acetaminophen names"
+      ]
+    }
+  ],
+  "review_gates": "not_evaluated_in_offline_static_rule_simulation",
+  "adapter_semantics": {
+    "symptoms_reviewed": "synthetic symptom-presence completeness only, not a doctor review",
+    "verified_symptoms": "explicitly present synthetic symptom facts only, not clinician verification",
+    "confirmed_history_and_risk_flags": "supplied synthetic facts only, no reviewer or attestation",
+    "engine_messages": "discarded; their live-workflow clinician wording is not synthetic evidence"
+  },
+  "live_patient_data_used": false,
+  "database_access": false,
+  "model_trained": false,
+  "api_enabled": false,
+  "publication_enabled": false
+}

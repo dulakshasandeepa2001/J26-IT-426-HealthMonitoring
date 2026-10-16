@@ -1,0 +1,28 @@
+{
+  "version": "six-condition-provisional-relevance-2026-10-16-v1",
+  "label_method": "rule_derived",
+  "clinical_review_status": "not_reviewed",
+  "task": "Provisional condition/purpose/symptom relevance from documented researcher-defined criteria; not diagnosis, safety, prescribing eligibility or dose selection",
+  "labels": ["relevant", "not_relevant", "undetermined"],
+  "feature_allowlist": ["condition", "candidate_id", "purpose", "clinical_role", "fever_present", "body_aches_present", "itching_present", "jaw_pain_present", "ocular_dryness_present", "ocular_irritation_present", "diarrhoea_present", "vomiting_present", "recent_fluid_loss_present"],
+  "decision_order": [
+    {"id": "unsupported_condition", "rule": "Missing or unsupported condition -> undetermined; never guess a diagnosis."},
+    {"id": "unmapped_candidate", "rule": "No declared condition/purpose mapping -> not_relevant as a bounded contrast row, not a medical contraindication."},
+    {"id": "mapped_antiviral", "rule": "Mapped antiviral purpose -> relevant; individual indication, onset and safety remain separate deterministic decisions."},
+    {"id": "target_present", "rule": "For mapped symptom-relief or rehydration purpose, any declared target explicitly true -> relevant, even when another target is unknown."},
+    {"id": "targets_absent", "rule": "All declared targets explicitly false -> not_relevant."},
+    {"id": "target_unknown", "rule": "Otherwise -> undetermined; missing is unknown, not absent."}
+  ],
+  "mapping_source": "Versioned Step 8B policies.json: condition, candidate_id, purpose, clinical_role, target_symptoms and source_ids",
+  "safety_excluded_from_target_and_model": ["age", "weight", "duration", "onset_window", "allergies", "current_medicines", "interactions", "organ_assessments", "complication_assessments", "dose", "product_identity_resolution", "review_decisions", "safety_outcomes"],
+  "interpretation": [
+    "Researcher-defined source-informed rules produce provisional labels, not independently supplied clinical ground truth.",
+    "Label evidence supports the mapping/context, not a clinician-labelled patient recommendation.",
+    "ORS purpose relevance does not supply a resolved product identifier, composition, dilution or regimen.",
+    "Each condition/purpose/role group has one candidate: no meaningful within-group ranking.",
+    "Mapped antiviral groups have constant relevance labels; report insufficient variation.",
+    "Condition, candidate identity and clinical role are predecision catalogue lookups and can proxy the deterministic mapping task.",
+    "Family holdout does not guarantee novel model inputs; report exact feature overlap and support gaps honestly.",
+    "No training, preprocessing fitting, clinical validation, review approval or prescription publication is performed in the batch-building step."
+  ]
+}

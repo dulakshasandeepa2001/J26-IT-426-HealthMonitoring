@@ -1,0 +1,54 @@
+{
+  "version": "provisional-relevance-2026-10-14-v1",
+  "label_method": "rule_derived",
+  "clinical_review_status": "not_reviewed",
+  "task": "Provisional condition/purpose/symptom relevance, not prescribing eligibility or dose selection",
+  "labels": ["relevant", "not_relevant", "undetermined"],
+  "supported_conditions": ["influenza", "chickenpox"],
+  "decision_order": [
+    "Unknown or unsupported condition -> undetermined; do not infer a diagnosis",
+    "No catalogue use mapping for this condition -> not_relevant (contrast row only)",
+    "Mapped antiviral -> relevant to its treatment purpose, without declaring an individual indication",
+    "Mapped symptom relief: any declared target present -> relevant",
+    "Mapped symptom relief: all declared targets explicitly absent -> not_relevant",
+    "Otherwise -> undetermined; unknown is not absent"
+  ],
+  "safety_excluded_from_target": [
+    "age/formulation", "weight", "allergy", "duplicate_ingredient", "interaction",
+    "renal", "hepatic", "red_flags", "special_population", "onset_window",
+    "vaccine_interaction", "varicella_indication_scope", "dose", "topical_scope"
+  ],
+  "feature_allowlist": [
+    "condition", "candidate_id", "purpose", "clinical_role",
+    "fever_present", "body_aches_present", "itching_present"
+  ],
+  "products": {
+    "paracetamol-500mg-tablet": {
+      "purpose": "symptom_relief",
+      "roles": {
+        "influenza": {"clinical_role": "fever_or_aches_relief", "target_symptoms": ["fever", "body_aches"]},
+        "chickenpox": {"clinical_role": "fever_relief", "target_symptoms": ["fever"]}
+      }
+    },
+    "oseltamivir-75mg-capsule": {
+      "purpose": "antiviral",
+      "roles": {"influenza": {"clinical_role": "influenza_antiviral", "target_symptoms": []}}
+    },
+    "acyclovir-800mg-tablet": {
+      "purpose": "antiviral",
+      "roles": {"chickenpox": {"clinical_role": "varicella_antiviral", "target_symptoms": []}}
+    },
+    "calamine-zinc-oxide-lotion": {
+      "purpose": "symptom_relief",
+      "roles": {"chickenpox": {"clinical_role": "itching_relief", "target_symptoms": ["itching"]}}
+    }
+  },
+  "interpretation": [
+    "These are researcher-defined source-informed criteria executed as rules; no human labels are fabricated.",
+    "Catalogue mapping evidence does not directly provide these patient-level labels.",
+    "A relevant row may be blocked or unassessable by deterministic controls.",
+    "No within-purpose ranking is measured: each supported condition/clinical-role group has one product.",
+    "Antiviral mapped rows have constant relevance labels; report insufficient within-product variation.",
+    "Allergy/interaction/contraindication/dose decisions remain outside ML."
+  ]
+}

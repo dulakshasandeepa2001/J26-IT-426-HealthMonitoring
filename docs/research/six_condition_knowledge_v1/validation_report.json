@@ -1,0 +1,51 @@
+{
+  "knowledge_version": "six-condition-knowledge-2026-10-16-v1",
+  "engine_version": "six-condition-static-experiment-2026-10-16-v1",
+  "counts": {
+    "conditions": 6,
+    "resolved_catalogue_products": 5,
+    "unresolved_products": 1,
+    "purpose_groups": 9,
+    "resolved_purpose_groups": 8,
+    "synthetic_check_cases": 25,
+    "candidate_rule_evaluations": 36,
+    "unsupported_cases": 1
+  },
+  "aggregate_status_counts": {
+    "blocked": 17,
+    "cannot_validate": 8,
+    "warning": 11
+  },
+  "workflow_counts": {
+    "experimental_reference_only": 11,
+    "requires_assessment": 25
+  },
+  "experimental_references": 11,
+  "prescription_eligible_rows": 0,
+  "candidate_count_by_purpose_group": {
+    "flu-fever-aches": 1,
+    "flu-antiviral": 1,
+    "varicella-fever": 1,
+    "varicella-antiviral": 1,
+    "varicella-itch": 1,
+    "measles-fever": 1,
+    "mumps-fever-pain": 1,
+    "conjunctivitis-lubrication": 1,
+    "gastroenteritis-rehydration": 1
+  },
+  "clinical_review_status": "not_reviewed",
+  "review_gate_evaluated": false,
+  "live_enabled": false,
+  "model_trained": false,
+  "clinical_validation_performed": false,
+  "within_group_ranking_evaluated": false,
+  "limitations": [
+    "Source-informed researcher controls, not a clinical protocol or validation.",
+    "One candidate per purpose group; no meaningful alternative ranking.",
+    "The new mappings use adult-only research scope, not label age contraindications.",
+    "Exact ORS identity/composition/dilution unresolved; no executable ORS regimen.",
+    "The CMC reference is a US label; local equivalence and complete excipient/interaction coverage are not established.",
+    "Static fixtures test selected technical behavior, not accuracy or model performance.",
+    "Every entry/policy is pending clinical review and no prescription is eligible."
+  ]
+}

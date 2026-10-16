@@ -1,5 +1,9 @@
 # Step 4B: Member 1 nested voice JSON adapter
 
+This document describes the retained **2.0** contract. The additive six-condition
+**2.1** contract, explicit unknown findings and unverified observations are in
+[Step 8A](STEP8A.md). Member 1's agreement/producer implementation is pending.
+
 The supplied Member 1 example is preserved as JSON data in
 `samples/member1_influenza_demo.json`. It includes transcript/audio information,
 symptom extraction scores, a primary diagnosis, differentials, reported clinical

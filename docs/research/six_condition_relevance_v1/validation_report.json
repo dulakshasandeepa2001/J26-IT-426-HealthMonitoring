@@ -1,0 +1,628 @@
+{
+  "validation": "passed",
+  "dataset_version": "six-condition-synthetic-relevance-2026-10-16-v1",
+  "criteria_version": "six-condition-provisional-relevance-2026-10-16-v1",
+  "label_method": "rule_derived",
+  "clinical_review_status": "not_reviewed",
+  "counts": {
+    "synthetic_contexts": 60,
+    "candidate_rows": 360,
+    "template_families": 12,
+    "supported_conditions": 6,
+    "candidate_identities": 6,
+    "resolved_products": 5,
+    "unresolved_planning_identities": 1,
+    "condition_mapped_rows": 81,
+    "contrast_rows": 243,
+    "unsupported_condition_rows": 36,
+    "unique_model_inputs": 264,
+    "unique_mapped_model_inputs": 59
+  },
+  "class_balance": {
+    "not_relevant": 260,
+    "relevant": 44,
+    "undetermined": 56
+  },
+  "mapped_class_balance": {
+    "not_relevant": 17,
+    "relevant": 44,
+    "undetermined": 20
+  },
+  "by_split": {
+    "train": {
+      "scenarios": 20,
+      "families": [
+        "acute_multi_symptom",
+        "incomplete_interview",
+        "resolved_symptoms",
+        "unknown_etiology_train"
+      ],
+      "rows": 120,
+      "mapped_rows": 27,
+      "class_balance": {
+        "not_relevant": 88,
+        "relevant": 13,
+        "undetermined": 19
+      },
+      "mapped_class_balance": {
+        "not_relevant": 7,
+        "relevant": 13,
+        "undetermined": 7
+      },
+      "missing_classes": [],
+      "unique_model_inputs": 120,
+      "unique_mapped_model_inputs": 27,
+      "mapped_inputs_also_in_train": null,
+      "novel_mapped_inputs_relative_to_train": null,
+      "model_inputs_also_in_train": null
+    },
+    "validation": {
+      "scenarios": 20,
+      "families": [
+        "localized_complaint",
+        "reported_concern",
+        "uncertain_target_history",
+        "unknown_etiology_validation"
+      ],
+      "rows": 120,
+      "mapped_rows": 27,
+      "class_balance": {
+        "not_relevant": 83,
+        "relevant": 19,
+        "undetermined": 18
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 19,
+        "undetermined": 6
+      },
+      "missing_classes": [],
+      "unique_model_inputs": 114,
+      "unique_mapped_model_inputs": 26,
+      "mapped_inputs_also_in_train": 10,
+      "novel_mapped_inputs_relative_to_train": 16,
+      "model_inputs_also_in_train": 42
+    },
+    "test": {
+      "scenarios": 20,
+      "families": [
+        "late_recovery",
+        "mixed_positive_unknown",
+        "unknown_etiology_test",
+        "unresolved_target_report"
+      ],
+      "rows": 120,
+      "mapped_rows": 27,
+      "class_balance": {
+        "not_relevant": 89,
+        "relevant": 12,
+        "undetermined": 19
+      },
+      "mapped_class_balance": {
+        "not_relevant": 8,
+        "relevant": 12,
+        "undetermined": 7
+      },
+      "missing_classes": [],
+      "unique_model_inputs": 120,
+      "unique_mapped_model_inputs": 27,
+      "mapped_inputs_also_in_train": 11,
+      "novel_mapped_inputs_relative_to_train": 16,
+      "model_inputs_also_in_train": 48
+    }
+  },
+  "by_condition": {
+    "influenza": {
+      "class_balance": {
+        "not_relevant": 38,
+        "relevant": 13,
+        "undetermined": 3
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 13,
+        "undetermined": 3
+      }
+    },
+    "chickenpox": {
+      "class_balance": {
+        "not_relevant": 34,
+        "relevant": 15,
+        "undetermined": 5
+      },
+      "mapped_class_balance": {
+        "not_relevant": 7,
+        "relevant": 15,
+        "undetermined": 5
+      }
+    },
+    "measles": {
+      "class_balance": {
+        "not_relevant": 47,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      }
+    },
+    "mumps": {
+      "class_balance": {
+        "not_relevant": 47,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      }
+    },
+    "viral_conjunctivitis": {
+      "class_balance": {
+        "not_relevant": 47,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      }
+    },
+    "viral_gastroenteritis": {
+      "class_balance": {
+        "not_relevant": 47,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "mapped_class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      }
+    }
+  },
+  "purpose_groups": {
+    "flu-fever-aches": {
+      "condition": "influenza",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_or_aches_relief",
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "flu-antiviral": {
+      "condition": "influenza",
+      "purpose": "antiviral",
+      "clinical_role": "influenza_antiviral",
+      "candidate_ids": [
+        "oseltamivir-75mg-capsule"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "relevant": 9
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        }
+      },
+      "constant_target": true,
+      "within_group_ranking_meaningful": false
+    },
+    "varicella-fever": {
+      "condition": "chickenpox",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_relief",
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 3,
+        "relevant": 4,
+        "undetermined": 2
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 2,
+            "relevant": 1
+          },
+          "missing_classes": [
+            "undetermined"
+          ]
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "varicella-antiviral": {
+      "condition": "chickenpox",
+      "purpose": "antiviral",
+      "clinical_role": "varicella_antiviral",
+      "candidate_ids": [
+        "acyclovir-800mg-tablet"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "relevant": 9
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "relevant": 3
+          },
+          "missing_classes": [
+            "not_relevant",
+            "undetermined"
+          ]
+        }
+      },
+      "constant_target": true,
+      "within_group_ranking_meaningful": false
+    },
+    "varicella-itch": {
+      "condition": "chickenpox",
+      "purpose": "symptom_relief",
+      "clinical_role": "itching_relief",
+      "candidate_ids": [
+        "calamine-zinc-oxide-lotion"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 4,
+        "relevant": 2,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "not_relevant": 2,
+            "relevant": 1
+          },
+          "missing_classes": [
+            "undetermined"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "undetermined": 2
+          },
+          "missing_classes": [
+            "relevant"
+          ]
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "measles-fever": {
+      "condition": "measles",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_relief",
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "mumps-fever-pain": {
+      "condition": "mumps",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_or_pain_relief",
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "conjunctivitis-lubrication": {
+      "condition": "viral_conjunctivitis",
+      "purpose": "symptom_relief",
+      "clinical_role": "ocular_dryness_or_irritation_relief",
+      "candidate_ids": [
+        "cmc-sodium-05pct-ophthalmic-solution"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    },
+    "gastroenteritis-rehydration": {
+      "condition": "viral_gastroenteritis",
+      "purpose": "rehydration_support",
+      "clinical_role": "oral_fluid_electrolyte_replacement",
+      "candidate_ids": [
+        "ors-low-osmolarity-powder"
+      ],
+      "rows": 9,
+      "class_balance": {
+        "not_relevant": 2,
+        "relevant": 4,
+        "undetermined": 3
+      },
+      "by_split": {
+        "train": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        },
+        "validation": {
+          "class_balance": {
+            "relevant": 2,
+            "undetermined": 1
+          },
+          "missing_classes": [
+            "not_relevant"
+          ]
+        },
+        "test": {
+          "class_balance": {
+            "not_relevant": 1,
+            "relevant": 1,
+            "undetermined": 1
+          },
+          "missing_classes": []
+        }
+      },
+      "constant_target": false,
+      "within_group_ranking_meaningful": false
+    }
+  },
+  "constant_target_groups": [
+    "flu-antiviral",
+    "varicella-antiviral"
+  ],
+  "model_feature_allowlist": [
+    "condition",
+    "candidate_id",
+    "purpose",
+    "clinical_role",
+    "fever_present",
+    "body_aches_present",
+    "itching_present",
+    "jaw_pain_present",
+    "ocular_dryness_present",
+    "ocular_irritation_present",
+    "diarrhoea_present",
+    "vomiting_present",
+    "recent_fluid_loss_present"
+  ],
+  "conflicting_identical_inputs": 0,
+  "split_overlap_inputs": {
+    "train--validation": 42,
+    "train--test": 48,
+    "validation--test": 12
+  },
+  "mapped_safety_statuses": {
+    "blocked": 20,
+    "cannot_validate": 42,
+    "warning": 19
+  },
+  "relevant_but_blocked_or_unknown": 25,
+  "ors_relevant_but_identity_blocked": 4,
+  "family_split_leakage": false,
+  "preprocessing_fitted": false,
+  "model_trained": false,
+  "held_out_agreement": null,
+  "clinical_validation_performed": false,
+  "prescription_eligible_rows": 0,
+  "live_patient_data_used": false,
+  "limitations": [
+    "Labels imitate documented researcher-defined rules; there is no independent clinical ground truth.",
+    "Purpose/role lookup is part of the bounded task and can proxy the mapping rules.",
+    "One candidate per purpose group; no meaningful within-group alternative ranking.",
+    "Mapped antiviral targets are constant; do not force per-group discrimination metrics.",
+    "Template-family separation is enforced, but exact model inputs can repeat across splits; reported overlap limits novelty claims.",
+    "Only a small set of symptom patterns is covered. This is an inspection batch, not a trained or clinically validated model.",
+    "ORS is an unresolved planning identity: purpose relevance never supplies composition, dilution or a dose.",
+    "Contrast rows dominate the overall distribution; future evaluation must report mapped-purpose and condition-level results separately."
+  ]
+}

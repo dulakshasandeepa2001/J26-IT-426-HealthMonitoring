@@ -1,0 +1,852 @@
+{
+  "schema_version": "2.0",
+  "knowledge_version": "six-condition-knowledge-2026-10-16-v1",
+  "clinical_review_status": "not_reviewed",
+  "live_enabled": false,
+  "catalogue": [
+    {
+      "schema_version": "2.0",
+      "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+      "id": "paracetamol-500mg-tablet",
+      "generic_name": "Paracetamol (acetaminophen)",
+      "form": "tablet",
+      "route": "oral",
+      "strength": "500 mg",
+      "ingredients": [
+        {
+          "name": "acetaminophen",
+          "strength": "500 mg"
+        }
+      ],
+      "aliases": [
+        {
+          "name": "paracetamol",
+          "level": "ingredient",
+          "source_id": "fda-acetaminophen-names"
+        },
+        {
+          "name": "acetaminophen",
+          "level": "ingredient",
+          "source_id": "dailymed-paracetamol"
+        },
+        {
+          "name": "APAP",
+          "level": "ingredient",
+          "source_id": "fda-acetaminophen-names"
+        },
+        {
+          "name": "paracetamol 500 mg tablet",
+          "level": "product",
+          "source_id": "fda-acetaminophen-names"
+        },
+        {
+          "name": "acetaminophen 500 mg tablet",
+          "level": "product",
+          "source_id": "dailymed-paracetamol"
+        },
+        {
+          "name": "acetaminophen 500 mg oral tablet",
+          "level": "product",
+          "source_id": "dailymed-paracetamol"
+        }
+      ],
+      "standard_concept": {
+        "rxcui": "198440",
+        "name": "acetaminophen 500 MG Oral Tablet",
+        "term_type": "SCD",
+        "source_id": "dailymed-paracetamol"
+      },
+      "uses": [
+        {
+          "condition": "influenza",
+          "purpose": "symptom_relief",
+          "basis": "symptom_mapping",
+          "summary": "Temporary fever or pain relief; does not treat influenza virus.",
+          "scope": "Pilot symptom mapping requires clinician review; this label does not establish influenza-specific treatment.",
+          "source_ids": [
+            "dailymed-paracetamol"
+          ]
+        },
+        {
+          "condition": "chickenpox",
+          "purpose": "symptom_relief",
+          "basis": "guidance",
+          "summary": "CDC discusses acetaminophen for chickenpox fever.",
+          "scope": "Guidance supports the ingredient, not this strength for every age. Formulation and any pediatric dose require separate review.",
+          "source_ids": [
+            "cdc-chickenpox",
+            "dailymed-paracetamol"
+          ]
+        },
+        {
+          "condition": "measles",
+          "purpose": "symptom_relief",
+          "basis": "symptom_mapping",
+          "summary": "Research mapping of fever relief after clinical assessment; not measles-specific antiviral treatment.",
+          "scope": "New-condition offline adult research scope only. Broader infection management, complications and supervised vitamin A are separate.",
+          "source_ids": [
+            "nhs-measles",
+            "dailymed-paracetamol",
+            "cdc-measles-care"
+          ]
+        },
+        {
+          "condition": "mumps",
+          "purpose": "symptom_relief",
+          "basis": "symptom_mapping",
+          "summary": "Research mapping for fever, aches or jaw-pain relief; not treatment of the mumps virus.",
+          "scope": "Guidance-to-product symptom mapping only; this is not a new disease indication in the product label. Assess intake and complications separately.",
+          "source_ids": [
+            "nhs-mumps",
+            "dailymed-paracetamol"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "category": "contraindication",
+          "summary": "Avoid with acetaminophen allergy or another acetaminophen-containing product.",
+          "source_ids": [
+            "dailymed-paracetamol"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Liver damage and severe skin reactions are reported; liver disease and alcohol use need review.",
+          "source_ids": [
+            "dailymed-paracetamol"
+          ]
+        },
+        {
+          "category": "interaction",
+          "summary": "Warfarin use requires clinician/pharmacist review.",
+          "source_ids": [
+            "dailymed-paracetamol"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "dailymed-paracetamol",
+          "title": "Acetaminophen 500 mg tablet — Rising Pharma",
+          "publisher": "DailyMed / NLM",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f8237772-7656-49fb-b1de-f8fcb5fa55ee",
+          "published_date": "2025-10-28",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Active ingredient",
+            "Uses",
+            "Warnings",
+            "Do not use",
+            "Ask doctor/pharmacist",
+            "RxNorm"
+          ]
+        },
+        {
+          "id": "fda-acetaminophen-names",
+          "title": "Acetaminophen — names and abbreviations",
+          "publisher": "FDA",
+          "url": "https://www.fda.gov/drugs/safe-use-over-counter-pain-relievers-and-fever-reducers/acetaminophen",
+          "published_date": null,
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Acetaminophen names"
+          ]
+        },
+        {
+          "id": "cdc-chickenpox",
+          "title": "How to Treat Chickenpox",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/chickenpox/treatment/index.html",
+          "published_date": "2024-04-24",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Over-the-counter medications",
+            "At home care"
+          ]
+        },
+        {
+          "id": "nhs-measles",
+          "title": "Measles: symptom support and assessment",
+          "publisher": "NHS",
+          "url": "https://www.nhs.uk/conditions/measles/",
+          "published_date": null,
+          "accessed_date": "2026-10-16",
+          "sections": [
+            "How to look after yourself or your child",
+            "Urgent advice",
+            "Complications"
+          ]
+        },
+        {
+          "id": "nhs-mumps",
+          "title": "Mumps: symptom support and complications",
+          "publisher": "NHS",
+          "url": "https://www.nhs.uk/conditions/mumps/",
+          "published_date": null,
+          "accessed_date": "2026-10-16",
+          "sections": [
+            "Things you can do",
+            "Complications",
+            "Urgent advice"
+          ]
+        },
+        {
+          "id": "cdc-measles-care",
+          "title": "Clinical Overview of Measles: Stay Alert for Measles Cases",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/measles/hcp/clinical-overview/stay-alert-for-measles-cases.html",
+          "published_date": "2026-01-26",
+          "accessed_date": "2026-10-16",
+          "sections": [
+            "Treatment and complications"
+          ]
+        }
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+      "id": "oseltamivir-75mg-capsule",
+      "generic_name": "Oseltamivir",
+      "form": "capsule",
+      "route": "oral",
+      "strength": "75 mg",
+      "ingredients": [
+        {
+          "name": "oseltamivir",
+          "strength": "75 mg (as oseltamivir phosphate)"
+        }
+      ],
+      "aliases": [
+        {
+          "name": "oseltamivir",
+          "level": "ingredient",
+          "source_id": "dailymed-oseltamivir"
+        },
+        {
+          "name": "oseltamivir phosphate",
+          "level": "ingredient",
+          "source_id": "dailymed-oseltamivir"
+        },
+        {
+          "name": "Tamiflu",
+          "level": "ingredient",
+          "source_id": "dailymed-oseltamivir"
+        },
+        {
+          "name": "oseltamivir 75 mg capsule",
+          "level": "product",
+          "source_id": "dailymed-oseltamivir"
+        },
+        {
+          "name": "oseltamivir 75 mg oral capsule",
+          "level": "product",
+          "source_id": "dailymed-oseltamivir"
+        },
+        {
+          "name": "Tamiflu 75 mg capsule",
+          "level": "product",
+          "source_id": "dailymed-oseltamivir"
+        }
+      ],
+      "standard_concept": {
+        "rxcui": "312122",
+        "name": "oseltamivir 75 MG Oral Capsule",
+        "term_type": "SCD",
+        "source_id": "dailymed-oseltamivir"
+      },
+      "uses": [
+        {
+          "condition": "influenza",
+          "purpose": "antiviral",
+          "basis": "label",
+          "summary": "Label includes acute uncomplicated influenza A/B with symptom onset within 48 hours.",
+          "scope": "Indication includes patients at least two weeks old; this capsule strength is not a universal dose. Onset, age, renal function and formulation require review.",
+          "source_ids": [
+            "dailymed-oseltamivir"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "category": "contraindication",
+          "summary": "Known serious hypersensitivity to oseltamivir or product components is a contraindication.",
+          "source_ids": [
+            "dailymed-oseltamivir"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Renal impairment needs dose adjustment; pediatric dosing can require weight. Serious skin reactions and neuropsychiatric events are described.",
+          "source_ids": [
+            "dailymed-oseltamivir"
+          ]
+        },
+        {
+          "category": "interaction",
+          "summary": "Live attenuated intranasal influenza vaccine timing needs review.",
+          "source_ids": [
+            "dailymed-oseltamivir"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "dailymed-oseltamivir",
+          "title": "Tamiflu (oseltamivir phosphate) prescribing information",
+          "publisher": "DailyMed / NLM",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ee3c9555-60f2-4f82-a760-11983c86e97b",
+          "published_date": "2025-12-15",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "1.1 Indications",
+            "2.2 Pediatric dosing",
+            "2.4 Renal impairment",
+            "4 Contraindications",
+            "5 Warnings",
+            "7 Drug interactions",
+            "RxNorm"
+          ]
+        }
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+      "id": "acyclovir-800mg-tablet",
+      "generic_name": "Acyclovir",
+      "form": "tablet",
+      "route": "oral",
+      "strength": "800 mg",
+      "ingredients": [
+        {
+          "name": "acyclovir",
+          "strength": "800 mg"
+        }
+      ],
+      "aliases": [
+        {
+          "name": "acyclovir",
+          "level": "ingredient",
+          "source_id": "dailymed-acyclovir"
+        },
+        {
+          "name": "acyclovir 800 mg tablet",
+          "level": "product",
+          "source_id": "dailymed-acyclovir"
+        },
+        {
+          "name": "acyclovir 800 mg oral tablet",
+          "level": "product",
+          "source_id": "dailymed-acyclovir"
+        }
+      ],
+      "standard_concept": {
+        "rxcui": "197313",
+        "name": "acyclovir 800 MG Oral Tablet",
+        "term_type": "SCD",
+        "source_id": "dailymed-acyclovir"
+      },
+      "uses": [
+        {
+          "condition": "chickenpox",
+          "purpose": "antiviral",
+          "basis": "label",
+          "summary": "Oral acyclovir is labelled for chickenpox.",
+          "scope": "CDC guidance limits routine oral treatment: it is not recommended for otherwise healthy children with typical uncomplicated varicella. Risk group, rash onset and severity need clinician assessment.",
+          "source_ids": [
+            "dailymed-acyclovir",
+            "cdc-varicella-guidance"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "category": "contraindication",
+          "summary": "Hypersensitivity to acyclovir or valacyclovir is a contraindication.",
+          "source_ids": [
+            "dailymed-acyclovir"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Renal impairment needs dose adjustment; hydration and renal/CNS adverse effects require review.",
+          "source_ids": [
+            "dailymed-acyclovir"
+          ]
+        },
+        {
+          "category": "interaction",
+          "summary": "Potentially nephrotoxic medicines require caution.",
+          "source_ids": [
+            "dailymed-acyclovir"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Severe disease and immunocompromised patients need a different treatment assessment; this oral product is not a universal chickenpox option.",
+          "source_ids": [
+            "cdc-varicella-guidance"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "dailymed-acyclovir",
+          "title": "Acyclovir tablets — 400 mg and 800 mg",
+          "publisher": "DailyMed / NLM",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=05f42300-2a06-45f1-a9b9-6e5c84ae58ec",
+          "published_date": "2026-09-29",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Indications and usage",
+            "Contraindications",
+            "Warnings",
+            "Precautions",
+            "RxNorm"
+          ]
+        },
+        {
+          "id": "cdc-varicella-guidance",
+          "title": "Clinical Guidance for People at Risk for Severe Varicella",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/chickenpox/hcp/clinical-guidance/index.html",
+          "published_date": "2024-04-24",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Acyclovir treatment"
+          ]
+        }
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+      "id": "calamine-zinc-oxide-lotion",
+      "generic_name": "Calamine + zinc oxide",
+      "form": "lotion",
+      "route": "topical",
+      "strength": "8% + 8%",
+      "ingredients": [
+        {
+          "name": "calamine",
+          "strength": "8%"
+        },
+        {
+          "name": "zinc oxide",
+          "strength": "8%"
+        }
+      ],
+      "aliases": [
+        {
+          "name": "calamine + zinc oxide",
+          "level": "ingredient",
+          "source_id": "dailymed-calamine"
+        },
+        {
+          "name": "calamine 8% + zinc oxide 8% lotion",
+          "level": "product",
+          "source_id": "dailymed-calamine"
+        },
+        {
+          "name": "calamine 8 % / zinc oxide 8 % topical lotion",
+          "level": "product",
+          "source_id": "dailymed-calamine"
+        }
+      ],
+      "standard_concept": {
+        "rxcui": "617954",
+        "name": "calamine 80 MG/ML / zinc oxide 80 MG/ML Topical Lotion",
+        "term_type": "SCD",
+        "source_id": "dailymed-calamine"
+      },
+      "uses": [
+        {
+          "condition": "chickenpox",
+          "purpose": "symptom_relief",
+          "basis": "guidance",
+          "summary": "CDC discusses calamine lotion for chickenpox itching.",
+          "scope": "The product label describes poison ivy/oak/sumac, not chickenpox. The pilot mapping comes from CDC guidance and requires product-specific clinician review.",
+          "source_ids": [
+            "cdc-chickenpox",
+            "dailymed-calamine"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "category": "precaution",
+          "summary": "External use only; avoid eyes. Seek medical advice if symptoms worsen, recur or persist beyond seven days.",
+          "source_ids": [
+            "dailymed-calamine"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Accidental ingestion requires medical help.",
+          "source_ids": [
+            "dailymed-calamine"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "dailymed-calamine",
+          "title": "Calamine 8% / zinc oxide 8% lotion — H-E-B",
+          "publisher": "DailyMed / NLM",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4a79259e-64ac-d187-e063-6294a90a78db",
+          "published_date": "2026-06-15",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Active ingredients",
+            "Use",
+            "Warnings",
+            "Stop use",
+            "RxNorm"
+          ]
+        },
+        {
+          "id": "cdc-chickenpox",
+          "title": "How to Treat Chickenpox",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/chickenpox/treatment/index.html",
+          "published_date": "2024-04-24",
+          "accessed_date": "2026-10-13",
+          "sections": [
+            "Over-the-counter medications",
+            "At home care"
+          ]
+        }
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+      "id": "cmc-sodium-05pct-ophthalmic-solution",
+      "generic_name": "Carboxymethylcellulose sodium",
+      "form": "ophthalmic_solution",
+      "route": "ophthalmic",
+      "strength": "0.5% (5 mg/mL)",
+      "ingredients": [
+        {
+          "name": "carboxymethylcellulose sodium",
+          "strength": "0.5% (5 mg/mL)"
+        }
+      ],
+      "aliases": [
+        {
+          "name": "carboxymethylcellulose sodium",
+          "level": "ingredient",
+          "source_id": "dailymed-cmc-05"
+        },
+        {
+          "name": "carboxymethylcellulose sodium 0.5% ophthalmic solution",
+          "level": "product",
+          "source_id": "dailymed-cmc-05"
+        },
+        {
+          "name": "carboxymethylcellulose sodium 5 mg/mL ophthalmic solution",
+          "level": "product",
+          "source_id": "dailymed-cmc-05"
+        }
+      ],
+      "standard_concept": {
+        "rxcui": "1188426",
+        "name": "carboxymethylcellulose sodium 5 MG/ML Ophthalmic Solution",
+        "term_type": "SCD",
+        "source_id": "dailymed-cmc-05"
+      },
+      "uses": [
+        {
+          "condition": "viral_conjunctivitis",
+          "purpose": "symptom_relief",
+          "basis": "symptom_mapping",
+          "summary": "Artificial-tear class guidance mapped to lubrication for ocular dryness or irritation; not antiviral therapy.",
+          "scope": "Research mapping after separate eye assessment. Label concerns dry-eye discomfort; local equivalent, excipients and clinical policy are not verified.",
+          "source_ids": [
+            "cdc-conjunctivitis",
+            "dailymed-cmc-05"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "category": "precaution",
+          "summary": "Eye pain, changed vision, continuing redness/irritation, worsening or persistence beyond 72 hours require assessment.",
+          "source_ids": [
+            "dailymed-cmc-05",
+            "cdc-conjunctivitis"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Prevent tip contamination; reject altered/cloudy solution or damaged seals and check expiry/opening limits. Assess inactive ingredients and individual hypersensitivity.",
+          "source_ids": [
+            "dailymed-cmc-05"
+          ]
+        },
+        {
+          "category": "precaution",
+          "summary": "Contact-lens context and possible herpetic disease require separate assessment; this limited lubrication policy cannot clear them.",
+          "source_ids": [
+            "cdc-conjunctivitis"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "dailymed-cmc-05",
+          "title": "REFRESH TEARS: single solution/drop product NDC 0023-0798; exclude kit",
+          "publisher": "DailyMed / NLM",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=329d1fe0-4432-4565-b7b1-65666bd86526",
+          "published_date": "2024-09-27",
+          "accessed_date": "2026-10-16",
+          "sections": [
+            "Active ingredient / Uses",
+            "Warnings / Directions",
+            "Other information / Inactive ingredients",
+            "Product NDC 0023-0798 / RxNorm"
+          ]
+        },
+        {
+          "id": "cdc-conjunctivitis",
+          "title": "How to Treat Pink Eye",
+          "publisher": "CDC",
+          "url": "https://www.cdc.gov/conjunctivitis/treatment/index.html",
+          "published_date": "2024-04-15",
+          "accessed_date": "2026-10-16",
+          "sections": [
+            "Managing symptoms at home",
+            "When to see a healthcare provider",
+            "Viral pink eye"
+          ]
+        }
+      ]
+    }
+  ],
+  "purpose_policies": [
+    {
+      "id": "flu-fever-aches",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "influenza",
+      "candidate_id": "paracetamol-500mg-tablet",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_or_aches_relief",
+      "handler": "paracetamol",
+      "target_symptoms": [
+        "fever",
+        "body_aches"
+      ],
+      "source_ids": [
+        "dailymed-paracetamol"
+      ],
+      "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": []
+    },
+    {
+      "id": "flu-antiviral",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "influenza",
+      "candidate_id": "oseltamivir-75mg-capsule",
+      "purpose": "antiviral",
+      "clinical_role": "influenza_antiviral",
+      "handler": "oseltamivir",
+      "target_symptoms": [],
+      "source_ids": [
+        "dailymed-oseltamivir"
+      ],
+      "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": []
+    },
+    {
+      "id": "varicella-fever",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "chickenpox",
+      "candidate_id": "paracetamol-500mg-tablet",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_relief",
+      "handler": "paracetamol",
+      "target_symptoms": [
+        "fever"
+      ],
+      "source_ids": [
+        "cdc-chickenpox",
+        "dailymed-paracetamol"
+      ],
+      "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": []
+    },
+    {
+      "id": "varicella-antiviral",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "chickenpox",
+      "candidate_id": "acyclovir-800mg-tablet",
+      "purpose": "antiviral",
+      "clinical_role": "varicella_antiviral",
+      "handler": "acyclovir",
+      "target_symptoms": [],
+      "source_ids": [
+        "dailymed-acyclovir",
+        "cdc-varicella-guidance"
+      ],
+      "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": []
+    },
+    {
+      "id": "varicella-itch",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "chickenpox",
+      "candidate_id": "calamine-zinc-oxide-lotion",
+      "purpose": "symptom_relief",
+      "clinical_role": "itching_relief",
+      "handler": "calamine",
+      "target_symptoms": [
+        "itching"
+      ],
+      "source_ids": [
+        "cdc-chickenpox",
+        "dailymed-calamine"
+      ],
+      "scope": "Existing two-condition product policy reused offline; original live policy and reviews are not changed.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": []
+    },
+    {
+      "id": "measles-fever",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "measles",
+      "candidate_id": "paracetamol-500mg-tablet",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_relief",
+      "handler": "paracetamol",
+      "target_symptoms": [
+        "fever"
+      ],
+      "source_ids": [
+        "nhs-measles",
+        "dailymed-paracetamol",
+        "cdc-measles-care"
+      ],
+      "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": [
+        "respiratory_concern",
+        "neurological_concern",
+        "hydration_concern"
+      ]
+    },
+    {
+      "id": "mumps-fever-pain",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "mumps",
+      "candidate_id": "paracetamol-500mg-tablet",
+      "purpose": "symptom_relief",
+      "clinical_role": "fever_or_pain_relief",
+      "handler": "paracetamol",
+      "target_symptoms": [
+        "fever",
+        "body_aches",
+        "jaw_pain"
+      ],
+      "source_ids": [
+        "nhs-mumps",
+        "dailymed-paracetamol"
+      ],
+      "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": [
+        "intake_difficulty",
+        "abdominal_pain",
+        "testicular_pain_or_swelling",
+        "neurological_concern",
+        "hydration_concern"
+      ]
+    },
+    {
+      "id": "conjunctivitis-lubrication",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "viral_conjunctivitis",
+      "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+      "purpose": "symptom_relief",
+      "clinical_role": "ocular_dryness_or_irritation_relief",
+      "handler": "ophthalmic_lubricant",
+      "target_symptoms": [
+        "ocular_dryness",
+        "ocular_irritation"
+      ],
+      "source_ids": [
+        "cdc-conjunctivitis",
+        "dailymed-cmc-05"
+      ],
+      "scope": "New-condition synthetic adult research scope (18+); source-based selected controls, not clinical approval or complete care.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": [
+        "eye_pain",
+        "photophobia",
+        "vision_change",
+        "marked_or_worsening_redness",
+        "contact_lens_use",
+        "suspected_herpetic_eye_disease"
+      ]
+    },
+    {
+      "id": "gastroenteritis-rehydration",
+      "version": "six-condition-knowledge-2026-10-16-v1",
+      "condition": "viral_gastroenteritis",
+      "candidate_id": "ors-low-osmolarity-powder",
+      "purpose": "rehydration_support",
+      "clinical_role": "oral_fluid_electrolyte_replacement",
+      "handler": "unresolved_ors",
+      "target_symptoms": [
+        "diarrhoea",
+        "vomiting",
+        "recent_fluid_loss"
+      ],
+      "source_ids": [
+        "niddk-gastroenteritis",
+        "who-ors"
+      ],
+      "scope": "Unresolved exact local product identity, composition and preparation. No executable dose; retain only a rehydration-purpose gap.",
+      "clinical_review_status": "not_reviewed",
+      "concern_fields": [
+        "hydration_concern",
+        "blood_in_stool",
+        "severe_abdominal_pain",
+        "fluid_restriction"
+      ]
+    }
+  ],
+  "unresolved_products": [
+    {
+      "id": "ors-low-osmolarity-powder",
+      "purpose": "rehydration_support",
+      "identity_status": "unresolved",
+      "rxcui": null,
+      "strength": null,
+      "composition": null,
+      "reconstitution_volume_ml": null,
+      "regimen": null,
+      "clinical_review_status": "not_reviewed",
+      "source_ids": [
+        "niddk-gastroenteritis",
+        "who-ors"
+      ],
+      "source_urls": [
+        "https://www.niddk.nih.gov/health-information/digestive-diseases/viral-gastroenteritis/treatment",
+        "https://www.who.int/publications/i/item/WHO-FCH-CAH-06.1"
+      ],
+      "source_handling": {
+        "accessed_date": "2026-10-16",
+        "niddk_publisher_review_month": "2018-05",
+        "who_publication_date": "2006-01-01",
+        "scope": "Guidance pages only; no exact local product label or full WHO PDF is claimed."
+      },
+      "gap": "An actual product label and supported identifier are required; a local sales listing and a WHO formulation reference are insufficient."
+    }
+  ]
+}

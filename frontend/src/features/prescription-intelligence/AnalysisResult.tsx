@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { FlaskConical, RefreshCw } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
-import { conditionLabel, readComponent1Payload, type DemoScenario } from "./analysisData";
+import { conditionLabel, HANDOFF_CONDITIONS, readComponent1Payload, symptomDuration, type DemoScenario } from "./analysisData";
 import { buttonStyle, controlStyle, Unavailable } from "./PageFrame";
 import { Member1Report } from "./Member1Report";
 
@@ -32,6 +32,7 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
             <option value="influenza">Influenza</option>
             <option value="chickenpox">Chickenpox</option>
             <option value="member1_influenza">Member 1 — Influenza voice JSON</option>
+            {HANDOFF_CONDITIONS.map((code) => <option key={code} value={`member1_v21_${code}`}>Member 1 v2.1 — {conditionLabel(code)}</option>)}
           </select>
           <button type="submit" className={buttonStyle} disabled={rx.loading || rx.diagnosisConfirmed || !scenario}>Load demo analysis</button>
           {rx.diagnosisConfirmed && <p className="text-xs text-amber-900">Diagnosis is already confirmed. Start a new demo visit to load another analysis.</p>}
@@ -53,6 +54,7 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
               <div className={`rounded-2xl border p-3 text-xs ${parsed.is_demo ? "border-amber-200 bg-amber-50 text-amber-900" : "border-purple-200 bg-purple-50 text-purple-900"}`}>
                 <p className="font-bold">{parsed.is_demo ? "Synthetic demo data — supplied JSON sample" : "Component 1 result — clinician review required"}</p>
                 <p className="mt-1">Model version: {parsed.model_version}</p>
+                <p className="mt-1">Handoff schema: {parsed.schema_version}</p>
                 <p className="mt-1">{parsed.is_demo ? "The scores are fixed sample values, not measured model performance." : "Reported model scores require clinician interpretation."}</p>
                 <p className="mt-1">{rx.diagnosisConfirmed ? "Doctor diagnosis confirmation is saved separately." : "Diagnosis has not been confirmed by the doctor."}</p>
               </div>
@@ -60,8 +62,8 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
                 <h3 className="text-xs font-bold text-slate-700">Reported symptoms</h3>
                 <ul className="mt-2 space-y-2 text-xs text-slate-600">
                   {parsed.symptoms.map((symptom) => <li key={symptom.code} className="flex flex-wrap justify-between gap-2 rounded-xl bg-slate-50 p-2.5">
-                    <span className="capitalize">{symptom.code.replaceAll("_", " ")} · {symptom.present ? "Present" : "Not present"}</span>
-                    <span>{symptom.duration_days === null ? "Duration not reported" : `${symptom.duration_days} ${symptom.duration_days === 1 ? "day" : "days"}`}</span>
+                    <span className="capitalize">{symptom.code.replaceAll("_", " ")} · {symptom.present === null ? "Unknown" : symptom.present ? "Present" : "Not present"}</span>
+                    <span>{symptomDuration(symptom)}</span>
                   </li>)}
                 </ul>
                 {!parsed.symptoms.length && <p className="mt-2 text-xs text-amber-800">No symptoms could be mapped to the pilot codes. Review the producer details and clarification messages.</p>}

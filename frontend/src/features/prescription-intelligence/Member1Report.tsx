@@ -1,4 +1,4 @@
-import { conditionLabel, type Member1Details } from "./analysisData";
+import { BOOLEAN_OBSERVATIONS, conditionLabel, HANDOFF_CONDITIONS, type HandoffCondition, type Member1Details } from "./analysisData";
 
 const pilotCodes = ["influenza", "chickenpox"];
 function percentage(value: number) { return new Intl.NumberFormat(undefined, { style: "percent", maximumFractionDigits: 1 }).format(value); }
@@ -7,6 +7,9 @@ export function Member1Report({ details }: { details: Member1Details }) {
   const body = details.raw_output.payload;
   const primary = body.primary_diagnosis;
   const notes = body.extracted_clinical_notes;
+  const v21 = details.adapter_version === "member1-v2.1.0";
+  const supported = v21 ? HANDOFF_CONDITIONS.includes(primary.condition_code.toLowerCase() as HandoffCondition) : pilotCodes.includes(primary.condition_code.toLowerCase());
+  const facts = details.reported_assessments;
   return <div className="space-y-4 text-xs leading-relaxed">
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
       <h3 className="font-bold text-slate-800">Member 1 voice-analysis details</h3>
@@ -19,14 +22,15 @@ export function Member1Report({ details }: { details: Member1Details }) {
       <p className="mt-2 break-words text-slate-700">{primary.condition_label}</p>
       <p className="mt-1 break-words text-slate-500">Reported code: {primary.condition_code}{primary.icd_10_code && ` · Reported ICD-10: ${primary.icd_10_code}`}</p>
       <p className="mt-1 text-slate-500">The diagnostic label, subtype and coding remain producer claims for clinician review.</p>
-      {!pilotCodes.includes(primary.condition_code.toLowerCase()) && <p className="mt-2 font-semibold text-amber-800">Primary condition is outside the current pilot. Review the diagnosis manually; no supported diagnosis was prefilled.</p>}
+      {!supported && <p className="mt-2 font-semibold text-amber-800">Primary condition is outside the current pilot. Review the diagnosis manually; no supported diagnosis was prefilled.</p>}
+      {supported && !pilotCodes.includes(primary.condition_code.toLowerCase()) && <p className="mt-2 font-semibold text-amber-800">Analysis handoff is supported. Medicine recommendations for this condition are pending catalogue and safety-rule development.</p>}
     </div>
     <details className="rounded-xl border border-slate-200 p-3">
       <summary className="cursor-pointer font-bold text-slate-700">Extracted symptom details</summary>
       <p className="mt-2 text-slate-500">Extraction scores describe the reported symptom extraction. They are separate from condition scores.</p>
       <ul className="mt-2 space-y-2">{body.extracted_symptoms.map((item, index) => <li key={index} className="rounded-xl bg-slate-50 p-3">
-        <p className="break-words font-semibold text-slate-700">{item.symptom} · {item.present === false ? "Reported absent" : "Reported present"}</p>
-        <p className="mt-1 break-words text-slate-600">{item.duration} · Reported symptom severity: {item.severity}</p>
+        <p className="break-words font-semibold text-slate-700">{item.symptom} · {v21 && item.present == null ? "Unknown presence" : item.present === false ? "Reported absent" : "Reported present"}</p>
+        <p className="mt-1 break-words text-slate-600">{item.duration ?? (item.duration_hours != null ? `${item.duration_hours} hours` : item.duration_days != null ? `${item.duration_days} days` : "Duration not reported")} · Reported symptom severity: {item.severity}</p>
         <p className="mt-1 text-slate-500">Reported extraction score: {percentage(item.confidence)}</p>
       </li>)}</ul>
     </details>
@@ -39,6 +43,17 @@ export function Member1Report({ details }: { details: Member1Details }) {
         <p className="mt-1 text-slate-500">{pilotCodes.includes(item.condition_code.toLowerCase()) ? `${conditionLabel(item.condition_code.toLowerCase())} is within the pilot; clinician review is required.` : "Outside the influenza/chickenpox prescription pilot."}</p>
       </li>)}</ul> : <p className="mt-2 text-slate-500">No differential diagnoses were supplied.</p>}
     </div>
+    {facts && <details className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
+      <summary className="cursor-pointer font-bold">Source-reported assessments — unverified</summary>
+      <p className="mt-2">Unknown entries have not been assessed. Reported negative findings do not clear safety checks. These fields do not fill the doctor&apos;s verified assessment.</p>
+      <dl className="mt-3 space-y-2">{BOOLEAN_OBSERVATIONS.map((name) => <div key={name}><dt className="font-semibold capitalize">{name.replaceAll("_", " ")}</dt><dd>{facts[name] === null ? "Unknown / not reported" : facts[name] ? "Reported yes — unverified" : "Reported no — unverified"}</dd></div>)}
+        <div><dt className="font-semibold">Dehydration assessment</dt><dd>{facts.dehydration_assessment} — unverified</dd></div>
+        <div><dt className="font-semibold">Oral fluid tolerance</dt><dd>{facts.oral_fluid_tolerance.replaceAll("_", " ")} — unverified</dd></div>
+        <div><dt className="font-semibold">Reported onset</dt><dd>{facts.reported_onset_hours === null ? "Unknown" : `${facts.reported_onset_hours} hours`}</dd></div>
+        <div><dt className="font-semibold">Reported weight</dt><dd>{facts.reported_weight_kg === null ? "Unknown" : `${facts.reported_weight_kg} kg`}{facts.weight_recorded_at && ` · ${facts.weight_recorded_at}`}</dd></div>
+        <div><dt className="font-semibold">Reported ORS product</dt><dd className="break-words">{facts.ors_product_name ?? "Unknown — no formulation or dose inferred"}</dd></div>
+      </dl>
+    </details>}
     <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
       <h3 className="font-bold">Voice-extracted patient information — unverified</h3>
       <p>Compare these reported details with the patient and saved record. Enter verified updates in the patient information form and explicitly review/save them for this visit.</p>

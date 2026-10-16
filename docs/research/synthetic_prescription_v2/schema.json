@@ -1,0 +1,596 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "meditrack:synthetic-prescription-batch:1.1",
+  "title": "Step 7B factorial symptom-family synthetic batch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_version",
+    "synthetic_only",
+    "clinical_review_status",
+    "scenarios",
+    "candidate_rows"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.1"
+    },
+    "dataset_version": {
+      "const": "synthetic-prescription-2026-10-15-v2"
+    },
+    "synthetic_only": {
+      "const": true
+    },
+    "clinical_review_status": {
+      "const": "not_reviewed"
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/scenario"
+      }
+    },
+    "candidate_rows": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 800,
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    }
+  },
+  "$defs": {
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "mentions"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "none",
+            "reported",
+            "unknown"
+          ]
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "symptom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "present",
+        "duration_hours"
+      ],
+      "properties": {
+        "present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "duration_hours": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 8760
+        }
+      }
+    },
+    "patient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "age_years",
+        "weight_kg",
+        "onset_hours",
+        "symptoms",
+        "allergy_history",
+        "current_medicines",
+        "assessments"
+      ],
+      "properties": {
+        "age_years": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 120
+        },
+        "weight_kg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.1,
+          "maximum": 500
+        },
+        "onset_hours": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 8760
+        },
+        "symptoms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fever",
+            "body_aches",
+            "itching"
+          ],
+          "properties": {
+            "fever": {
+              "$ref": "#/$defs/symptom"
+            },
+            "body_aches": {
+              "$ref": "#/$defs/symptom"
+            },
+            "itching": {
+              "$ref": "#/$defs/symptom"
+            }
+          }
+        },
+        "allergy_history": {
+          "$ref": "#/$defs/history"
+        },
+        "current_medicines": {
+          "$ref": "#/$defs/history"
+        },
+        "assessments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "red_flags",
+            "special_population",
+            "hepatic_assessment",
+            "renal_assessment",
+            "varicella_risk",
+            "laiv_timing",
+            "topical_assessment"
+          ],
+          "properties": {
+            "red_flags": {
+              "enum": [
+                "none",
+                "present",
+                "unknown"
+              ]
+            },
+            "special_population": {
+              "enum": [
+                "standard",
+                "requires_review",
+                "unknown"
+              ]
+            },
+            "hepatic_assessment": {
+              "enum": [
+                "standard",
+                "requires_review",
+                "unknown"
+              ]
+            },
+            "renal_assessment": {
+              "enum": [
+                "standard",
+                "requires_adjustment",
+                "unknown"
+              ]
+            },
+            "varicella_risk": {
+              "enum": [
+                "risk_group_confirmed",
+                "typical_uncomplicated_child",
+                "unknown"
+              ]
+            },
+            "laiv_timing": {
+              "enum": [
+                "no_conflict",
+                "requires_review",
+                "unknown"
+              ]
+            },
+            "topical_assessment": {
+              "enum": [
+                "standard",
+                "requires_review",
+                "unknown"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "template_family",
+        "variant_id",
+        "split",
+        "condition",
+        "as_of_date",
+        "data_origin",
+        "clinical_review_status",
+        "patient_features",
+        "base_scenario_id"
+      ],
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variant_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ]
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "as_of_date": {
+          "const": "2026-10-15"
+        },
+        "data_origin": {
+          "const": "synthetic_template"
+        },
+        "clinical_review_status": {
+          "const": "not_reviewed"
+        },
+        "patient_features": {
+          "$ref": "#/$defs/patient"
+        },
+        "base_scenario_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "condition",
+        "candidate_id",
+        "purpose",
+        "clinical_role",
+        "fever_present",
+        "body_aches_present",
+        "itching_present"
+      ],
+      "properties": {
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "enum": [
+            "antiviral",
+            "symptom_relief"
+          ]
+        },
+        "clinical_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fever_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "body_aches_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "itching_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "status",
+        "source_ids"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "warning",
+            "cannot_validate",
+            "blocked"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_status",
+        "aggregate_status",
+        "findings",
+        "reference_regimen_available",
+        "simulation_only",
+        "review_gate_evaluated",
+        "full_safety_clearance"
+      ],
+      "properties": {
+        "evaluation_status": {
+          "enum": [
+            "static_rules_evaluated",
+            "outside_condition_scope"
+          ]
+        },
+        "aggregate_status": {
+          "enum": [
+            "warning",
+            "cannot_validate",
+            "blocked",
+            "not_evaluated"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "reference_regimen_available": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "simulation_only": {
+          "const": true
+        },
+        "review_gate_evaluated": {
+          "const": false
+        },
+        "full_safety_clearance": {
+          "const": false
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "label_method",
+        "criterion_id",
+        "reason"
+      ],
+      "properties": {
+        "value": {
+          "enum": [
+            "relevant",
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "label_method": {
+          "const": "rule_derived"
+        },
+        "criterion_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "dataset",
+        "criteria",
+        "templates",
+        "catalogue",
+        "rule",
+        "engine",
+        "adapter"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "dataset": {
+          "type": "string"
+        },
+        "criteria": {
+          "type": "string"
+        },
+        "templates": {
+          "type": "string"
+        },
+        "catalogue": {
+          "type": "string"
+        },
+        "rule": {
+          "type": "string"
+        },
+        "engine": {
+          "type": "string"
+        },
+        "adapter": {
+          "type": "string"
+        }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_id",
+        "scenario_id",
+        "template_family",
+        "split",
+        "condition",
+        "candidate_id",
+        "candidate_purpose",
+        "clinical_role",
+        "group_key",
+        "model_features",
+        "relevance_target",
+        "label_source_ids",
+        "research_safety",
+        "clinical_review_status",
+        "versions",
+        "catalogue_content_sha256",
+        "rule_content_sha256",
+        "base_scenario_id"
+      ],
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ]
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_purpose": {
+          "enum": [
+            "antiviral",
+            "symptom_relief"
+          ]
+        },
+        "clinical_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_features": {
+          "$ref": "#/$defs/features"
+        },
+        "relevance_target": {
+          "$ref": "#/$defs/target"
+        },
+        "label_source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "research_safety": {
+          "$ref": "#/$defs/safety"
+        },
+        "clinical_review_status": {
+          "const": "not_reviewed"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "catalogue_content_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "rule_content_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "base_scenario_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

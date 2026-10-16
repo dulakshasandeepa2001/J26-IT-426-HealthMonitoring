@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offline pending catalogue 2.0; resolved products only",
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "publisher",
+        "url",
+        "published_date",
+        "accessed_date",
+        "sections"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "published_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "accessed_date": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 15,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "ingredient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "strength"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "strength": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "level",
+        "source_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "level": {
+          "enum": [
+            "ingredient",
+            "product"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "concept": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rxcui",
+        "name",
+        "term_type",
+        "source_id"
+      ],
+      "properties": {
+        "rxcui": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "term_type": {
+          "const": "SCD"
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "use": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "condition",
+        "purpose",
+        "basis",
+        "summary",
+        "scope",
+        "source_ids"
+      ],
+      "properties": {
+        "condition": {
+          "enum": [
+            "influenza",
+            "chickenpox",
+            "measles",
+            "mumps",
+            "viral_conjunctivitis",
+            "viral_gastroenteritis"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "antiviral",
+            "symptom_relief",
+            "rehydration_support"
+          ]
+        },
+        "basis": {
+          "enum": [
+            "label",
+            "guidance",
+            "symptom_mapping"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 700
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 700
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "summary",
+        "source_ids"
+      ],
+      "properties": {
+        "category": {
+          "enum": [
+            "contraindication",
+            "precaution",
+            "interaction"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 700
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "catalogue_version",
+        "id",
+        "generic_name",
+        "form",
+        "route",
+        "strength",
+        "ingredients",
+        "aliases",
+        "standard_concept",
+        "uses",
+        "warnings",
+        "sources"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "2.0"
+        },
+        "catalogue_version": {
+          "const": "six-condition-knowledge-2026-10-16-v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "generic_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "form": {
+          "enum": [
+            "tablet",
+            "capsule",
+            "lotion",
+            "ophthalmic_solution"
+          ]
+        },
+        "route": {
+          "enum": [
+            "oral",
+            "topical",
+            "ophthalmic"
+          ]
+        },
+        "strength": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "ingredients": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/ingredient"
+          }
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/alias"
+          }
+        },
+        "standard_concept": {
+          "$ref": "#/$defs/concept"
+        },
+        "uses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/use"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/warning"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        }
+      }
+    }
+  },
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 10,
+  "items": {
+    "$ref": "#/$defs/entry"
+  }
+}

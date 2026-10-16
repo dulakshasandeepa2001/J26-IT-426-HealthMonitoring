@@ -1,0 +1,1317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "meditrack:six-condition-synthetic-relevance:1.0",
+  "title": "Small six-condition provisional relevance inspection batch; no clinical labels",
+  "$defs": {
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "template_family",
+        "variant_id",
+        "split",
+        "synthetic_only",
+        "fact_origin",
+        "condition",
+        "patient_features",
+        "reported_observations"
+      ],
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "template_family": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "variant_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ]
+        },
+        "synthetic_only": {
+          "const": true
+        },
+        "fact_origin": {
+          "const": "synthetic_researcher_defined"
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 50
+        },
+        "patient_features": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "age_years",
+            "weight_kg",
+            "onset_hours",
+            "symptoms",
+            "allergy_history",
+            "current_medicines",
+            "assessments",
+            "condition_assessments"
+          ],
+          "properties": {
+            "age_years": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 120
+            },
+            "weight_kg": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0.1,
+              "maximum": 350
+            },
+            "onset_hours": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 8760
+            },
+            "symptoms": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fever",
+                "body_aches",
+                "itching",
+                "jaw_pain",
+                "ocular_dryness",
+                "ocular_irritation",
+                "diarrhoea",
+                "vomiting",
+                "recent_fluid_loss"
+              ],
+              "properties": {
+                "fever": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "body_aches": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "itching": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "jaw_pain": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "ocular_dryness": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "ocular_irritation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "diarrhoea": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "vomiting": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                },
+                "recent_fluid_loss": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "present",
+                    "duration_hours"
+                  ],
+                  "properties": {
+                    "present": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "duration_hours": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 8760
+                    }
+                  }
+                }
+              }
+            },
+            "allergy_history": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "mentions"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "none",
+                    "reported",
+                    "unknown"
+                  ]
+                },
+                "mentions": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            },
+            "current_medicines": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "mentions"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "none",
+                    "reported",
+                    "unknown"
+                  ]
+                },
+                "mentions": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                }
+              }
+            },
+            "assessments": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "red_flags",
+                "special_population",
+                "hepatic_assessment",
+                "renal_assessment",
+                "varicella_risk",
+                "laiv_timing",
+                "topical_assessment",
+                "ophthalmic_integrity",
+                "excipient_assessment",
+                "dehydration_assessment",
+                "oral_fluid_tolerance"
+              ],
+              "properties": {
+                "red_flags": {
+                  "enum": [
+                    "none",
+                    "present",
+                    "unknown"
+                  ]
+                },
+                "special_population": {
+                  "enum": [
+                    "standard",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "hepatic_assessment": {
+                  "enum": [
+                    "standard",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "renal_assessment": {
+                  "enum": [
+                    "standard",
+                    "requires_adjustment",
+                    "unknown"
+                  ]
+                },
+                "varicella_risk": {
+                  "enum": [
+                    "risk_group_confirmed",
+                    "typical_uncomplicated_child",
+                    "unknown"
+                  ]
+                },
+                "laiv_timing": {
+                  "enum": [
+                    "no_conflict",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "topical_assessment": {
+                  "enum": [
+                    "standard",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "ophthalmic_integrity": {
+                  "enum": [
+                    "acceptable",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "excipient_assessment": {
+                  "enum": [
+                    "acceptable",
+                    "requires_review",
+                    "unknown"
+                  ]
+                },
+                "dehydration_assessment": {
+                  "enum": [
+                    "none",
+                    "mild",
+                    "moderate",
+                    "severe",
+                    "unknown"
+                  ]
+                },
+                "oral_fluid_tolerance": {
+                  "enum": [
+                    "tolerated",
+                    "not_tolerated",
+                    "unknown"
+                  ]
+                }
+              }
+            },
+            "condition_assessments": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "respiratory_concern",
+                "neurological_concern",
+                "hydration_concern",
+                "intake_difficulty",
+                "abdominal_pain",
+                "testicular_pain_or_swelling",
+                "eye_pain",
+                "photophobia",
+                "vision_change",
+                "marked_or_worsening_redness",
+                "contact_lens_use",
+                "suspected_herpetic_eye_disease",
+                "blood_in_stool",
+                "severe_abdominal_pain",
+                "fluid_restriction",
+                "immunocompromised",
+                "pregnant_or_breastfeeding"
+              ],
+              "properties": {
+                "respiratory_concern": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "neurological_concern": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "hydration_concern": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "intake_difficulty": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "abdominal_pain": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "testicular_pain_or_swelling": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "eye_pain": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "photophobia": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "vision_change": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "marked_or_worsening_redness": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "contact_lens_use": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "suspected_herpetic_eye_disease": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "blood_in_stool": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "severe_abdominal_pain": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "fluid_restriction": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "immunocompromised": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "pregnant_or_breastfeeding": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "reported_observations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "respiratory_concern": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "neurological_concern": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "hydration_concern": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "intake_difficulty": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "abdominal_pain": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "testicular_pain_or_swelling": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "eye_pain": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "photophobia": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "vision_change": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "marked_or_worsening_redness": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "contact_lens_use": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "suspected_herpetic_eye_disease": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "blood_in_stool": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "severe_abdominal_pain": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "fluid_restriction": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "immunocompromised": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "pregnant_or_breastfeeding": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "condition",
+        "candidate_id",
+        "purpose",
+        "clinical_role",
+        "fever_present",
+        "body_aches_present",
+        "itching_present",
+        "jaw_pain_present",
+        "ocular_dryness_present",
+        "ocular_irritation_present",
+        "diarrhoea_present",
+        "vomiting_present",
+        "recent_fluid_loss_present"
+      ],
+      "properties": {
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 50
+        },
+        "candidate_id": {
+          "enum": [
+            "paracetamol-500mg-tablet",
+            "oseltamivir-75mg-capsule",
+            "acyclovir-800mg-tablet",
+            "calamine-zinc-oxide-lotion",
+            "cmc-sodium-05pct-ophthalmic-solution",
+            "ors-low-osmolarity-powder"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "symptom_relief",
+            "antiviral",
+            "rehydration_support"
+          ]
+        },
+        "clinical_role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "fever_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "body_aches_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "itching_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "jaw_pain_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "ocular_dryness_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "ocular_irritation_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "diarrhoea_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "vomiting_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "recent_fluid_loss_present": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "criterion_id",
+        "label_method",
+        "clinical_review_status"
+      ],
+      "properties": {
+        "value": {
+          "enum": [
+            "relevant",
+            "not_relevant",
+            "undetermined"
+          ]
+        },
+        "criterion_id": {
+          "enum": [
+            "unsupported_condition",
+            "unmapped_candidate",
+            "mapped_antiviral",
+            "target_present",
+            "targets_absent",
+            "target_unknown"
+          ]
+        },
+        "label_method": {
+          "const": "rule_derived"
+        },
+        "clinical_review_status": {
+          "const": "not_reviewed"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "status",
+        "reason_code",
+        "source_ids"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "warning",
+            "cannot_validate",
+            "blocked"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_status",
+        "aggregate_status",
+        "findings",
+        "experimental_reference_available",
+        "simulation_only",
+        "review_gate_evaluated",
+        "eligible_for_prescription",
+        "full_safety_clearance",
+        "approved",
+        "published"
+      ],
+      "properties": {
+        "evaluation_status": {
+          "enum": [
+            "selected_static_rules_evaluated",
+            "outside_condition_mapping"
+          ]
+        },
+        "aggregate_status": {
+          "enum": [
+            "passed",
+            "warning",
+            "cannot_validate",
+            "blocked",
+            "not_evaluated"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "experimental_reference_available": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "simulation_only": {
+          "const": true
+        },
+        "review_gate_evaluated": {
+          "const": false
+        },
+        "eligible_for_prescription": {
+          "const": false
+        },
+        "full_safety_clearance": {
+          "const": false
+        },
+        "approved": {
+          "const": false
+        },
+        "published": {
+          "const": false
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset",
+        "schema",
+        "criteria",
+        "templates",
+        "knowledge",
+        "engine",
+        "adapter",
+        "policy"
+      ],
+      "properties": {
+        "dataset": {
+          "const": "six-condition-synthetic-relevance-2026-10-16-v1"
+        },
+        "schema": {
+          "const": "1.0"
+        },
+        "criteria": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "templates": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "knowledge": {
+          "const": "six-condition-knowledge-2026-10-16-v1"
+        },
+        "engine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "policy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_id",
+        "scenario_id",
+        "template_family",
+        "split",
+        "condition",
+        "candidate_id",
+        "candidate_purpose",
+        "clinical_role",
+        "mapping_status",
+        "identity_status",
+        "group_key",
+        "model_features",
+        "relevance_target",
+        "label_source_ids",
+        "research_safety",
+        "clinical_review_status",
+        "synthetic_only",
+        "versions",
+        "catalogue_content_sha256",
+        "policy_content_sha256"
+      ],
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "template_family": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ]
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 50
+        },
+        "candidate_id": {
+          "enum": [
+            "paracetamol-500mg-tablet",
+            "oseltamivir-75mg-capsule",
+            "acyclovir-800mg-tablet",
+            "calamine-zinc-oxide-lotion",
+            "cmc-sodium-05pct-ophthalmic-solution",
+            "ors-low-osmolarity-powder"
+          ]
+        },
+        "candidate_purpose": {
+          "enum": [
+            "symptom_relief",
+            "antiviral",
+            "rehydration_support"
+          ]
+        },
+        "clinical_role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "mapping_status": {
+          "enum": [
+            "unsupported_condition",
+            "mapped",
+            "unmapped"
+          ]
+        },
+        "identity_status": {
+          "enum": [
+            "unresolved_planning_identity",
+            "source_reference_product"
+          ]
+        },
+        "group_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "model_features": {
+          "$ref": "#/$defs/features"
+        },
+        "relevance_target": {
+          "$ref": "#/$defs/target"
+        },
+        "label_source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 15,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "research_safety": {
+          "$ref": "#/$defs/safety"
+        },
+        "clinical_review_status": {
+          "const": "not_reviewed"
+        },
+        "synthetic_only": {
+          "const": true
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "catalogue_content_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "policy_content_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 64,
+          "maxLength": 64
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "purpose",
+        "display_name",
+        "identity_status",
+        "strength",
+        "form",
+        "route",
+        "standard_concept",
+        "policy_ids",
+        "clinical_review_status"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "purpose": {
+          "enum": [
+            "symptom_relief",
+            "antiviral",
+            "rehydration_support"
+          ]
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "identity_status": {
+          "enum": [
+            "source_reference_product",
+            "unresolved_planning_identity"
+          ]
+        },
+        "strength": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "form": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "route": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "standard_concept": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "rxcui",
+            "name",
+            "term_type",
+            "source_id"
+          ],
+          "properties": {
+            "rxcui": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "term_type": {
+              "const": "SCD"
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        },
+        "policy_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "clinical_review_status": {
+          "const": "not_reviewed"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_version",
+    "synthetic_only",
+    "clinical_review_status",
+    "evidence_references",
+    "scenarios",
+    "candidate_rows",
+    "candidate_definitions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "dataset_version": {
+      "const": "six-condition-synthetic-relevance-2026-10-16-v1"
+    },
+    "synthetic_only": {
+      "const": true
+    },
+    "clinical_review_status": {
+      "const": "not_reviewed"
+    },
+    "evidence_references": {
+      "type": "object",
+      "description": "Exact source registry is checked against versioned knowledge by validate_batch."
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/scenario"
+      }
+    },
+    "candidate_rows": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 384,
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "candidate_definitions": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    }
+  }
+}

@@ -1,5 +1,25 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+Later offline research work is documented in [Step 7A](STEP7A.md) (initial
+synthetic batch) and [Step 7B](STEP7B.md) (experimental fitted model). Neither
+provides independent clinical validation. The
+[six-condition scope/evidence plan](../../docs/research/SIX_CONDITION_SCOPE_EVIDENCE_2026-10-16.md)
+documents the proposed four-condition expansion; it does not enable new uses
+or change catalogue/rule reviews.
+
+[Step 8A](STEP8A.md) implements the six-condition **2.1 analysis handoff** and
+synthetic doctor demos. Medicine screening and the saved experimental model still
+cover the original two conditions; the new four show treatment support pending.
+
+[Step 8B](STEP8B.md) stages the expanded catalogue and explicit deterministic
+rules **offline**, with source provenance, unknown handling and an unresolved ORS
+identity block. It does not import pending content into the live doctor workflow.
+
+[Step 8C](STEP8C.md) creates a small six-condition synthetic relevance dataset:
+60 contexts / 360 candidate rows, provisional rule-derived labels, independent
+safety outcomes, family splits and explicit input-overlap reports. No model is
+fitted or live workflow enabled by this dataset stage.
+
 The Medicine Knowledge page now reads a persisted pilot catalogue from Django.
 The initial four entries cover influenza/chickenpox and all start **Pending review**.
 Importing evidence does not create a clinician review or prescribe a medicine.

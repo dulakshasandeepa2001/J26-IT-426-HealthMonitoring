@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from .analysis_contract import Component1PayloadSerializer
 from .member1_adapter import adapt_member1_output
+from .member1_v21 import adapt_member1_v21, DEMO_FILENAMES
 from .models import (
     PrescriptionContextConsultation as Consultation,
     PrescriptionContextConsultationanalysis as Analysis,
@@ -23,7 +24,7 @@ class AnalysisConflict(APIException):
 def demo_payload(consultation, scenario):
     # Fixed choices only: a caller cannot provide a filesystem path.
     filenames = {'influenza': 'influenza_demo.json', 'chickenpox': 'chickenpox_demo.json',
-                 'member1_influenza': 'member1_influenza_demo.json'}
+                 'member1_influenza': 'member1_influenza_demo.json', **DEMO_FILENAMES}
     if scenario not in filenames:
         raise ValidationError({'scenario': 'Choose one of the supported bundled scenarios.'})
     path = Path(__file__).resolve().parent / 'samples' / filenames[scenario]
@@ -37,11 +38,15 @@ def demo_payload(consultation, scenario):
         payload.update(schema_version='2.0', source='component_1_sample', is_demo=True,
                        model_version='synthetic-demo-member1-v1', review_status='unconfirmed',
                        doctor_id=consultation.doctor_id)
+    elif scenario in DEMO_FILENAMES:
+        payload['doctor_id'] = consultation.doctor_id
     return payload
 
 
 def ingest_analysis(payload, actor, *, mode):
-    if isinstance(payload, dict) and payload.get('schema_version') == '2.0':
+    if isinstance(payload, dict) and payload.get('schema_version') == '2.1':
+        normalized = adapt_member1_v21(payload)
+    elif isinstance(payload, dict) and payload.get('schema_version') == '2.0':
         normalized = adapt_member1_output(payload)
     else:
         contract = Component1PayloadSerializer(data=payload)

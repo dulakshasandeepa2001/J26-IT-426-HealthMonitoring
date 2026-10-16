@@ -1,0 +1,172 @@
+{
+  "version": "six-condition-knowledge-2026-10-16-v1",
+  "clinical_review_status": "not_reviewed",
+  "paracetamol_additional_uses": [
+    {
+      "condition": "measles",
+      "purpose": "symptom_relief",
+      "basis": "symptom_mapping",
+      "summary": "Research mapping of fever relief after clinical assessment; not measles-specific antiviral treatment.",
+      "scope": "New-condition offline adult research scope only. Broader infection management, complications and supervised vitamin A are separate.",
+      "source_ids": [
+        "nhs-measles",
+        "dailymed-paracetamol",
+        "cdc-measles-care"
+      ]
+    },
+    {
+      "condition": "mumps",
+      "purpose": "symptom_relief",
+      "basis": "symptom_mapping",
+      "summary": "Research mapping for fever, aches or jaw-pain relief; not treatment of the mumps virus.",
+      "scope": "Guidance-to-product symptom mapping only; this is not a new disease indication in the product label. Assess intake and complications separately.",
+      "source_ids": [
+        "nhs-mumps",
+        "dailymed-paracetamol"
+      ]
+    }
+  ],
+  "paracetamol_additional_sources": [
+    {
+      "id": "nhs-measles",
+      "title": "Measles: symptom support and assessment",
+      "publisher": "NHS",
+      "url": "https://www.nhs.uk/conditions/measles/",
+      "published_date": null,
+      "accessed_date": "2026-10-16",
+      "sections": [
+        "How to look after yourself or your child",
+        "Urgent advice",
+        "Complications"
+      ]
+    },
+    {
+      "id": "nhs-mumps",
+      "title": "Mumps: symptom support and complications",
+      "publisher": "NHS",
+      "url": "https://www.nhs.uk/conditions/mumps/",
+      "published_date": null,
+      "accessed_date": "2026-10-16",
+      "sections": [
+        "Things you can do",
+        "Complications",
+        "Urgent advice"
+      ]
+    },
+    {
+      "id": "cdc-measles-care",
+      "title": "Clinical Overview of Measles: Stay Alert for Measles Cases",
+      "publisher": "CDC",
+      "url": "https://www.cdc.gov/measles/hcp/clinical-overview/stay-alert-for-measles-cases.html",
+      "published_date": "2026-01-26",
+      "accessed_date": "2026-10-16",
+      "sections": [
+        "Treatment and complications"
+      ]
+    }
+  ],
+  "new_product": {
+    "schema_version": "2.0",
+    "catalogue_version": "six-condition-knowledge-2026-10-16-v1",
+    "id": "cmc-sodium-05pct-ophthalmic-solution",
+    "generic_name": "Carboxymethylcellulose sodium",
+    "form": "ophthalmic_solution",
+    "route": "ophthalmic",
+    "strength": "0.5% (5 mg/mL)",
+    "ingredients": [
+      {
+        "name": "carboxymethylcellulose sodium",
+        "strength": "0.5% (5 mg/mL)"
+      }
+    ],
+    "aliases": [
+      {
+        "name": "carboxymethylcellulose sodium",
+        "level": "ingredient",
+        "source_id": "dailymed-cmc-05"
+      },
+      {
+        "name": "carboxymethylcellulose sodium 0.5% ophthalmic solution",
+        "level": "product",
+        "source_id": "dailymed-cmc-05"
+      },
+      {
+        "name": "carboxymethylcellulose sodium 5 mg/mL ophthalmic solution",
+        "level": "product",
+        "source_id": "dailymed-cmc-05"
+      }
+    ],
+    "standard_concept": {
+      "rxcui": "1188426",
+      "name": "carboxymethylcellulose sodium 5 MG/ML Ophthalmic Solution",
+      "term_type": "SCD",
+      "source_id": "dailymed-cmc-05"
+    },
+    "uses": [
+      {
+        "condition": "viral_conjunctivitis",
+        "purpose": "symptom_relief",
+        "basis": "symptom_mapping",
+        "summary": "Artificial-tear class guidance mapped to lubrication for ocular dryness or irritation; not antiviral therapy.",
+        "scope": "Research mapping after separate eye assessment. Label concerns dry-eye discomfort; local equivalent, excipients and clinical policy are not verified.",
+        "source_ids": [
+          "cdc-conjunctivitis",
+          "dailymed-cmc-05"
+        ]
+      }
+    ],
+    "warnings": [
+      {
+        "category": "precaution",
+        "summary": "Eye pain, changed vision, continuing redness/irritation, worsening or persistence beyond 72 hours require assessment.",
+        "source_ids": [
+          "dailymed-cmc-05",
+          "cdc-conjunctivitis"
+        ]
+      },
+      {
+        "category": "precaution",
+        "summary": "Prevent tip contamination; reject altered/cloudy solution or damaged seals and check expiry/opening limits. Assess inactive ingredients and individual hypersensitivity.",
+        "source_ids": [
+          "dailymed-cmc-05"
+        ]
+      },
+      {
+        "category": "precaution",
+        "summary": "Contact-lens context and possible herpetic disease require separate assessment; this limited lubrication policy cannot clear them.",
+        "source_ids": [
+          "cdc-conjunctivitis"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "dailymed-cmc-05",
+        "title": "REFRESH TEARS: single solution/drop product NDC 0023-0798; exclude kit",
+        "publisher": "DailyMed / NLM",
+        "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=329d1fe0-4432-4565-b7b1-65666bd86526",
+        "published_date": "2024-09-27",
+        "accessed_date": "2026-10-16",
+        "sections": [
+          "Active ingredient / Uses",
+          "Warnings / Directions",
+          "Other information / Inactive ingredients",
+          "Product NDC 0023-0798 / RxNorm"
+        ]
+      },
+      {
+        "id": "cdc-conjunctivitis",
+        "title": "How to Treat Pink Eye",
+        "publisher": "CDC",
+        "url": "https://www.cdc.gov/conjunctivitis/treatment/index.html",
+        "published_date": "2024-04-15",
+        "accessed_date": "2026-10-16",
+        "sections": [
+          "Managing symptoms at home",
+          "When to see a healthcare provider",
+          "Viral pink eye"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,312 @@
+{
+  "artifact_version": "1.0",
+  "model_version": "experimental-relevance-tree-2026-10-15-v1",
+  "presentation_label": "Experimental ML",
+  "clinical_review_status": "not_reviewed",
+  "label_provenance": {
+    "method": "rule_derived",
+    "criteria_version": "provisional-relevance-2026-10-14-v1",
+    "source": "researcher_defined_source_informed_criteria",
+    "independent_clinical_validation": false
+  },
+  "supported_conditions": [
+    "influenza",
+    "chickenpox"
+  ],
+  "candidate_definitions": {
+    "paracetamol-500mg-tablet": {
+      "purpose": "symptom_relief",
+      "roles": {
+        "influenza": {
+          "clinical_role": "fever_or_aches_relief",
+          "target_symptoms": [
+            "fever",
+            "body_aches"
+          ]
+        },
+        "chickenpox": {
+          "clinical_role": "fever_relief",
+          "target_symptoms": [
+            "fever"
+          ]
+        }
+      }
+    },
+    "oseltamivir-75mg-capsule": {
+      "purpose": "antiviral",
+      "roles": {
+        "influenza": {
+          "clinical_role": "influenza_antiviral",
+          "target_symptoms": []
+        }
+      }
+    },
+    "acyclovir-800mg-tablet": {
+      "purpose": "antiviral",
+      "roles": {
+        "chickenpox": {
+          "clinical_role": "varicella_antiviral",
+          "target_symptoms": []
+        }
+      }
+    },
+    "calamine-zinc-oxide-lotion": {
+      "purpose": "symptom_relief",
+      "roles": {
+        "chickenpox": {
+          "clinical_role": "itching_relief",
+          "target_symptoms": [
+            "itching"
+          ]
+        }
+      }
+    }
+  },
+  "learner": {
+    "algorithm_version": "categorical-information-gain-v1",
+    "feature_names": [
+      "condition",
+      "candidate_id",
+      "purpose",
+      "clinical_role",
+      "fever_present",
+      "body_aches_present",
+      "itching_present"
+    ],
+    "labels": [
+      "not_relevant",
+      "relevant",
+      "undetermined"
+    ],
+    "hyperparameters": {
+      "max_depth": 6,
+      "min_split_samples": 2,
+      "min_information_gain": 1e-12
+    },
+    "vocabulary": {
+      "condition": [
+        "string:chickenpox",
+        "string:influenza"
+      ],
+      "candidate_id": [
+        "string:acyclovir-800mg-tablet",
+        "string:calamine-zinc-oxide-lotion",
+        "string:oseltamivir-75mg-capsule",
+        "string:paracetamol-500mg-tablet"
+      ],
+      "purpose": [
+        "string:antiviral",
+        "string:symptom_relief"
+      ],
+      "clinical_role": [
+        "string:fever_or_aches_relief",
+        "string:fever_relief",
+        "string:influenza_antiviral",
+        "string:itching_relief",
+        "string:varicella_antiviral"
+      ],
+      "fever_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "body_aches_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "itching_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ]
+    },
+    "training_unique_inputs": 85,
+    "root": {
+      "class_counts": {
+        "not_relevant": 12,
+        "relevant": 57,
+        "undetermined": 16
+      },
+      "training_unique_inputs": 85,
+      "prediction": "relevant",
+      "feature": "clinical_role",
+      "information_gain": 0.3610299011614626,
+      "branches": {
+        "string:fever_or_aches_relief": {
+          "class_counts": {
+            "not_relevant": 2,
+            "relevant": 11,
+            "undetermined": 4
+          },
+          "training_unique_inputs": 17,
+          "prediction": "relevant",
+          "feature": "fever_present",
+          "information_gain": 0.4602047071652169,
+          "branches": {
+            "bool:false": {
+              "class_counts": {
+                "not_relevant": 2,
+                "relevant": 3,
+                "undetermined": 1
+              },
+              "training_unique_inputs": 6,
+              "prediction": "relevant",
+              "feature": "body_aches_present",
+              "information_gain": 1.4591479170272448,
+              "branches": {
+                "bool:false": {
+                  "class_counts": {
+                    "not_relevant": 2
+                  },
+                  "training_unique_inputs": 2,
+                  "prediction": "not_relevant"
+                },
+                "bool:true": {
+                  "class_counts": {
+                    "relevant": 3
+                  },
+                  "training_unique_inputs": 3,
+                  "prediction": "relevant"
+                },
+                "null": {
+                  "class_counts": {
+                    "undetermined": 1
+                  },
+                  "training_unique_inputs": 1,
+                  "prediction": "undetermined"
+                }
+              }
+            },
+            "bool:true": {
+              "class_counts": {
+                "relevant": 6
+              },
+              "training_unique_inputs": 6,
+              "prediction": "relevant"
+            },
+            "null": {
+              "class_counts": {
+                "relevant": 2,
+                "undetermined": 3
+              },
+              "training_unique_inputs": 5,
+              "prediction": "undetermined",
+              "feature": "body_aches_present",
+              "information_gain": 0.9709505944546686,
+              "branches": {
+                "bool:false": {
+                  "class_counts": {
+                    "undetermined": 2
+                  },
+                  "training_unique_inputs": 2,
+                  "prediction": "undetermined"
+                },
+                "bool:true": {
+                  "class_counts": {
+                    "relevant": 2
+                  },
+                  "training_unique_inputs": 2,
+                  "prediction": "relevant"
+                },
+                "null": {
+                  "class_counts": {
+                    "undetermined": 1
+                  },
+                  "training_unique_inputs": 1,
+                  "prediction": "undetermined"
+                }
+              }
+            }
+          }
+        },
+        "string:fever_relief": {
+          "class_counts": {
+            "not_relevant": 6,
+            "relevant": 6,
+            "undetermined": 5
+          },
+          "training_unique_inputs": 17,
+          "prediction": "not_relevant",
+          "feature": "fever_present",
+          "information_gain": 1.5798634010685344,
+          "branches": {
+            "bool:false": {
+              "class_counts": {
+                "not_relevant": 6
+              },
+              "training_unique_inputs": 6,
+              "prediction": "not_relevant"
+            },
+            "bool:true": {
+              "class_counts": {
+                "relevant": 6
+              },
+              "training_unique_inputs": 6,
+              "prediction": "relevant"
+            },
+            "null": {
+              "class_counts": {
+                "undetermined": 5
+              },
+              "training_unique_inputs": 5,
+              "prediction": "undetermined"
+            }
+          }
+        },
+        "string:influenza_antiviral": {
+          "class_counts": {
+            "relevant": 17
+          },
+          "training_unique_inputs": 17,
+          "prediction": "relevant"
+        },
+        "string:itching_relief": {
+          "class_counts": {
+            "not_relevant": 4,
+            "relevant": 6,
+            "undetermined": 7
+          },
+          "training_unique_inputs": 17,
+          "prediction": "undetermined",
+          "feature": "itching_present",
+          "information_gain": 1.548565226030918,
+          "branches": {
+            "bool:false": {
+              "class_counts": {
+                "not_relevant": 4
+              },
+              "training_unique_inputs": 4,
+              "prediction": "not_relevant"
+            },
+            "bool:true": {
+              "class_counts": {
+                "relevant": 6
+              },
+              "training_unique_inputs": 6,
+              "prediction": "relevant"
+            },
+            "null": {
+              "class_counts": {
+                "undetermined": 7
+              },
+              "training_unique_inputs": 7,
+              "prediction": "undetermined"
+            }
+          }
+        },
+        "string:varicella_antiviral": {
+          "class_counts": {
+            "relevant": 17
+          },
+          "training_unique_inputs": 17,
+          "prediction": "relevant"
+        }
+      }
+    }
+  },
+  "medical_confidence_calibrated": false,
+  "deterministic_controls_required": true,
+  "api_enabled": false,
+  "publication_enabled": false
+}

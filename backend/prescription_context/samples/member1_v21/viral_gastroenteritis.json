@@ -1,0 +1,72 @@
+{
+  "schema_version": "2.1",
+  "status": "success",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "model_version": "synthetic-demo-member1-v2.1",
+  "review_status": "unconfirmed",
+  "analysis_reference": "SYNTHETIC-V21-VIRAL_GASTROENTERITIS",
+  "consultation_id": "00000000-0000-4000-8000-000000000021",
+  "patient_id": 1,
+  "doctor_id": 2,
+  "timestamp": "2026-10-16T09:00:00+05:30",
+  "payload": {
+    "audio_metadata": {
+      "duration_seconds": 0,
+      "language": "en-US",
+      "audio_quality": "unknown"
+    },
+    "transcript_summary": "Fictional handoff-format example for Viral gastroenteritis. No patient recording or diagnostic model was used. Missing findings remain unknown.",
+    "extracted_symptoms": [
+      {
+        "symptom": "Diarrhoea",
+        "code": "diarrhoea",
+        "present": true,
+        "duration": "18 hours",
+        "severity": "mild",
+        "confidence": 0.8
+      },
+      {
+        "symptom": "Vomiting",
+        "code": "vomiting",
+        "present": null,
+        "duration": null,
+        "severity": "unknown",
+        "confidence": 0.8
+      },
+      {
+        "symptom": "Recent fluid loss",
+        "code": "recent_fluid_loss",
+        "present": null,
+        "duration": null,
+        "severity": "unknown",
+        "confidence": 0.8
+      }
+    ],
+    "primary_diagnosis": {
+      "condition_code": "VIRAL_GASTROENTERITIS",
+      "condition_label": "Viral gastroenteritis",
+      "confidence": 0.8,
+      "severity_level": "unknown"
+    },
+    "differential_diagnoses": [],
+    "extracted_clinical_notes": {
+      "chief_complaint": "Synthetic format example; confirm all details with the patient.",
+      "patient_reported_allergies": [],
+      "patient_current_medications": [],
+      "vital_signs_mentioned": {}
+    },
+    "reported_assessments": {
+      "reported_onset_hours": 18,
+      "dehydration_assessment": "unknown",
+      "oral_fluid_tolerance": "unknown",
+      "blood_in_stool": null,
+      "ors_product_name": null
+    },
+    "red_flags": {
+      "assessment_status": "not_assessed",
+      "items": []
+    },
+    "suggested_treatment_categories": []
+  }
+}

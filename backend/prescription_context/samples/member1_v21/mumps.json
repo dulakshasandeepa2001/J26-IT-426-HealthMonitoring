@@ -1,0 +1,62 @@
+{
+  "schema_version": "2.1",
+  "status": "success",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "model_version": "synthetic-demo-member1-v2.1",
+  "review_status": "unconfirmed",
+  "analysis_reference": "SYNTHETIC-V21-MUMPS",
+  "consultation_id": "00000000-0000-4000-8000-000000000021",
+  "patient_id": 1,
+  "doctor_id": 2,
+  "timestamp": "2026-10-16T09:00:00+05:30",
+  "payload": {
+    "audio_metadata": {
+      "duration_seconds": 0,
+      "language": "en-US",
+      "audio_quality": "unknown"
+    },
+    "transcript_summary": "Fictional handoff-format example for Mumps. No patient recording or diagnostic model was used. Missing findings remain unknown.",
+    "extracted_symptoms": [
+      {
+        "symptom": "Jaw pain",
+        "code": "jaw_pain",
+        "present": true,
+        "duration": "18 hours",
+        "severity": "mild",
+        "confidence": 0.8
+      },
+      {
+        "symptom": "Fever",
+        "code": "fever",
+        "present": false,
+        "duration": null,
+        "severity": "unknown",
+        "confidence": 0.8
+      }
+    ],
+    "primary_diagnosis": {
+      "condition_code": "MUMPS",
+      "condition_label": "Mumps",
+      "confidence": 0.8,
+      "severity_level": "unknown"
+    },
+    "differential_diagnoses": [],
+    "extracted_clinical_notes": {
+      "chief_complaint": "Synthetic format example; confirm all details with the patient.",
+      "patient_reported_allergies": [],
+      "patient_current_medications": [],
+      "vital_signs_mentioned": {}
+    },
+    "reported_assessments": {
+      "reported_onset_hours": 18,
+      "intake_difficulty": null,
+      "testicular_pain_or_swelling": null
+    },
+    "red_flags": {
+      "assessment_status": "not_assessed",
+      "items": []
+    },
+    "suggested_treatment_categories": []
+  }
+}

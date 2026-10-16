@@ -1,0 +1,212 @@
+{
+  "validation": "passed",
+  "clinical_review_status": "not_reviewed",
+  "counts": {
+    "synthetic_contexts": 36,
+    "candidate_rows": 144,
+    "template_families": 18,
+    "condition_mapped_rows": 85,
+    "contrast_or_unsupported_rows": 59
+  },
+  "class_balance": {
+    "not_relevant": 56,
+    "relevant": 74,
+    "undetermined": 14
+  },
+  "condition_mapped_class_balance": {
+    "not_relevant": 5,
+    "relevant": 74,
+    "undetermined": 6
+  },
+  "contrast_or_unsupported_class_balance": {
+    "not_relevant": 51,
+    "undetermined": 8
+  },
+  "by_condition": {
+    "chickenpox": {
+      "contexts": 17,
+      "candidate_rows": 68,
+      "labels": {
+        "not_relevant": 21,
+        "relevant": 43,
+        "undetermined": 4
+      }
+    },
+    "influenza": {
+      "contexts": 17,
+      "candidate_rows": 68,
+      "labels": {
+        "not_relevant": 35,
+        "relevant": 31,
+        "undetermined": 2
+      }
+    },
+    "unknown": {
+      "contexts": 1,
+      "candidate_rows": 4,
+      "labels": {
+        "undetermined": 4
+      }
+    },
+    "viral_urti": {
+      "contexts": 1,
+      "candidate_rows": 4,
+      "labels": {
+        "undetermined": 4
+      }
+    }
+  },
+  "by_split": {
+    "train": {
+      "contexts": 20,
+      "template_families": 10,
+      "candidate_rows": 80,
+      "labels": {
+        "not_relevant": 33,
+        "relevant": 44,
+        "undetermined": 3
+      },
+      "missing_label_classes": []
+    },
+    "validation": {
+      "contexts": 8,
+      "template_families": 4,
+      "candidate_rows": 32,
+      "labels": {
+        "not_relevant": 14,
+        "relevant": 18
+      },
+      "missing_label_classes": [
+        "undetermined"
+      ]
+    },
+    "test": {
+      "contexts": 8,
+      "template_families": 4,
+      "candidate_rows": 32,
+      "labels": {
+        "not_relevant": 9,
+        "relevant": 12,
+        "undetermined": 11
+      },
+      "missing_label_classes": []
+    }
+  },
+  "supported_groups": {
+    "chickenpox::antiviral::varicella_antiviral": {
+      "candidate_ids": [
+        "acyclovir-800mg-tablet"
+      ],
+      "labels": {
+        "relevant": 17
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "chickenpox::symptom_relief::fever_relief": {
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "labels": {
+        "not_relevant": 2,
+        "relevant": 13,
+        "undetermined": 2
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "chickenpox::symptom_relief::itching_relief": {
+      "candidate_ids": [
+        "calamine-zinc-oxide-lotion"
+      ],
+      "labels": {
+        "not_relevant": 2,
+        "relevant": 13,
+        "undetermined": 2
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "influenza::antiviral::influenza_antiviral": {
+      "candidate_ids": [
+        "oseltamivir-75mg-capsule"
+      ],
+      "labels": {
+        "relevant": 17
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "influenza::symptom_relief::fever_or_aches_relief": {
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "labels": {
+        "not_relevant": 1,
+        "relevant": 14,
+        "undetermined": 2
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    }
+  },
+  "by_candidate": {
+    "acyclovir-800mg-tablet": {
+      "not_relevant": 17,
+      "relevant": 17,
+      "undetermined": 2
+    },
+    "calamine-zinc-oxide-lotion": {
+      "not_relevant": 19,
+      "relevant": 13,
+      "undetermined": 4
+    },
+    "oseltamivir-75mg-capsule": {
+      "not_relevant": 17,
+      "relevant": 17,
+      "undetermined": 2
+    },
+    "paracetamol-500mg-tablet": {
+      "not_relevant": 3,
+      "relevant": 27,
+      "undetermined": 6
+    }
+  },
+  "research_safety_counts": {
+    "blocked": 10,
+    "cannot_validate": 47,
+    "not_evaluated": 59,
+    "warning": 28
+  },
+  "relevant_but_blocked_count": 10,
+  "relevant_but_blocked_examples": [
+    "SYN-matching_allergy-01::paracetamol-500mg-tablet",
+    "SYN-matching_allergy-02::paracetamol-500mg-tablet",
+    "SYN-duplicate_current_ingredient-01::paracetamol-500mg-tablet",
+    "SYN-duplicate_current_ingredient-02::paracetamol-500mg-tablet"
+  ],
+  "unique_model_feature_vectors": 48,
+  "feature_vectors_shared_across_splits": 8,
+  "family_split_overlap": 0,
+  "feature_allowlist": [
+    "condition",
+    "candidate_id",
+    "purpose",
+    "clinical_role",
+    "fever_present",
+    "body_aches_present",
+    "itching_present"
+  ],
+  "model_trained": false,
+  "held_out_agreement": null,
+  "model_errors": null,
+  "limitations": [
+    "This batch verifies schema, provenance and research engineering; no clinician labels or clinical validation exist.",
+    "All relevance labels imitate documented researcher-defined rules. Evidence references do not supply independent patient-level labels.",
+    "Condition-mismatch rows are negative contrasts, not interchangeable treatment alternatives.",
+    "Each supported condition/purpose/role group has one candidate; within-group ranking performance is not meaningful.",
+    "Mapped antivirals are always relevant to their purpose under this target; no within-condition applicability variation is learned for them.",
+    "Complete synthetic symptom facts are mapped to historical engine flags only for simulation; no clinical review gates are evaluated.",
+    "Static safety findings cover selected rules only. A reference regimen being calculable is not safety clearance or approval.",
+    "8 identical allowed feature vectors occur across family splits; agreement later could reflect repeated inputs as well as rule imitation.",
+    "The small fixed template set is not a population sample. Labels and feature diversity must be reviewed before expansion or fitting.",
+    "The validation split has no undetermined labels; class-specific validation agreement for that class cannot be measured in this batch.",
+    "No model was fitted: held-out agreement/error metrics are unavailable, not zero."
+  ],
+  "next_step": "Inspect this batch/criteria, settle feature repetition and coverage, then Step 7B: offline training/evaluation with train-only preprocessing and a rules baseline."
+}

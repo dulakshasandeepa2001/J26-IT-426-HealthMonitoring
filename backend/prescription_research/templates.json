@@ -1,0 +1,27 @@
+{
+  "version": "synthetic-families-2026-10-14-v1",
+  "context_seed": 20261014,
+  "split_method": "explicit_template_family_holdout_v1",
+  "split_seed": null,
+  "as_of_date": "2026-10-14",
+  "families": [
+    {"id": "present_targets", "split": "train", "changes": {}},
+    {"id": "absent_targets", "split": "train", "changes": {"symptoms": {"fever": {"present": false, "duration_hours": null}, "body_aches": {"present": false, "duration_hours": null}, "itching": {"present": false, "duration_hours": null}}}},
+    {"id": "unknown_targets", "split": "train", "changes": {"symptoms": {"fever": {"present": null, "duration_hours": null}, "body_aches": {"present": null, "duration_hours": null}, "itching": {"present": null, "duration_hours": null}}}},
+    {"id": "isolated_targets", "split": "validation", "changes": {"symptoms": {"fever": {"present": false, "duration_hours": null}, "body_aches": {"present": true, "duration_hours": 12}, "itching": {"present": false, "duration_hours": null}}}},
+    {"id": "matching_allergy", "split": "train", "changes": {"allergy_history": {"status": "reported", "mentions": ["Paracetamol (Rash)"]}}},
+    {"id": "unresolved_allergy", "split": "validation", "changes": {"allergy_history": {"status": "reported", "mentions": ["Penicillin (Rash)"]}}},
+    {"id": "duplicate_current_ingredient", "split": "train", "changes": {"current_medicines": {"status": "reported", "mentions": ["paracetamol 500 mg tablet"]}}},
+    {"id": "unresolved_current_medicine", "split": "test", "changes": {"current_medicines": {"status": "reported", "mentions": ["Paracetamol 500mg SOS"]}}},
+    {"id": "unknown_renal_context", "split": "train", "changes": {"assessments": {"renal_assessment": "unknown"}}},
+    {"id": "pediatric_other_formulation", "split": "train", "changes": {"age_years": 8, "weight_kg": 20, "assessments": {"varicella_risk": "typical_uncomplicated_child"}}},
+    {"id": "missing_age_and_weight", "split": "validation", "changes": {"age_years": null, "weight_kg": null}},
+    {"id": "late_onset", "split": "test", "changes": {"onset_hours": 96}},
+    {"id": "missing_duration_and_histories", "split": "train", "changes": {"onset_hours": null, "allergy_history": {"status": "unknown", "mentions": []}, "current_medicines": {"status": "unknown", "mentions": []}, "symptoms": {"fever": {"duration_hours": null}, "body_aches": {"duration_hours": null}, "itching": {"duration_hours": null}}}},
+    {"id": "special_population_review", "split": "train", "changes": {"assessments": {"special_population": "requires_review", "laiv_timing": "unknown"}}},
+    {"id": "organ_and_topical_review", "split": "train", "changes": {"assessments": {"hepatic_assessment": "requires_review", "topical_assessment": "unknown"}}},
+    {"id": "red_flags", "split": "validation", "changes": {"assessments": {"red_flags": "present"}}},
+    {"id": "partially_unknown_targets", "split": "test", "changes": {"symptoms": {"fever": {"present": null, "duration_hours": null}, "body_aches": {"present": false, "duration_hours": null}, "itching": {"present": null, "duration_hours": null}}}},
+    {"id": "unsupported_condition", "split": "test", "conditions": [null, "viral_urti"], "changes": {}}
+  ]
+}

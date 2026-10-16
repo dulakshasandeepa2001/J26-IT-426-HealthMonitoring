@@ -1,0 +1,47 @@
+{
+  "dataset_version": "six-condition-synthetic-relevance-2026-10-16-v1",
+  "clinical_review_status": "not_reviewed",
+  "label_method": "rule_derived",
+  "inputs": {
+    "backend/medicine_knowledge/data/pilot_catalogue.json": "bdd39e9bdcc3330874555213a7d9a6f4c605f4a919d12ba8433c0f491bfb8804",
+    "backend/prescription_drafts/data/safety_profiles.json": "8a5dcc0b7e62d4eb12f11ef04be3cb4599832a6cce3e0a4bf48c9e8fd476057f",
+    "backend/prescription_drafts/engine.py": "2b338797fb63b37b3247422f0c546dda1a508099335c271e92bc8e69d9810407",
+    "backend/prescription_research/dataset.py": "51c5c75bdd10ebfd5990abd790adb1686fc4a4f04aed8e1e2e3fa1ae6d5f88b6",
+    "backend/prescription_research/expansion/knowledge.py": "c36264be492fa5cb7d32c32178830ac4bb9a4630942521d0b174111cc6073e2c",
+    "backend/prescription_research/expansion/changes.json": "dabbf63b92470067612c4c7095f1b0648a2a32ce2197d080b42d8a17c4c56b84",
+    "backend/prescription_research/expansion/policies.json": "5e0ebe3f9623530bf2aaf254d9f2fea81bdc0ac540b37f3b5356f7aff32c6bd9",
+    "backend/prescription_research/expansion/catalogue.schema.json": "dd747f64ad5090f894b107663d870e136c1fceacc75d7253021f75e535cea79b",
+    "backend/prescription_research/expansion/case.schema.json": "6f2f62aaff347eee05ebe62da71fe3a84c648a521c148d1be03432e41c77344d",
+    "backend/prescription_research/expansion/screening.py": "e154c22dca76a9ed119ae2212e75f3420fcd9b1583862262caaf792af942b92c",
+    "backend/prescription_research/expansion/check.py": "4341f5c10acaf2b8a6e9fe294376193de35061a92b68242140d90228d1c9b333",
+    "backend/prescription_research/expansion/relevance.py": "5caf59356c930d0f703ce4a7229141a8df3e0fa97f73ff01abefd60a066d1262",
+    "backend/prescription_research/expansion/relevance_criteria.json": "7932d64dc095d6fd1f2c0e61b43b51eef913ad0755e3125e8586f932bbbd65ce",
+    "backend/prescription_research/expansion/relevance_templates.json": "e085279162ab90b73c08c01fe1689006cc9422e31c7f497e62c708bfc2b47f5e",
+    "backend/prescription_research/expansion/relevance.schema.json": "4702343f2675f72c8fefab549ce371261aa2140d87b2be5e76a9cf9ca2332ba4"
+  },
+  "outputs": {
+    "batch.json": "12e00c0301bc435d04aa2abaf299f8ad4acb5529aa0fa4ea156e4b6c92110c2e",
+    "inspection_rows.csv": "abd1340cddc558a72aa41e2f6be8b94a40378d4eb160ecf1ec0659f41b344dec",
+    "schema.json": "4702343f2675f72c8fefab549ce371261aa2140d87b2be5e76a9cf9ca2332ba4",
+    "criteria.json": "7932d64dc095d6fd1f2c0e61b43b51eef913ad0755e3125e8586f932bbbd65ce",
+    "templates.json": "e085279162ab90b73c08c01fe1689006cc9422e31c7f497e62c708bfc2b47f5e",
+    "validation_report.json": "8bb3ee9802e2dd3d76660a1b1d8814a085fa2954fa144cd3408749f2a44c904d",
+    "validation_report.md": "3379dd5e6e7be8f35fe0dcdfde72d2513c283b9dc87b8b26c05895270dc262df"
+  },
+  "family_splits": {
+    "acute_multi_symptom": "train",
+    "resolved_symptoms": "train",
+    "incomplete_interview": "train",
+    "localized_complaint": "validation",
+    "uncertain_target_history": "validation",
+    "reported_concern": "validation",
+    "late_recovery": "test",
+    "mixed_positive_unknown": "test",
+    "unresolved_target_report": "test",
+    "unknown_etiology_train": "train",
+    "unknown_etiology_validation": "validation",
+    "unknown_etiology_test": "test"
+  },
+  "model_trained": false,
+  "live_patient_data_used": false
+}

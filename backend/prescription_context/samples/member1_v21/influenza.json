@@ -1,0 +1,69 @@
+{
+  "schema_version": "2.1",
+  "status": "success",
+  "source": "component_1_sample",
+  "is_demo": true,
+  "model_version": "synthetic-demo-member1-v2.1",
+  "review_status": "unconfirmed",
+  "analysis_reference": "SYNTHETIC-V21-INFLUENZA",
+  "consultation_id": "00000000-0000-4000-8000-000000000021",
+  "patient_id": 1,
+  "doctor_id": 2,
+  "timestamp": "2026-10-16T09:00:00+05:30",
+  "payload": {
+    "audio_metadata": {
+      "duration_seconds": 0,
+      "language": "en-US",
+      "audio_quality": "unknown"
+    },
+    "transcript_summary": "Fictional handoff-format example for Influenza. No patient recording or diagnostic model was used. Missing findings remain unknown.",
+    "extracted_symptoms": [
+      {
+        "symptom": "High Fever",
+        "code": "fever",
+        "present": true,
+        "duration": "12 hours",
+        "severity": "mild",
+        "confidence": 0.8
+      },
+      {
+        "symptom": "Dry Cough",
+        "code": "cough",
+        "present": true,
+        "duration": "0.5 days",
+        "severity": "mild",
+        "confidence": 0.8
+      },
+      {
+        "symptom": "Body aches",
+        "code": "body_aches",
+        "present": null,
+        "duration": null,
+        "severity": "unknown",
+        "confidence": 0.8
+      }
+    ],
+    "primary_diagnosis": {
+      "condition_code": "INFLUENZA",
+      "condition_label": "Influenza",
+      "confidence": 0.8,
+      "severity_level": "unknown"
+    },
+    "differential_diagnoses": [],
+    "extracted_clinical_notes": {
+      "chief_complaint": "Synthetic format example; confirm all details with the patient.",
+      "patient_reported_allergies": [],
+      "patient_current_medications": [],
+      "vital_signs_mentioned": {}
+    },
+    "reported_assessments": {
+      "reported_onset_hours": 12,
+      "respiratory_concern": false
+    },
+    "red_flags": {
+      "assessment_status": "not_assessed",
+      "items": []
+    },
+    "suggested_treatment_categories": []
+  }
+}

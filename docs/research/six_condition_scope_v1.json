@@ -1,0 +1,156 @@
+{
+  "artifact_type": "planning_only_not_runtime_configuration",
+  "version": "scope-six-conditions-2026-10-16-v1",
+  "prepared_on": "2026-10-16",
+  "clinical_review_status": "not_reviewed",
+  "evidence_work": "researcher_source_check_only",
+  "runtime_enabled_conditions": ["influenza", "chickenpox"],
+  "proposed_condition_codes": ["influenza", "chickenpox", "measles", "mumps", "viral_conjunctivitis", "viral_gastroenteritis"],
+  "new_condition_code_status": "proposed_pending_member1_contract_agreement",
+  "initial_new_condition_research_scope": {
+    "population": "synthetic adult standard-context examples first",
+    "minimum_age_years": 18,
+    "age_limit_basis": "research scope choice, not a clinical contraindication or product-label age limit",
+    "pediatric_cases": "retain as missing-data, specialist-review or out-of-scope examples until product-specific policies exist",
+    "existing_two_condition_age_policies": "unchanged"
+  },
+  "research_relevance_labels": ["relevant", "not_relevant", "undetermined"],
+  "proposed_label_method": "rule_derived",
+  "relevance_semantics": "Relevance to a documented treatment purpose only; never prescribing eligibility or safety clearance",
+  "label_decision_policy": {
+    "known_supported_symptom_target_present": "relevant",
+    "all_declared_targets_explicitly_absent": "not_relevant",
+    "necessary_target_information_missing": "undetermined",
+    "antivirals": "Retain existing purpose-mapping target; individual indication remains deterministic and constant targets must be reported",
+    "safety_results_used_as_target_or_model_inputs": false
+  },
+  "separate_workflow_outcomes": ["no_medicine_needed", "requires_clinician_review", "outside_product_scope", "refer_for_assessment"],
+  "workflow_outcomes_are_ml_classes": false,
+  "conditions": [
+    {
+      "code": "influenza", "label": "Influenza", "implementation_status": "existing_bounded_pilot",
+      "clinical_review_status": "not_reviewed",
+      "mapping_ids": ["flu-fever-aches", "flu-antiviral"],
+      "relevance_fact_fields": ["fever", "body_aches"],
+      "deterministic_fact_fields": ["onset_hours", "renal_assessment", "hepatic_assessment", "laiv_timing", "red_flags", "special_population", "age_years", "weight_kg_when_required"],
+      "scope_note": "Keep existing product-specific boundaries. No extension to severe influenza or adjusted-dose policies."
+    },
+    {
+      "code": "chickenpox", "label": "Chickenpox", "implementation_status": "existing_bounded_pilot",
+      "clinical_review_status": "not_reviewed",
+      "mapping_ids": ["varicella-fever", "varicella-antiviral", "varicella-itch"],
+      "relevance_fact_fields": ["fever", "itching"],
+      "deterministic_fact_fields": ["rash_onset_hours", "varicella_risk", "renal_assessment", "hepatic_assessment", "topical_assessment", "red_flags", "special_population", "age_years", "weight_kg_when_required"],
+      "scope_note": "Do not interpret condition presence as a routine antiviral indication; preserve current risk-group and formulation controls."
+    },
+    {
+      "code": "measles", "label": "Measles", "implementation_status": "proposed_not_enabled",
+      "clinical_review_status": "not_reviewed", "mapping_ids": ["measles-fever"],
+      "relevance_fact_fields": ["fever"],
+      "deterministic_fact_fields": ["symptom_duration_hours", "respiratory_red_flags", "neurological_red_flags", "hydration_assessment", "special_population", "hepatic_assessment", "renal_assessment"],
+      "deferred_care": ["vitamin_A_requires_separate_clinician_led_policy", "complication_management", "local_infection_control_and_notification_workflow"],
+      "scope_note": "Symptom-support mapping only; does not represent complete measles management.",
+      "source_ids": ["nhs-measles", "cdc-measles-care"]
+    },
+    {
+      "code": "mumps", "label": "Mumps", "implementation_status": "proposed_not_enabled",
+      "clinical_review_status": "not_reviewed", "mapping_ids": ["mumps-fever-pain"],
+      "relevance_fact_fields": ["fever", "body_aches", "jaw_pain"],
+      "deterministic_fact_fields": ["symptom_duration_hours", "swallowing_or_intake_assessment", "abdominal_pain", "testicular_pain_or_swelling", "neurological_red_flags", "hydration_assessment", "special_population", "hepatic_assessment", "renal_assessment"],
+      "deferred_care": ["complication_management", "local_infection_control_and_notification_workflow"],
+      "scope_note": "Support for documented symptoms, not treatment of the infection or its complications.",
+      "source_ids": ["nhs-mumps"]
+    },
+    {
+      "code": "viral_conjunctivitis", "label": "Viral conjunctivitis", "implementation_status": "proposed_not_enabled",
+      "clinical_review_status": "not_reviewed", "mapping_ids": ["conjunctivitis-lubrication"],
+      "relevance_fact_fields": ["ocular_dryness", "ocular_irritation"],
+      "deterministic_fact_fields": ["eye_pain", "photophobia", "vision_change", "marked_or_worsening_redness", "ocular_duration_hours", "contact_lens_use", "suspected_herpetic_eye_disease", "ophthalmic_product_and_container_assessment", "special_population"],
+      "deferred_care": ["herpetic_or_other_specialist_antiviral_treatment", "ocular_steroids", "bacterial_or_allergic_conjunctivitis"],
+      "scope_note": "Mild symptom-support research cases only; do not reuse the oral chickenpox acyclovir regimen for eye disease.",
+      "source_ids": ["cdc-conjunctivitis", "dailymed-cmc-05"]
+    },
+    {
+      "code": "viral_gastroenteritis", "label": "Viral gastroenteritis", "implementation_status": "proposed_not_enabled",
+      "clinical_review_status": "not_reviewed", "mapping_ids": ["gastroenteritis-rehydration"],
+      "relevance_fact_fields": ["diarrhoea", "vomiting", "recent_fluid_loss"],
+      "deterministic_fact_fields": ["symptom_duration_hours", "dehydration_assessment", "oral_fluid_tolerance", "blood_in_stool", "severe_abdominal_pain", "renal_or_cardiac_fluid_restriction", "electrolyte_related_context", "measured_weight_when_required", "exact_ors_product", "reconstitution_instructions_verified", "special_population"],
+      "deferred_care": ["severe_dehydration_or_IV_fluids", "antidiarrhoeal_or_antiemetic_drug_selection", "nonviral_or_uncertain_diagnoses"],
+      "scope_note": "Fluid-replacement purpose relevance can coexist with oral-route or clinical blocks; it does not authorize an ORS amount.",
+      "source_ids": ["niddk-gastroenteritis", "who-ors", "spc-jeevani-listing"]
+    }
+  ],
+  "products": [
+    {"planning_id": "paracetamol-500mg-tablet", "identity_status": "existing_catalogue_reference", "name": "Paracetamol (acetaminophen)", "strength": "500 mg", "form": "tablet", "route": "oral", "rxcui": "198440", "source_ids": ["dailymed-paracetamol"], "clinical_review_status": "not_reviewed"},
+    {"planning_id": "oseltamivir-75mg-capsule", "identity_status": "existing_catalogue_reference", "name": "Oseltamivir", "strength": "75 mg", "form": "capsule", "route": "oral", "rxcui": "312122", "source_ids": ["dailymed-oseltamivir"], "clinical_review_status": "not_reviewed"},
+    {"planning_id": "acyclovir-800mg-tablet", "identity_status": "existing_catalogue_reference", "name": "Acyclovir", "strength": "800 mg", "form": "tablet", "route": "oral", "rxcui": "197313", "source_ids": ["dailymed-acyclovir"], "clinical_review_status": "not_reviewed"},
+    {"planning_id": "calamine-zinc-oxide-lotion", "identity_status": "existing_catalogue_reference", "name": "Calamine + zinc oxide", "strength": "8% + 8%", "form": "lotion", "route": "topical", "rxcui": "617954", "source_ids": ["dailymed-calamine"], "clinical_review_status": "not_reviewed"},
+    {
+      "planning_id": "cmc-sodium-05pct-ophthalmic-solution", "identity_status": "primary_label_identified_not_imported",
+      "name": "Carboxymethylcellulose sodium", "strength": "0.5% (5 mg/mL)", "form": "ophthalmic_solution", "route": "ophthalmic",
+      "rxcui": "1188426", "rxcui_basis": "SCD listed in the source label", "reference_product": "REFRESH TEARS single solution/drop product, NDC product code 0023-0798; exclude the kit",
+      "source_ids": ["dailymed-cmc-05"], "local_product_equivalence": "not_verified", "catalogue_import_ready": false,
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "planning_id": "ors-low-osmolarity-powder", "identity_status": "formulation_guidance_only_local_product_unresolved",
+      "name": "Reduced-osmolarity oral rehydration salts", "strength": null, "form": "powder_for_oral_solution", "route": "oral_after_verified_reconstitution",
+      "rxcui": null, "exact_product_label": null, "reconstitution_volume_ml": null, "dose_policy": null,
+      "source_ids": ["who-ors", "niddk-gastroenteritis", "spc-jeevani-listing"],
+      "local_listing_lead": {"supplier": "State Pharmaceuticals Corporation of Sri Lanka", "listing_code": "1720720700", "listed_pack_mass_g": 21.5, "listing_water_volume_ml": 1000, "composition_or_label_verified": false},
+      "identity_gap": "SPC listing mass differs from the WHO formulation reference; a sales listing cannot establish composition, dilution, ingredient aliases or dosing.",
+      "catalogue_import_ready": false, "clinical_review_status": "not_reviewed"
+    }
+  ],
+  "mappings": [
+    {"id": "flu-fever-aches", "condition": "influenza", "product": "paracetamol-500mg-tablet", "purpose": "symptom_relief", "clinical_role": "fever_or_aches_relief", "target_symptoms": ["fever", "body_aches"], "basis": "symptom_mapping", "source_ids": ["dailymed-paracetamol"], "status": "existing_pilot_reference", "clinical_review_status": "not_reviewed"},
+    {"id": "flu-antiviral", "condition": "influenza", "product": "oseltamivir-75mg-capsule", "purpose": "antiviral", "clinical_role": "influenza_antiviral", "target_symptoms": [], "basis": "label", "source_ids": ["dailymed-oseltamivir"], "status": "existing_pilot_reference", "clinical_review_status": "not_reviewed"},
+    {"id": "varicella-fever", "condition": "chickenpox", "product": "paracetamol-500mg-tablet", "purpose": "symptom_relief", "clinical_role": "fever_relief", "target_symptoms": ["fever"], "basis": "guidance_and_product_label", "source_ids": ["cdc-chickenpox", "dailymed-paracetamol"], "status": "existing_pilot_reference", "clinical_review_status": "not_reviewed"},
+    {"id": "varicella-antiviral", "condition": "chickenpox", "product": "acyclovir-800mg-tablet", "purpose": "antiviral", "clinical_role": "varicella_antiviral", "target_symptoms": [], "basis": "label_and_guidance", "source_ids": ["dailymed-acyclovir", "cdc-varicella-guidance"], "status": "existing_pilot_reference", "clinical_review_status": "not_reviewed"},
+    {"id": "varicella-itch", "condition": "chickenpox", "product": "calamine-zinc-oxide-lotion", "purpose": "symptom_relief", "clinical_role": "itching_relief", "target_symptoms": ["itching"], "basis": "guidance_symptom_mapping_not_label_indication", "source_ids": ["cdc-chickenpox", "dailymed-calamine"], "status": "existing_pilot_reference", "clinical_review_status": "not_reviewed"},
+    {"id": "measles-fever", "condition": "measles", "product": "paracetamol-500mg-tablet", "purpose": "symptom_relief", "clinical_role": "fever_relief", "target_symptoms": ["fever"], "basis": "guidance_symptom_mapping_and_product_label_not_disease_label_indication", "source_ids": ["nhs-measles", "dailymed-paracetamol", "cdc-measles-care"], "status": "proposed_not_enabled", "clinical_review_status": "not_reviewed"},
+    {"id": "mumps-fever-pain", "condition": "mumps", "product": "paracetamol-500mg-tablet", "purpose": "symptom_relief", "clinical_role": "fever_or_pain_relief", "target_symptoms": ["fever", "body_aches", "jaw_pain"], "basis": "guidance_symptom_mapping_and_product_label_not_disease_label_indication", "source_ids": ["nhs-mumps", "dailymed-paracetamol"], "status": "proposed_not_enabled", "clinical_review_status": "not_reviewed"},
+    {"id": "conjunctivitis-lubrication", "condition": "viral_conjunctivitis", "product": "cmc-sodium-05pct-ophthalmic-solution", "purpose": "symptom_relief", "clinical_role": "ocular_dryness_or_irritation_relief", "target_symptoms": ["ocular_dryness", "ocular_irritation"], "basis": "guidance_class_to_product_symptom_mapping_not_direct_viral_indication", "source_ids": ["cdc-conjunctivitis", "dailymed-cmc-05"], "status": "proposed_not_enabled", "clinical_review_status": "not_reviewed"},
+    {"id": "gastroenteritis-rehydration", "condition": "viral_gastroenteritis", "product": "ors-low-osmolarity-powder", "purpose": "rehydration_support", "clinical_role": "oral_fluid_electrolyte_replacement", "target_symptoms": ["diarrhoea", "vomiting", "recent_fluid_loss"], "basis": "guidance_only_pending_exact_product_label", "source_ids": ["niddk-gastroenteritis", "who-ors", "spc-jeevani-listing"], "status": "blocked_on_product_identity_before_catalogue_import", "clinical_review_status": "not_reviewed"}
+  ],
+  "planned_handoff": {
+    "contract_status": "proposal_only_not_accepted_by_current_API",
+    "keep_existing_nested_member1_envelope": true,
+    "candidate_condition_codes": ["influenza", "chickenpox", "measles", "mumps", "viral_conjunctivitis", "viral_gastroenteritis"],
+    "unmapped_codes": "remain unsupported; never promote a differential diagnosis into a confirmed primary condition",
+    "symptom_presence": "explicit present/absent/unknown; missing is unknown, not false",
+    "durations": "retain source text and units; structured hours only when explicitly supplied or deterministically converted from an unambiguous value",
+    "assessment_origin": "Component 1 findings are unverified; doctor assessments remain separate",
+    "age": "registered DOB in the live workflow; explicitly synthetic age in research examples",
+    "weight": "measured value with kg unit only where the product-specific rule requires it; missing remains null"
+  },
+  "blocking_engineering_work": [
+    {"id": "G1", "task": "Agree and version the six-condition Member 1/backend/frontend contract; add independent missing/red-flag facts", "status": "not_implemented"},
+    {"id": "G2", "task": "Resolve exact local ORS label/composition/dilution and product identifiers; retain null until verified", "status": "not_completed"},
+    {"id": "G3", "task": "Extend catalogue condition/form/route/purpose/use-count and trusted primary-source domain contracts deliberately", "status": "not_implemented"},
+    {"id": "G4", "task": "Add explicit ophthalmic and ORS rule handlers/units; unknown product kinds fail closed; preserve content/code review bindings", "status": "not_implemented"},
+    {"id": "G5", "task": "Check a small synthetic batch spanning all six conditions before versioned expansion; no live patient imports", "status": "not_implemented"},
+    {"id": "G6", "task": "Compare three compact models on common family partitions after dataset checks; choose on validation and evaluate once on held-out test", "status": "not_implemented"}
+  ],
+  "sources": [
+    {"id": "dailymed-paracetamol", "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f8237772-7656-49fb-b1de-f8fcb5fa55ee", "sections": ["ingredient and product identity", "symptom uses", "directions and selected warnings"], "source_handling": "existing_shipped_reference_reused", "catalogue_recorded_access_date": "2026-10-13"},
+    {"id": "dailymed-oseltamivir", "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ee3c9555-60f2-4f82-a760-11983c86e97b", "sections": ["influenza indication", "age/weight/formulation and renal policies"], "source_handling": "existing_shipped_reference_reused", "catalogue_recorded_access_date": "2026-10-13"},
+    {"id": "dailymed-acyclovir", "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=05f42300-2a06-45f1-a9b9-6e5c84ae58ec", "sections": ["chickenpox indication", "formulation and renal policies"], "source_handling": "existing_shipped_reference_reused", "catalogue_recorded_access_date": "2026-10-13"},
+    {"id": "dailymed-calamine", "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4a79259e-64ac-d187-e063-6294a90a78db", "sections": ["product identity", "external use and warnings"], "source_handling": "existing_shipped_reference_reused", "catalogue_recorded_access_date": "2026-10-13"},
+    {"id": "cdc-chickenpox", "url": "https://www.cdc.gov/chickenpox/treatment/index.html", "sections": ["symptom support", "when assessment is needed"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "cdc-varicella-guidance", "url": "https://www.cdc.gov/chickenpox/hcp/clinical-guidance/index.html", "sections": ["risk-group and antiviral scope"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "nhs-measles", "url": "https://www.nhs.uk/conditions/measles/", "sections": ["symptom relief after assessment", "urgent features"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "cdc-measles-care", "url": "https://www.cdc.gov/measles/hcp/clinical-overview/stay-alert-for-measles-cases.html", "sections": ["supportive management and complications", "supervised vitamin A context"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "nhs-mumps", "url": "https://www.nhs.uk/conditions/mumps/", "sections": ["symptom relief after assessment", "complication and urgent features"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "cdc-conjunctivitis", "url": "https://www.cdc.gov/conjunctivitis/treatment/index.html", "sections": ["artificial-tear symptom support", "ocular features requiring assessment", "viral and other types"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16"},
+    {"id": "dailymed-cmc-05", "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=329d1fe0-4432-4565-b7b1-65666bd86526", "sections": ["single-solution identity and RxNorm SCD", "lubrication use and cautions"], "source_handling": "label_checked_for_planning", "checked_on": "2026-10-16", "publisher_label_updated_date": "2022-06-30"},
+    {"id": "niddk-gastroenteritis", "url": "https://www.niddk.nih.gov/health-information/digestive-diseases/viral-gastroenteritis/treatment", "sections": ["fluid/electrolyte replacement", "assessment and treatment limits"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16", "publisher_last_reviewed_date": "2018-05"},
+    {"id": "who-ors", "url": "https://www.who.int/publications/i/item/WHO-FCH-CAH-06.1", "sections": ["reduced-osmolarity formulation overview"], "source_handling": "page_checked_for_planning", "checked_on": "2026-10-16", "publisher_publication_date": "2006-01-01", "linked_document_url": "https://iris.who.int/bitstream/handle/10665/69227/1/WHO_FCH_CAH_06.1.pdf", "full_pdf_access": "HTTP_403_on_direct_fetch", "reference_sachet_mass_evidence": "primary_document_search_index_excerpt_only; not a full local PDF inspection"},
+    {"id": "spc-jeevani-listing", "url": "https://www.spc.lk/products.php", "sections": ["product listing code 1720720700"], "source_handling": "listing_checked_identity_lead_only_not_a_product_label", "checked_on": "2026-10-16"}
+  ],
+  "implementation_enabled_by_this_file": false,
+  "existing_reviews_modified": false,
+  "live_patient_data_used": false,
+  "model_retrained": false,
+  "patient_publication_enabled": false
+}

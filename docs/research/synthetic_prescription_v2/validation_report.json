@@ -1,0 +1,155 @@
+{
+  "validation": "passed",
+  "clinical_review_status": "not_reviewed",
+  "model_trained": false,
+  "counts": {
+    "synthetic_contexts": 168,
+    "candidate_rows": 672,
+    "template_families": 28,
+    "base_scenarios": 56,
+    "condition_mapped_rows": 405,
+    "unique_condition_mapped_inputs": 135
+  },
+  "class_balance_all_rows": {
+    "not_relevant": 306,
+    "relevant": 261,
+    "undetermined": 105
+  },
+  "class_balance_condition_mapped_rows": {
+    "not_relevant": 63,
+    "relevant": 261,
+    "undetermined": 81
+  },
+  "by_split": {
+    "train": {
+      "contexts": 102,
+      "families": 17,
+      "all_candidate_rows": 408,
+      "condition_mapped_rows": 255,
+      "unique_condition_mapped_inputs": 85,
+      "mapped_label_balance": {
+        "not_relevant": 36,
+        "relevant": 171,
+        "undetermined": 48
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 12,
+        "relevant": 57,
+        "undetermined": 16
+      }
+    },
+    "validation": {
+      "contexts": 30,
+      "families": 5,
+      "all_candidate_rows": 120,
+      "condition_mapped_rows": 75,
+      "unique_condition_mapped_inputs": 25,
+      "mapped_label_balance": {
+        "not_relevant": 18,
+        "relevant": 39,
+        "undetermined": 18
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 6,
+        "relevant": 13,
+        "undetermined": 6
+      }
+    },
+    "test": {
+      "contexts": 36,
+      "families": 6,
+      "all_candidate_rows": 144,
+      "condition_mapped_rows": 75,
+      "unique_condition_mapped_inputs": 25,
+      "mapped_label_balance": {
+        "not_relevant": 9,
+        "relevant": 51,
+        "undetermined": 15
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 3,
+        "relevant": 17,
+        "undetermined": 5
+      }
+    }
+  },
+  "family_split_overlap": 0,
+  "base_scenario_split_overlap": 0,
+  "feature_vector_split_overlap": 0,
+  "feature_allowlist": [
+    "condition",
+    "candidate_id",
+    "purpose",
+    "clinical_role",
+    "fever_present",
+    "body_aches_present",
+    "itching_present"
+  ],
+  "supported_groups": {
+    "chickenpox::antiviral::varicella_antiviral": {
+      "candidate_ids": [
+        "acyclovir-800mg-tablet"
+      ],
+      "labels": {
+        "relevant": 81
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "chickenpox::symptom_relief::fever_relief": {
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "labels": {
+        "not_relevant": 27,
+        "relevant": 27,
+        "undetermined": 27
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "chickenpox::symptom_relief::itching_relief": {
+      "candidate_ids": [
+        "calamine-zinc-oxide-lotion"
+      ],
+      "labels": {
+        "not_relevant": 27,
+        "relevant": 27,
+        "undetermined": 27
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "influenza::antiviral::influenza_antiviral": {
+      "candidate_ids": [
+        "oseltamivir-75mg-capsule"
+      ],
+      "labels": {
+        "relevant": 81
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    },
+    "influenza::symptom_relief::fever_or_aches_relief": {
+      "candidate_ids": [
+        "paracetamol-500mg-tablet"
+      ],
+      "labels": {
+        "not_relevant": 9,
+        "relevant": 45,
+        "undetermined": 27
+      },
+      "ranking_evaluation": "not_meaningful_single_candidate"
+    }
+  },
+  "research_safety_counts": {
+    "blocked": 72,
+    "cannot_validate": 259,
+    "warning": 74
+  },
+  "relevant_but_blocked_count": 43,
+  "limitations": [
+    "All labels remain unreviewed, rule-derived targets; more generated rows are not new clinical evidence.",
+    "Families partition a single factorial generator; this is held-out symptom-pattern agreement, not independent clinical validation.",
+    "Three safety variants deliberately share relevance features within each base scenario; fit once per unique input to avoid overweighting duplicates.",
+    "Off-condition contrasts and unsupported diagnoses are excluded from fitting and primary model evaluation.",
+    "Mapped antiviral targets are constant. Every condition/purpose/role group still has one candidate; no within-group ranking metric is meaningful.",
+    "Unknown facts are explicit null/categories. The existing conservative global symptom-completeness adapter is retained."
+  ]
+}

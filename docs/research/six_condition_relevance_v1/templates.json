@@ -1,0 +1,21 @@
+{
+  "version": "six-condition-inspection-families-2026-10-16-v1",
+  "dataset_version": "six-condition-synthetic-relevance-2026-10-16-v1",
+  "schema_version": "1.0",
+  "split_method": "frozen_template_family_holdout_before_preprocessing",
+  "initial_context_limit": 64,
+  "families": [
+    {"id": "acute_multi_symptom", "split": "train", "pattern": "all_present", "context": "supplied", "duration_hours": 12, "description": "Fictional initial interview explicitly reports all declared purpose targets; other symptoms stay unknown."},
+    {"id": "resolved_symptoms", "split": "train", "pattern": "all_absent", "context": "supplied", "duration_hours": null, "description": "Follow-up explicitly reports that the declared relief targets are absent; this is not a declaration that antivirals are indicated."},
+    {"id": "incomplete_interview", "split": "train", "pattern": "all_unknown", "context": "missing", "duration_hours": null, "description": "Interview and context facts are missing; retain nulls and unknown statuses."},
+    {"id": "localized_complaint", "split": "validation", "pattern": "first_present_rest_absent", "context": "supplied", "duration_hours": 18, "description": "Only the first condition target is reported present; other declared targets are explicitly absent."},
+    {"id": "uncertain_target_history", "split": "validation", "pattern": "first_unknown_rest_absent", "context": "unknown_histories", "duration_hours": null, "description": "The first target is uncertain; the remaining declared targets are explicitly absent and medicine/allergy histories are unknown."},
+    {"id": "reported_concern", "split": "validation", "pattern": "all_present", "context": "reported_concern", "duration_hours": 24, "description": "Declared targets are present with a positive unverified source concern; relevance is not a safety clearance."},
+    {"id": "late_recovery", "split": "test", "pattern": "all_absent", "context": "late_onset", "duration_hours": null, "description": "No current declared relief targets; onset is late for the selected antiviral pilot windows."},
+    {"id": "mixed_positive_unknown", "split": "test", "pattern": "first_present_rest_unknown", "context": "outside_adult_scope", "duration_hours": 36, "description": "Known positive target with other targets unknown in a fictional younger context; new adult research policies remain outside scope."},
+    {"id": "unresolved_target_report", "split": "test", "pattern": "first_absent_rest_unknown", "context": "unresolved_medicine", "duration_hours": null, "description": "First target absent, others unknown; a sole declared target remains unknown. Current medicine identity is unresolved."},
+    {"id": "unknown_etiology_train", "split": "train", "pattern": "all_unknown", "context": "missing", "duration_hours": null, "conditions": [null, "bacterial_conjunctivitis"], "description": "No supported diagnosis; unknown symptom context does not imply a supported condition."},
+    {"id": "unknown_etiology_validation", "split": "validation", "pattern": "all_absent", "context": "supplied", "duration_hours": null, "conditions": [null, "bacterial_conjunctivitis"], "description": "Explicit negative symptoms do not establish a diagnosis for a missing/unsupported condition."},
+    {"id": "unknown_etiology_test", "split": "test", "pattern": "all_present", "context": "supplied", "duration_hours": 18, "conditions": [null, "bacterial_conjunctivitis"], "description": "Positive symptoms do not promote an unsupported or missing condition into a supported diagnosis."}
+  ]
+}

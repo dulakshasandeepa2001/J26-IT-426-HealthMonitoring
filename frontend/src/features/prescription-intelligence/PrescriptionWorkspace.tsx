@@ -7,6 +7,7 @@ import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm } from "./PatientContextForm";
 import { AnalysisResult } from "./AnalysisResult";
 import { DraftFlow } from "./DraftFlow";
+import { prescriptionCondition } from "./analysisData";
 import { controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
 // ─── Workflow steps shown at the top ─────────────────────────────────────────
@@ -40,6 +41,8 @@ export default function PrescriptionWorkspace() {
   // Derived flags
   const hasConsultation = !!rx.activeConsultation;
   const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
+  const diagnosis = rx.diagnoses.find((item) => item.consultation === rx.activeConsultation?.id);
+  const pendingTreatment = diagnosis && !prescriptionCondition(diagnosis.condition_code, diagnosis.condition_label);
 
   return (
     <PageFrame
@@ -153,12 +156,12 @@ export default function PrescriptionWorkspace() {
           </fieldset>
           <p id="diagnosis-confirmation-help" className="mt-4 text-xs leading-relaxed text-slate-500">
             Review and correct the structured diagnosis context, then confirm it before generation.
-            A changed diagnosis requires renewed confirmation. Initial pilot: influenza and chickenpox.
+            A changed diagnosis requires renewed confirmation. The v2.1 handoff supports six conditions; medicine screening currently supports influenza and chickenpox.
           </p>
         </Section>
       </div>
 
-      <DraftFlow key={rx.activeConsultation?.id ?? "none"} rx={rx} />
+      {pendingTreatment ? <Unavailable title="Medicine support pending for this condition">Diagnosis confirmation is saved. Catalogue, deterministic safety rules and experimental model coverage must be developed before generating medicine recommendations for this condition.</Unavailable> : <DraftFlow key={rx.activeConsultation?.id ?? "none"} rx={rx} />}
 
       <Section title="Eligible candidate ranking and explanations" icon={ArrowUpDown}>
         <Unavailable title="ML ranking remains a later step">Step 6 shows unranked catalogue candidates and deterministic rule explanations. A trained ranking model and its evaluation are not connected.</Unavailable>

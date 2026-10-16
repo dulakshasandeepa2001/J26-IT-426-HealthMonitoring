@@ -1,0 +1,2063 @@
+{
+  "presentation_label": "Experimental ML",
+  "model_version": "experimental-relevance-tree-2026-10-15-v1",
+  "model_trained": true,
+  "clinical_review_status": "not_reviewed",
+  "label_method": "rule_derived",
+  "task": "Provisional condition/purpose/symptom relevance classification",
+  "baseline_type": "experimental_rule_imitation",
+  "counts": {
+    "synthetic_contexts": 168,
+    "candidate_rows": 672,
+    "template_families": 28,
+    "base_scenarios": 56,
+    "condition_mapped_rows": 405,
+    "unique_condition_mapped_inputs": 135
+  },
+  "class_balance_condition_mapped_rows": {
+    "not_relevant": 63,
+    "relevant": 261,
+    "undetermined": 81
+  },
+  "dataset_splits": {
+    "train": {
+      "contexts": 102,
+      "families": 17,
+      "all_candidate_rows": 408,
+      "condition_mapped_rows": 255,
+      "unique_condition_mapped_inputs": 85,
+      "mapped_label_balance": {
+        "not_relevant": 36,
+        "relevant": 171,
+        "undetermined": 48
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 12,
+        "relevant": 57,
+        "undetermined": 16
+      }
+    },
+    "validation": {
+      "contexts": 30,
+      "families": 5,
+      "all_candidate_rows": 120,
+      "condition_mapped_rows": 75,
+      "unique_condition_mapped_inputs": 25,
+      "mapped_label_balance": {
+        "not_relevant": 18,
+        "relevant": 39,
+        "undetermined": 18
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 6,
+        "relevant": 13,
+        "undetermined": 6
+      }
+    },
+    "test": {
+      "contexts": 36,
+      "families": 6,
+      "all_candidate_rows": 144,
+      "condition_mapped_rows": 75,
+      "unique_condition_mapped_inputs": 25,
+      "mapped_label_balance": {
+        "not_relevant": 9,
+        "relevant": 51,
+        "undetermined": 15
+      },
+      "unique_mapped_label_balance": {
+        "not_relevant": 3,
+        "relevant": 17,
+        "undetermined": 5
+      }
+    }
+  },
+  "family_split_overlap": 0,
+  "model_input_split_overlap": 0,
+  "fit_unique_inputs": 85,
+  "model_structure": {
+    "nodes": 21,
+    "leaves": 15,
+    "maximum_depth": 3
+  },
+  "hyperparameters": {
+    "max_depth": 6,
+    "min_split_samples": 2,
+    "min_information_gain": 1e-12
+  },
+  "tuning": "none; fixed before validation/test evaluation",
+  "fit_population": "condition_mapped_rows_only",
+  "feature_allowlist": [
+    "condition",
+    "candidate_id",
+    "purpose",
+    "clinical_role",
+    "fever_present",
+    "body_aches_present",
+    "itching_present"
+  ],
+  "splits": {
+    "train": {
+      "unique_input_metrics": {
+        "evaluated_inputs": 85,
+        "correct": 85,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 12,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 57,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 16,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 12,
+            "predicted_count": 12,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 57,
+            "predicted_count": 57,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 16,
+            "predicted_count": 16,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "all_mapped_row_metrics": {
+        "evaluated_inputs": 255,
+        "correct": 255,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 36,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 171,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 48,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 36,
+            "predicted_count": 36,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 171,
+            "predicted_count": 171,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 48,
+            "predicted_count": 48,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "training_majority_baseline": {
+        "evaluated_inputs": 85,
+        "correct": 57,
+        "errors_including_abstentions": 28,
+        "agreement_with_provisional_labels": 0.6705882352941176,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 0,
+            "relevant": 12,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 57,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 16,
+            "undetermined": 0,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 12,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 57,
+            "predicted_count": 85,
+            "precision": 0.6705882352941176,
+            "recall": 1.0,
+            "f1": 0.8028169014084507,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 16,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "predicted_class": "relevant"
+      },
+      "generating_criteria_baseline": {
+        "evaluated_inputs": 85,
+        "correct": 85,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 12,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 57,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 16,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 12,
+            "predicted_count": 12,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 57,
+            "predicted_count": 57,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 16,
+            "predicted_count": 16,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "independence": "none; same criteria generated targets"
+      },
+      "by_condition_unique_inputs": {
+        "chickenpox": {
+          "evaluated_inputs": 51,
+          "correct": 51,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 10,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 29,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 12,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 10,
+              "predicted_count": 10,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 29,
+              "predicted_count": 29,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 12,
+              "predicted_count": 12,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        },
+        "influenza": {
+          "evaluated_inputs": 34,
+          "correct": 34,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 2,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 28,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 4,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 28,
+              "predicted_count": 28,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 4,
+              "predicted_count": 4,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        }
+      },
+      "by_group_unique_inputs": {
+        "chickenpox::antiviral::varicella_antiviral": {
+          "evaluated_inputs": 17,
+          "correct": 17,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 17,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 17,
+              "predicted_count": 17,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "acyclovir-800mg-tablet"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::fever_relief": {
+          "evaluated_inputs": 17,
+          "correct": 17,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 6,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 6,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 5,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 6,
+              "predicted_count": 6,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 6,
+              "predicted_count": 6,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::itching_relief": {
+          "evaluated_inputs": 17,
+          "correct": 17,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 4,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 6,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 7,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 4,
+              "predicted_count": 4,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 6,
+              "predicted_count": 6,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 7,
+              "predicted_count": 7,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "calamine-zinc-oxide-lotion"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::antiviral::influenza_antiviral": {
+          "evaluated_inputs": 17,
+          "correct": 17,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 17,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 17,
+              "predicted_count": 17,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "oseltamivir-75mg-capsule"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::symptom_relief::fever_or_aches_relief": {
+          "evaluated_inputs": 17,
+          "correct": 17,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 2,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 11,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 4,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 11,
+              "predicted_count": 11,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 4,
+              "predicted_count": 4,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        }
+      }
+    },
+    "validation": {
+      "unique_input_metrics": {
+        "evaluated_inputs": 25,
+        "correct": 25,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 6,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 13,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 6,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 6,
+            "predicted_count": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 13,
+            "predicted_count": 13,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 6,
+            "predicted_count": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "all_mapped_row_metrics": {
+        "evaluated_inputs": 75,
+        "correct": 75,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 18,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 39,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 18,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 18,
+            "predicted_count": 18,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 39,
+            "predicted_count": 39,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 18,
+            "predicted_count": 18,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "training_majority_baseline": {
+        "evaluated_inputs": 25,
+        "correct": 13,
+        "errors_including_abstentions": 12,
+        "agreement_with_provisional_labels": 0.52,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 0,
+            "relevant": 6,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 13,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 6,
+            "undetermined": 0,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 6,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 13,
+            "predicted_count": 25,
+            "precision": 0.52,
+            "recall": 1.0,
+            "f1": 0.6842105263157895,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 6,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "predicted_class": "relevant"
+      },
+      "generating_criteria_baseline": {
+        "evaluated_inputs": 25,
+        "correct": 25,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 6,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 13,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 6,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 6,
+            "predicted_count": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 13,
+            "predicted_count": 13,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 6,
+            "predicted_count": 6,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "independence": "none; same criteria generated targets"
+      },
+      "by_condition_unique_inputs": {
+        "chickenpox": {
+          "evaluated_inputs": 15,
+          "correct": 15,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 6,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 6,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 3,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 6,
+              "predicted_count": 6,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 6,
+              "predicted_count": 6,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        },
+        "influenza": {
+          "evaluated_inputs": 10,
+          "correct": 10,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 7,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 3,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 7,
+              "predicted_count": 7,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        }
+      },
+      "by_group_unique_inputs": {
+        "chickenpox::antiviral::varicella_antiviral": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 5,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "acyclovir-800mg-tablet"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::fever_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 1,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 1,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 3,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 1,
+              "predicted_count": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 1,
+              "predicted_count": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::itching_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 5,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "calamine-zinc-oxide-lotion"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::antiviral::influenza_antiviral": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 5,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "oseltamivir-75mg-capsule"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::symptom_relief::fever_or_aches_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 2,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 3,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 2,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        }
+      }
+    },
+    "test": {
+      "unique_input_metrics": {
+        "evaluated_inputs": 25,
+        "correct": 25,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 3,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 17,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 5,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 3,
+            "predicted_count": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 17,
+            "predicted_count": 17,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 5,
+            "predicted_count": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "all_mapped_row_metrics": {
+        "evaluated_inputs": 75,
+        "correct": 75,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 9,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 51,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 15,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 9,
+            "predicted_count": 9,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 51,
+            "predicted_count": 51,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 15,
+            "predicted_count": 15,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        }
+      },
+      "training_majority_baseline": {
+        "evaluated_inputs": 25,
+        "correct": 17,
+        "errors_including_abstentions": 8,
+        "agreement_with_provisional_labels": 0.68,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 0,
+            "relevant": 3,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 17,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 5,
+            "undetermined": 0,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 3,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 17,
+            "predicted_count": 25,
+            "precision": 0.68,
+            "recall": 1.0,
+            "f1": 0.8095238095238095,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 5,
+            "predicted_count": 0,
+            "precision": null,
+            "recall": 0.0,
+            "f1": null,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "predicted_class": "relevant"
+      },
+      "generating_criteria_baseline": {
+        "evaluated_inputs": 25,
+        "correct": 25,
+        "errors_including_abstentions": 0,
+        "agreement_with_provisional_labels": 1.0,
+        "prediction_coverage": 1.0,
+        "abstentions": 0,
+        "confusion_matrix": {
+          "not_relevant": {
+            "not_relevant": 3,
+            "relevant": 0,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "relevant": {
+            "not_relevant": 0,
+            "relevant": 17,
+            "undetermined": 0,
+            "abstained": 0
+          },
+          "undetermined": {
+            "not_relevant": 0,
+            "relevant": 0,
+            "undetermined": 5,
+            "abstained": 0
+          }
+        },
+        "per_class": {
+          "not_relevant": {
+            "support": 3,
+            "predicted_count": 3,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "relevant": {
+            "support": 17,
+            "predicted_count": 17,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          },
+          "undetermined": {
+            "support": 5,
+            "predicted_count": 5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "measurement": "rule_label_agreement_only"
+          }
+        },
+        "independence": "none; same criteria generated targets"
+      },
+      "by_condition_unique_inputs": {
+        "chickenpox": {
+          "evaluated_inputs": 15,
+          "correct": 15,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 2,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 10,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 3,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 10,
+              "predicted_count": 10,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        },
+        "influenza": {
+          "evaluated_inputs": 10,
+          "correct": 10,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 1,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 7,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 2,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 1,
+              "predicted_count": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 7,
+              "predicted_count": 7,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          }
+        }
+      },
+      "by_group_unique_inputs": {
+        "chickenpox::antiviral::varicella_antiviral": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 5,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "acyclovir-800mg-tablet"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::fever_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 2,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 2,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 1,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 1,
+              "predicted_count": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "chickenpox::symptom_relief::itching_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 3,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 2,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 3,
+              "predicted_count": 3,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "calamine-zinc-oxide-lotion"
+          ],
+          "target_variation": 2,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::antiviral::influenza_antiviral": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 5,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 5,
+              "predicted_count": 5,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 0,
+              "predicted_count": 0,
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "oseltamivir-75mg-capsule"
+          ],
+          "target_variation": 1,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        },
+        "influenza::symptom_relief::fever_or_aches_relief": {
+          "evaluated_inputs": 5,
+          "correct": 5,
+          "errors_including_abstentions": 0,
+          "agreement_with_provisional_labels": 1.0,
+          "prediction_coverage": 1.0,
+          "abstentions": 0,
+          "confusion_matrix": {
+            "not_relevant": {
+              "not_relevant": 1,
+              "relevant": 0,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "relevant": {
+              "not_relevant": 0,
+              "relevant": 2,
+              "undetermined": 0,
+              "abstained": 0
+            },
+            "undetermined": {
+              "not_relevant": 0,
+              "relevant": 0,
+              "undetermined": 2,
+              "abstained": 0
+            }
+          },
+          "per_class": {
+            "not_relevant": {
+              "support": 1,
+              "predicted_count": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "relevant": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            },
+            "undetermined": {
+              "support": 2,
+              "predicted_count": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "measurement": "rule_label_agreement_only"
+            }
+          },
+          "candidate_ids": [
+            "paracetamol-500mg-tablet"
+          ],
+          "target_variation": 3,
+          "ranking_evaluation": "not_meaningful_single_candidate"
+        }
+      }
+    }
+  },
+  "unique_input_error_count": 0,
+  "coverage": {
+    "supported_conditions": [
+      "influenza",
+      "chickenpox"
+    ],
+    "pilot_product_count": 4,
+    "purpose_role_groups": {
+      "chickenpox::antiviral::varicella_antiviral": {
+        "candidate_ids": [
+          "acyclovir-800mg-tablet"
+        ],
+        "labels": {
+          "relevant": 81
+        },
+        "ranking_evaluation": "not_meaningful_single_candidate"
+      },
+      "chickenpox::symptom_relief::fever_relief": {
+        "candidate_ids": [
+          "paracetamol-500mg-tablet"
+        ],
+        "labels": {
+          "not_relevant": 27,
+          "relevant": 27,
+          "undetermined": 27
+        },
+        "ranking_evaluation": "not_meaningful_single_candidate"
+      },
+      "chickenpox::symptom_relief::itching_relief": {
+        "candidate_ids": [
+          "calamine-zinc-oxide-lotion"
+        ],
+        "labels": {
+          "not_relevant": 27,
+          "relevant": 27,
+          "undetermined": 27
+        },
+        "ranking_evaluation": "not_meaningful_single_candidate"
+      },
+      "influenza::antiviral::influenza_antiviral": {
+        "candidate_ids": [
+          "oseltamivir-75mg-capsule"
+        ],
+        "labels": {
+          "relevant": 81
+        },
+        "ranking_evaluation": "not_meaningful_single_candidate"
+      },
+      "influenza::symptom_relief::fever_or_aches_relief": {
+        "candidate_ids": [
+          "paracetamol-500mg-tablet"
+        ],
+        "labels": {
+          "not_relevant": 9,
+          "relevant": 45,
+          "undetermined": 27
+        },
+        "ranking_evaluation": "not_meaningful_single_candidate"
+      }
+    },
+    "contrast_rows_used_for_fitting": false,
+    "unsupported_conditions_used_for_fitting": false,
+    "medical_confidence_calibrated": false,
+    "independent_clinical_validation": false
+  },
+  "limitations": [
+    "All labels remain unreviewed, rule-derived targets; more generated rows are not new clinical evidence.",
+    "Families partition a single factorial generator; this is held-out symptom-pattern agreement, not independent clinical validation.",
+    "Three safety variants deliberately share relevance features within each base scenario; fit once per unique input to avoid overweighting duplicates.",
+    "Off-condition contrasts and unsupported diagnoses are excluded from fitting and primary model evaluation.",
+    "Mapped antiviral targets are constant. Every condition/purpose/role group still has one candidate; no within-group ranking metric is meaningful.",
+    "Unknown facts are explicit null/categories. The existing conservative global symptom-completeness adapter is retained.",
+    "Agreement measures imitation of the researcher-defined generating criteria, not clinical accuracy or independent validation.",
+    "This compact learner is a stdlib categorical information-gain implementation, not scikit-learn CART and not a tuned benchmark.",
+    "The generating criteria remain the exact baseline; learned agreement provides no evidence of superiority or additional clinical knowledge.",
+    "Vocabularies and splits are fitted on deduplicated training inputs only. Null remains distinct from false; unseen categories/branches abstain.",
+    "Small held-out pattern counts do not establish population generalization; all partitions come from the same synthetic generator.",
+    "No numeric output is medical confidence. Leaf training support and learned paths describe engineering evidence only.",
+    "ML relevance cannot approve medicines, clear unknown facts, override deterministic findings or publish a prescription."
+  ],
+  "next_step": "Step 7C: review offline findings, then optionally build an explicitly enabled synthetic-only Django demo using this frozen artifact and existing deterministic controls."
+}

@@ -43,7 +43,7 @@ export function DraftFlow({ rx }: { rx: ReturnType<typeof usePrescription> }) {
   const request = useRef<{ key: string; body: string } | null>(null), sequence = useRef(0);
   const reloadWorkspace = rx.loadAll, visitId = visit?.id;
   const analysis = rx.activeAnalysis ? readComponent1Payload(rx.activeAnalysis.payload) : null;
-  const sourceSymptoms = JSON.stringify((analysis?.symptoms ?? []).filter((row) => row.present && targets.some((target) => target.code === row.code)).map((row) => ({ code: row.code, hours: row.duration_days == null ? null : String(row.duration_days * 24) })));
+  const sourceSymptoms = JSON.stringify((analysis?.symptoms ?? []).filter((row) => row.present === true && targets.some((target) => target.code === row.code)).map((row) => ({ code: row.code, hours: row.duration_hours != null ? String(row.duration_hours) : row.duration_days == null ? null : String(row.duration_days * 24) })));
   useEffect(() => {
     const timer = setTimeout(() => {
       if (symptomsEdited.current) return;
