@@ -80,16 +80,23 @@ function selectEncounter(
   };
 }
 
-export function usePrescription() {
+export function usePrescription(requestedConsultation?: string) {
   const [state, setState] = useState<PrescriptionState>(initialState);
   const selectionKey = useRef<string | null>(null);
   const saving = useRef(false);
   const loadSequence = useRef(0);
+  const requestedVisit = useRef(requestedConsultation);
 
   const rememberEncounter = useCallback((encounter: Consultation | null) => {
     if (!selectionKey.current) return;
     if (encounter) sessionStorage.setItem(selectionKey.current, encounter.id);
     else sessionStorage.removeItem(selectionKey.current);
+    // Keep reload/retry aligned with an explicit selection after an appointment handoff.
+    requestedVisit.current = encounter?.id;
+    const url = new URL(window.location.href);
+    if (encounter) url.searchParams.set("consultation", encounter.id);
+    else url.searchParams.delete("consultation");
+    window.history.replaceState(null, "", url);
   }, []);
 
   const loadAll = useCallback(async () => {
@@ -108,12 +115,17 @@ export function usePrescription() {
         fetchPatients(), fetchConsultations(), fetchDiagnoses(), fetchAnalyses(), fetchPatientContexts(),
       ]);
       if (sequence !== loadSequence.current) return;
-      const savedId = sessionStorage.getItem(selectionKey.current);
-      const encounter = consultations.find((item) => item.id === savedId) ?? null;
+      const hasHandoff = requestedVisit.current !== undefined;
+      const selectedId = hasHandoff ? requestedVisit.current : sessionStorage.getItem(selectionKey.current);
+      const encounter = consultations.find((item) => item.id === selectedId && item.doctor === user.id) ?? null;
       const patient = patients.find((item) => item.id === encounter?.patient) ?? null;
       setState(selectEncounter({
         ...initialState, loading: false, patients, consultations, diagnoses, analyses, patientContexts,
+        error: hasHandoff && (!encounter || !patient)
+          ? "The requested consultation is unavailable for your account. Select an assigned patient and visit."
+          : null,
       }, patient, patient ? encounter : null));
+      if (patient && encounter) sessionStorage.setItem(selectionKey.current, encounter.id);
     } catch (err) {
       if (sequence !== loadSequence.current) return;
       selectionKey.current = null;

@@ -5,20 +5,42 @@ import { useState, type FormEvent } from "react";
 import { Plus, Check, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
 import { buttonStyle, controlStyle, Unavailable } from "./PageFrame";
+import { visitDetails } from "./visitDetails";
 
-export function EncounterSelector({ rx }: { rx: ReturnType<typeof usePrescription> }) {
+type Prescription = ReturnType<typeof usePrescription>;
+function ManualVisitForm({ rx, onStatus }: { rx: Prescription; onStatus: (message: string) => void }) {
   const [reason, setReason] = useState("");
-  const [savedMessage, setSavedMessage] = useState("");
-  const visits = rx.consultations.filter((item) => item.patient === rx.activePatient?.id);
-
   async function startVisit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSavedMessage("");
+    onStatus("");
     if (await rx.startConsultation(reason)) {
-      setReason("");
-      setSavedMessage("New visit saved. The registered patient ID stays the same.");
+      onStatus("New visit saved. The registered patient ID stays the same.");
     }
   }
+  return (
+    <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <summary className="cursor-pointer text-xs font-semibold text-slate-700">Start a visit manually</summary>
+      <form onSubmit={startVisit} className="mt-3 space-y-3">
+        <p className="text-xs font-bold text-slate-700">Start a new visit for this patient</p>
+        <div className="space-y-1.5">
+          <label htmlFor="visit-reason" className="text-xs font-semibold text-slate-700">Reason for visit</label>
+          <input id="visit-reason" className={controlStyle} value={reason} maxLength={300} required disabled={rx.loading}
+            placeholder="Enter the reason for this visit" onChange={(event) => setReason(event.target.value)} />
+        </div>
+        <button type="submit" className={buttonStyle} disabled={rx.loading || !reason.trim()}>
+          {rx.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
+          Start new consultation
+        </button>
+        <p className="text-xs text-slate-500">Use this when a visit has not already been created. A linked consultation opens automatically. Previous visit reasons and diagnoses are not copied.</p>
+      </form>
+    </details>
+  );
+}
+
+export function EncounterSelector({ rx }: { rx: Prescription }) {
+  const [savedMessage, setSavedMessage] = useState("");
+  const visits = rx.consultations.filter((item) => item.patient === rx.activePatient?.id);
+  const details = rx.activeConsultation ? visitDetails(rx.activeConsultation, rx.activeAnalysis) : null;
 
   return (
     <div className="space-y-4">
@@ -68,22 +90,12 @@ export function EncounterSelector({ rx }: { rx: ReturnType<typeof usePrescriptio
             <dl className="grid gap-2 rounded-2xl border border-slate-200 p-3 text-xs sm:grid-cols-2">
               <div><dt className="font-semibold text-slate-600">Consultation ID</dt><dd className="mt-1 break-all" data-testid="consultation-id">{rx.activeConsultation.id}</dd></div>
               <div><dt className="font-semibold text-slate-600">Visit status</dt><dd className="mt-1">{rx.activeConsultation.is_demo ? "Synthetic research consultation" : "Saved encounter"}</dd></div>
+              <div className="sm:col-span-2"><dt className="font-semibold text-slate-600">Recorded visit reason</dt><dd className="mt-1" data-testid="current-visit-reason">{details?.reason ? interfaceText(details.reason) : "Not recorded"}</dd></div>
+              {details?.complaint && <div className="sm:col-span-2"><dt className="font-semibold text-slate-600">Reported chief complaint — confirm for this visit</dt><dd className="mt-1" data-testid="current-visit-complaint">{details.complaint}</dd></div>}
             </dl>
           )}
 
-          <form onSubmit={startVisit} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-bold text-slate-700">Start a new visit for this patient</p>
-            <div className="space-y-1.5">
-              <label htmlFor="visit-reason" className="text-xs font-semibold text-slate-700">Reason for visit</label>
-              <input id="visit-reason" className={controlStyle} value={reason} maxLength={300} required disabled={rx.loading}
-                placeholder="Enter the reason for this visit" onChange={(event) => setReason(event.target.value)} />
-            </div>
-            <button type="submit" className={buttonStyle} disabled={rx.loading || !reason.trim()}>
-              {rx.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
-              Start new consultation
-            </button>
-            <p className="text-xs text-slate-500">Each visit has its own consultation ID. Existing patient context belongs to the same patient across visits.</p>
-          </form>
+          <ManualVisitForm key={rx.activeConsultation?.id ?? "no-visit"} rx={rx} onStatus={setSavedMessage} />
           {savedMessage && <p role="status" className="flex gap-2 text-xs text-emerald-700"><Check className="h-4 w-4" aria-hidden="true" />{savedMessage}</p>}
 
           {rx.activePatientContext ? (

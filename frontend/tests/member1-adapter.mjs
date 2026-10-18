@@ -134,6 +134,7 @@ try {
   assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing verified allergy');
   assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Existing verified medicine');
   assert.equal(diagnoses.length, 0);
+  assert.equal(await page.getByTestId('current-visit-complaint').textContent(), wires[0].payload.extracted_clinical_notes.chief_complaint);
   await page.getByText('View structured clinical details', { exact: true }).click();
   const sourceDetails = page.locator('details').filter({ has: page.getByText('View structured clinical details', { exact: true }) });
   assert.deepEqual(JSON.parse(await sourceDetails.locator('pre').textContent()), wires[0].payload);
@@ -157,9 +158,11 @@ try {
   console.log('PASS: desktop/mobile output, refresh persistence and explicit reference-bound doctor confirmation; prescription generation remains disabled.');
 
   await page.getByLabel('Active encounter / consultation').selectOption(ids[1]);
+  assert.equal(await page.getByTestId('current-visit-complaint').count(), 0, 'A new visit cannot inherit the previous complaint');
   assert.equal(await page.getByLabel('Analysis scenario').count(), 0);
   analyses.push(result(1));
   await page.getByText('Producer URTI label', { exact: true }).waitFor({ state: 'visible', timeout: 12000 });
+  assert.equal(await page.getByTestId('current-visit-complaint').textContent(), wires[1].payload.extracted_clinical_notes.chief_complaint);
   assert.equal(await diagnosis().inputValue(), '');
   await visible(page.getByText('Influenza alternative', { exact: true }));
   await visible(page.getByText('Input clarification required', { exact: true }));

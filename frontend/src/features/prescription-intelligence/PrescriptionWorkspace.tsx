@@ -25,8 +25,8 @@ function Badge({ label, variant }: { label: string; variant: "green" | "amber" |
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function PrescriptionWorkspace() {
-  const rx = usePrescription();
+export default function PrescriptionWorkspace({ requestedConsultation }: { requestedConsultation?: string }) {
+  const rx = usePrescription(requestedConsultation);
 
   // Derived flags
   const hasConsultation = !!rx.activeConsultation;

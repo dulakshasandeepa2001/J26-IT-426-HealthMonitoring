@@ -1,5 +1,9 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+[Step 11](STEP11.md) adds exact consultation-link selection and a clearer
+returning-patient history prefill. The appointment service can open a saved visit;
+its upstream scheduling integration remains separate.
+
 Current page update: [Step 8F](STEP8F.md) adds the remaining four condition scopes
 to Medicine Knowledge and reuses completed content/safety reviews. Existing
 reviewed pilot entries are preserved; new scopes have independent real review

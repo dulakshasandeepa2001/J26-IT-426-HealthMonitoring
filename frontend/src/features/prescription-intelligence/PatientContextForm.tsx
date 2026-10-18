@@ -61,6 +61,10 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
   return (
     <form onSubmit={submit} className="space-y-4">
       <p className="text-xs leading-relaxed text-slate-500">Saved information is prefilled for this patient. Check it with the patient at each visit. Choose Unknown when the information has not been established.</p>
+      {context && !reviewedForVisit && <p className="rounded-xl border border-purple-100 bg-purple-50 p-3 text-xs text-purple-900">
+        Saved patient history loaded. Confirm what is still current and update any changes before saving for this visit.
+        {context.provenance.last_reviewed_at && ` Last reviewed: ${new Date(context.provenance.last_reviewed_at).toLocaleString()}.`}
+      </p>}
       <fieldset disabled={rx.loading} className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-3">
           <div className="space-y-1.5">

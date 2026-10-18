@@ -120,6 +120,11 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
 });
 
 async function visible(locator) { await locator.waitFor({ state: "visible" }); }
+async function fillVisitReason(text) {
+  const field = page.getByLabel("Reason for visit");
+  if (!await field.isVisible()) await page.getByText("Start a visit manually", { exact: true }).click();
+  await field.fill(text);
+}
 async function disabledActions() {
   for (const name of ["Generate Prescription Draft", "Edit draft", "Revalidate edited version", "Reject", "Approve", "Publish Approved Version"]) {
     const action = page.getByRole("button", { name, exact: true });
@@ -140,12 +145,15 @@ try {
   await visible(page.getByText("TEST-ANALYSIS-A", { exact: true }));
   assert.equal(await page.getByRole("textbox", { name: /^Diagnosis context/ }).inputValue(), "Test diagnosis A");
   await disabledActions();
+  assert.equal(await page.getByLabel("Reason for visit").isVisible(), false, "Manual creation is collapsed for a saved visit");
+  await page.getByText("Start a visit manually", { exact: true }).click();
   assert.equal(await page.getByRole("button", { name: "Start new consultation", exact: true }).isDisabled(), true);
-  await page.getByLabel("Reason for visit").fill("   ");
+  await fillVisitReason("   ");
   assert.equal(await page.getByRole("button", { name: "Start new consultation", exact: true }).isDisabled(), true);
 
+  assert.equal(await page.getByLabel("Reason for visit").inputValue(), "   ");
   failCreation = true;
-  await page.getByLabel("Reason for visit").fill("PP1 repeat visit");
+  await fillVisitReason("PP1 repeat visit");
   await page.getByRole("button", { name: "Start new consultation", exact: true }).click();
   await visible(page.getByText("Test save failure. Retry this visit.", { exact: true }));
   assert.equal(await page.getByTestId("consultation-id").textContent(), firstId);
@@ -169,7 +177,7 @@ try {
   await visible(page.getByText("Allergies: Test allergy A", { exact: true }));
   await page.getByLabel("Active encounter / consultation").selectOption(firstId);
   await visible(page.getByText("TEST-ANALYSIS-A", { exact: true }));
-  await page.getByLabel("Reason for visit").fill("Unsaved A-specific reason");
+  await fillVisitReason("Unsaved A-specific reason");
   await page.getByLabel("Assigned registered patient").selectOption("202");
   assert.equal(await page.getByTestId("consultation-id").textContent(), secondId);
   assert.equal(await page.getByLabel("Reason for visit").inputValue(), "");
@@ -213,7 +221,7 @@ try {
   await visible(page.getByText(/^Patient information reviewed and saved for this visit\./));
   assert.equal(await page.getByLabel("Current medicines", { exact: true }).inputValue(), "Test medicine B");
   assert.equal(await page.getByLabel("Allergy status", { exact: true }).inputValue(), "none");
-  await page.getByLabel("Reason for visit").fill("Patient B return visit");
+  await fillVisitReason("Patient B return visit");
   await page.getByRole("button", { name: "Start new consultation", exact: true }).click();
   await visible(page.getByText("Patient information has not been reviewed for this visit yet.", { exact: true }));
   assert.equal(await page.getByLabel("Current medicines", { exact: true }).inputValue(), "Test medicine B");
@@ -242,6 +250,45 @@ try {
   assert.equal(await page.getByLabel("Current medicines", { exact: true }).count(), 0);
   console.log("PASS: newer patient data cannot be overwritten by stale edits; refresh loads it and patient changes clear unsaved clinical information.");
 
+  const writesBeforeHandoff = [createRequests, contextWrites];
+  await page.goto(origin + "/doctor/prescription-workspace?consultation=" + secondId);
+  await visible(page.getByTestId("consultation-id"));
+  assert.equal(await page.getByTestId("consultation-id").textContent(), secondId);
+  assert.equal(await page.getByLabel("Assigned registered patient").inputValue(), "202");
+  assert.equal(await page.getByLabel("Allergies", { exact: true }).inputValue(), "Changed in another session");
+  assert.equal(await page.getByLabel("Current medicines", { exact: true }).inputValue(), "Test medicine B");
+  assert.equal(await reviewCheckbox.isChecked(), false);
+  assert.equal(await saveInformation.isDisabled(), true);
+  assert.equal(await page.getByLabel("Reason for visit").isVisible(), false);
+  assert.equal(await page.getByTestId("current-visit-reason").textContent(), "Assigned first visit");
+  await page.reload();
+  await visible(page.getByTestId("consultation-id"));
+  assert.equal(await page.getByTestId("consultation-id").textContent(), secondId);
+  assert.deepEqual([createRequests, contextWrites], writesBeforeHandoff, "Opening/reloading a handoff never creates visits or marks history reviewed");
+
+  for (const query of ["consultation=unassigned-visit", "consultation=", "consultation=" + firstId + "&consultation=" + secondId]) {
+    await page.goto(origin + "/doctor/prescription-workspace?" + query);
+    await visible(page.getByText("The requested consultation is unavailable for your account. Select an assigned patient and visit.", { exact: true }));
+    assert.equal(await page.getByTestId("consultation-id").count(), 0, "Invalid handoff never silently opens the previously selected patient");
+    assert.equal(await page.getByLabel("Current medicines", { exact: true }).count(), 0);
+  }
+  await page.getByLabel("Assigned registered patient").selectOption("201");
+  await page.getByLabel("Active encounter / consultation").selectOption(newId);
+  assert.equal(new URL(page.url()).searchParams.get("consultation"), newId);
+  assert.equal(await page.getByTestId("current-visit-reason").textContent(), "repeat visit");
+  assert.equal(await page.getByRole("textbox", { name: /^Diagnosis context/ }).inputValue(), "");
+  assert.equal(await page.getByText("TEST-ANALYSIS-A", { exact: true }).count(), 0);
+  await fillVisitReason("Unsaved reason belonging to this visit");
+  await page.getByLabel("Active encounter / consultation").selectOption(firstId);
+  assert.equal(await page.getByLabel("Reason for visit").inputValue(), "");
+  await page.getByLabel("Active encounter / consultation").selectOption(newId);
+  assert.equal(await page.getByLabel("Reason for visit").inputValue(), "", "Returning to a visit does not resurrect its discarded manual reason");
+  await page.getByLabel("Active encounter / consultation").selectOption(firstId);
+  await page.reload();
+  await visible(page.getByTestId("consultation-id"));
+  assert.equal(await page.getByTestId("consultation-id").textContent(), firstId, "Explicit selection replaces the appointment link for reload");
+  console.log("PASS: appointment handoff selects the exact assigned visit and reuses patient history without writes; invalid/ambiguous links do not restore another patient; manual selections survive reload.");
+
   mkdirSync(artifacts, { recursive: true });
   await page.screenshot({ path: join(artifacts, "step1-encounter.png"), fullPage: true });
   for (const width of [1024, 390]) {
@@ -249,7 +296,7 @@ try {
     assert.equal(await page.locator("main").evaluate((element) => element.scrollWidth > element.clientWidth + 1), false);
   }
   denyAccess = true;
-  await page.getByLabel("Reason for visit").fill("Expired session test");
+  await fillVisitReason("Expired session test");
   await page.getByRole("button", { name: "Start new consultation", exact: true }).click();
   await visible(page.getByRole("link", { name: "Sign in as a doctor" }));
   assert.equal(await page.getByTestId("consultation-id").count(), 0);
