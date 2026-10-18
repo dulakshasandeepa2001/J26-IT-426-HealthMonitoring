@@ -44,24 +44,49 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   return route.fulfill({ status: result.status, json: result.data, headers });
 });
 const visible = (locator) => locator.waitFor({ state: 'visible' });
-const section = () => page.getByRole('region', { name: 'Experimental ML proposal and doctor decision', exact: true });
+const section = () => page.getByRole('region', { name: 'Doctor-review prescription draft', exact: true });
+const ml = () => page.getByRole('region', { name: 'Experimental ML suggestions', exact: true });
+const screening = () => page.getByRole('region', { name: 'Patient safety screening', exact: true });
 const reviewCheck = () => section().getByLabel('I reviewed the selected medicines, fixed screened regimens, exclusions and model limitations for this visit.', { exact: true });
 const artifacts = join(tmpdir(), 'meditrack-doctor-review');
 try {
-  const base = `/api/prescription/consultations/${row.visit}/clinical-screening/`;
-  const metadata = await ask({ method: 'GET', path: base + 'inputs/' });
-  const body = { diagnosis_id: metadata.data.confirmed_diagnoses[0].id, expected_context_updated_at: metadata.data.expected_context_updated_at, expected_analysis_hash: metadata.data.expected_analysis_hash, clinical: row.clinical };
-  const preview = await ask({ method: 'POST', path: base + 'preview/', body }); assert.equal(preview.status, 200);
-  const saved = await ask({ method: 'POST', path: base + 'drafts/', body: { ...body, request_key: crypto.randomUUID(), expected_plan_hash: preview.data.plan_hash, expected_latest_revision: preview.data.expected_latest_revision } }); assert.equal(saved.status, 201);
   await page.goto(origin + '/doctor/prescription-workspace');
   await visible(page.getByLabel('Assigned registered patient', { exact: true }));
   await page.getByLabel('Assigned registered patient', { exact: true }).selectOption(String(row.patient));
   await page.getByLabel('Active encounter / consultation', { exact: true }).selectOption(row.visit);
+  await visible(screening().getByRole('group', { name: 'Quick clinical review', exact: true }));
+  const stageNames = await page.locator('section[aria-label]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('aria-label')));
+  assert.ok(stageNames.indexOf('Patient safety screening') < stageNames.indexOf('Experimental ML suggestions'));
+  assert.ok(stageNames.indexOf('Experimental ML suggestions') < stageNames.indexOf('Doctor-review prescription draft'));
+  assert.equal(await page.getByLabel('Frozen fictional scenario', { exact: true }).count(), 0, 'Frozen experiment is separate from the medicine workflow');
+  assert.equal(await ml().getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).count(), 0, 'Screening must be saved first');
+  await screening().getByRole('button', { name: 'Edit all clinical details', exact: true }).click();
+  for (const field of await screening().locator('[data-clinical-field]').all()) {
+    const name = await field.getAttribute('data-clinical-field'), value = row.clinical[name];
+    if (await field.evaluate((node) => node.tagName === 'SELECT')) await field.selectOption(value ?? 'unknown');
+    else await field.fill(value ?? '');
+  }
+  for (const field of await screening().locator('[data-concern]').all()) await field.selectOption('false');
+  for (const field of await screening().locator('[data-symptom]').all()) {
+    await field.selectOption('true');
+    await screening().locator(`[data-duration="${await field.getAttribute('data-symptom')}"]`).fill('12');
+  }
+  await screening().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).check();
+  await screening().getByRole('button', { name: 'Preview medicine candidates', exact: true }).click();
+  await visible(screening().getByRole('region', { name: 'Six-condition screening result', exact: true }));
+  await screening().getByLabel('I reviewed this screening, exclusions and unresolved alternatives. Save this assessment to continue.', { exact: true }).check();
+  await screening().getByRole('button', { name: 'Continue to ML suggestions', exact: true }).click();
+  await visible(ml().getByLabel('Enable Experimental ML medicine suggestions', { exact: true }));
   await visible(section());
-  await section().getByLabel('Enable Experimental ML medicine proposals', { exact: true }).check();
-  await section().getByRole('button', { name: 'Generate medicine proposal', exact: true }).click();
-  await visible(section().getByText(/^Experimental ML · categorical_tree/));
+  await ml().getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).check();
+  await ml().getByRole('button', { name: 'Generate ML suggestions', exact: true }).click();
+  await visible(ml().getByText(/^Experimental ML · categorical_tree/));
   assert.equal(await section().getByRole('link', { name: 'Open approved prescription', exact: true }).count(), 0);
+  assert.equal(await section().getByRole('button', { name: 'Approve selected medicines', exact: true }).count(), 0, 'Prediction alone does not expose doctor decisions');
+  mkdirSync(artifacts, { recursive: true });
+  await page.screenshot({ path: join(artifacts, 'screening-ml-suggestions.png'), fullPage: true });
+  await ml().getByRole('button', { name: 'Prepare doctor-review draft', exact: true }).click();
+  await page.screenshot({ path: join(artifacts, 'doctor-review-draft.png'), fullPage: true });
   assert.equal(await section().getByRole('button', { name: 'Approve selected medicines', exact: true }).isDisabled(), true);
   await section().getByRole('button', { name: 'Edit medicines', exact: true }).click();
   await section().getByLabel('Select Oseltamivir', { exact: true }).uncheck();
@@ -79,7 +104,7 @@ try {
   await visible(section().getByText('Doctor decision: approved · Version 2', { exact: true }));
   const history = await ask({ method: 'GET', path: '/api/prescription/doctor-decisions/' }); assert.equal(history.data.length, 2, 'Lost response retry creates no duplicate approval');
   await page.reload(); await visible(section());
-  await section().getByLabel('Enable Experimental ML medicine proposals', { exact: true }).check();
+  await ml().getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).check();
   await visible(section().getByRole('link', { name: 'Open approved prescription', exact: true }));
   await section().getByRole('link', { name: 'Open approved prescription', exact: true }).click();
   await visible(page.locator('#prescription-slip'));
@@ -96,12 +121,14 @@ try {
   mkdirSync(artifacts, { recursive: true });
   await page.locator('#prescription-slip').screenshot({ path: join(artifacts, 'approved-a6-slip.png') });
   await page.emulateMedia({ media: 'screen' }); await page.setViewportSize({ width: 1440, height: 1000 });
-  console.log('PASS: real saved-model proposal, edit/approve history, lost-response retry, selected-only A6 view and browser print without PDF export.');
+  console.log('PASS: ordered UI screening, saved-model suggestions, explicit review-draft preparation, edit/approve history, lost-response retry, selected-only A6 view and browser print without PDF export.');
   await page.goto(origin + '/doctor/prescription-workspace');
   await visible(section());
-  await section().getByLabel('Enable Experimental ML medicine proposals', { exact: true }).check();
+  await ml().getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).check();
   await visible(section().getByRole('link', { name: 'Open approved prescription', exact: true }));
-  await section().getByRole('button', { name: 'Generate medicine proposal', exact: true }).click();
+  await ml().getByRole('button', { name: 'Generate ML suggestions', exact: true }).click();
+  await visible(ml().getByRole('button', { name: 'Prepare doctor-review draft', exact: true }));
+  await ml().getByRole('button', { name: 'Prepare doctor-review draft', exact: true }).click();
   await visible(section().getByRole('button', { name: 'Reject proposal', exact: true }));
   await section().getByLabel('Doctor decision reason', { exact: true }).fill('Fictional doctor rejected this second proposal for demonstration.');
   await reviewCheck().check(); await section().getByRole('button', { name: 'Reject proposal', exact: true }).click();

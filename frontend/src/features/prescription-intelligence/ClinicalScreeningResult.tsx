@@ -38,10 +38,10 @@ export function ClinicalScreeningResult({ result }: { result: ScreeningResult })
   const excluded = result.candidates.filter((row) => !available.includes(row));
   return <div className="space-y-4" role="region" aria-label="Six-condition screening result">
     <p className="text-sm font-bold">{conditionNames[result.condition]} · Candidate screening</p>
-    <p className="text-xs text-slate-600">Unapproved clinician-review draft. Candidates are unranked; this is not an approved prescription.</p>
+    <p className="text-xs text-slate-600">Screening assessment for clinician review. Candidates are unranked; this is not an approved prescription.</p>
     <div role="region" aria-label="Medicine candidates for this patient" className="space-y-3">
       <h3 className="text-sm font-bold">Medicine candidates for this patient</h3>
-      {!available.length && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">No medicine candidate is available. Review the exclusions below. You can save the assessment and its reasons as an unapproved draft.</p>}
+      {!available.length && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">No medicine candidate is available. Review the exclusions below. You can save the assessment and its reasons.</p>}
       {result.purpose_groups.map((group) => <div key={group.purpose + ":" + group.clinical_role} className="space-y-3 rounded-2xl border border-purple-200 p-3">
         <p className="text-xs font-bold">{group.clinical_role.replaceAll("_", " ")}</p>
         {group.selection === "clinician_choice_required" && <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">Alternatives for the same purpose: clinician choice is still required. These candidates are not a combined treatment plan.</p>}
@@ -53,17 +53,20 @@ export function ClinicalScreeningResult({ result }: { result: ScreeningResult })
   </div>;
 }
 
-export function ClinicalDraftResult({ draft, edited = false }: { draft: ScreeningDraft; edited?: boolean }) {
-  return <Section title="Saved six-condition screening draft" icon={FileText}>
+export function ClinicalDraftResult({ draft, edited = false, compact = false }: { draft: ScreeningDraft; edited?: boolean; compact?: boolean }) {
+  const screeningDetails = <>
+    <ClinicalScreeningResult result={draft.result} />
+    <p className="text-xs text-slate-500">{draft.result.limitations}</p>
+    <details><summary className="cursor-pointer text-xs font-semibold">Saved clinical inputs</summary><pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-all text-xs">{JSON.stringify(clinicalInputSummary(draft.snapshot), null, 2)}</pre></details>
+  </>;
+  return <Section title="Saved safety screening assessment" icon={FileText}>
     <div className="space-y-4">
-      <p className="text-sm font-bold">{conditionNames[draft.result.condition]} · Draft version {draft.revision}</p>
+      <p className="text-sm font-bold">{conditionNames[draft.result.condition]} · Assessment version {draft.revision}</p>
       <p className="text-xs text-slate-600">Patient #{draft.patient} · Age from registered DOB: {draft.snapshot.patient.age_years ?? "Unavailable"}. Saved {new Date(draft.created_at).toLocaleString(undefined, { timeZone: "Asia/Colombo" })}.</p>
       <p className="break-all text-xs text-slate-500">Consultation: {draft.consultation_id}</p>
       {!draft.current_state.is_current && <p role="status" className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">{draft.current_state.reason}</p>}
       {edited && <p role="status" className="text-xs text-amber-900">Inputs have changed. Preview and save a new version to record the current assessment.</p>}
-      <ClinicalScreeningResult result={draft.result} />
-      <p className="text-xs text-slate-500">{draft.result.limitations}</p>
-      <details><summary className="cursor-pointer text-xs font-semibold">Saved clinical inputs</summary><pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-all text-xs">{JSON.stringify(clinicalInputSummary(draft.snapshot), null, 2)}</pre></details>
+      {compact ? <details><summary className="cursor-pointer text-xs font-semibold">View saved screening details</summary><div className="mt-3 space-y-4">{screeningDetails}</div></details> : screeningDetails}
     </div>
   </Section>;
 }

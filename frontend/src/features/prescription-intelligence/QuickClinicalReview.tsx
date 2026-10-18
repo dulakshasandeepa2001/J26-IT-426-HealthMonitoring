@@ -8,10 +8,11 @@ import type { ClinicalAssessment, ScreeningInputs } from "./clinicalScreeningApi
 import type { HandoffCondition } from "./analysisData";
 import type { PatientContext, RegisteredPatient } from "./prescriptionApi";
 
-export function QuickClinicalReview({ metadata, condition, clinical, initial, requirements, patient, history, doctor, disabled, onEdit, onConfirm }: {
+export function QuickClinicalReview({ metadata, condition, clinical, initial, requirements, patient, history, doctor, disabled, onEdit, onConfirm, onReviewHistory }: {
   metadata: ScreeningInputs; condition: HandoffCondition; clinical: ClinicalAssessment; initial: ClinicalAssessment;
   requirements: QuickRequirements; patient: RegisteredPatient | null; history: PatientContext | null; doctor: number; disabled: boolean;
   onEdit: (value: ClinicalAssessment) => void; onConfirm: (checked: boolean) => void;
+  onReviewHistory?: () => void;
 }) {
   const [editingAll, setEditingAll] = useState(false);
   const [presence, setPresence] = useState(() => sourcePresence(metadata, condition));
@@ -46,7 +47,7 @@ export function QuickClinicalReview({ metadata, condition, clinical, initial, re
       <p>{patient?.display_name ?? "Registered patient"} · Patient #{patient?.id} · Age from registered DOB: {metadata.patient_age_years ?? "Unavailable"}</p>
       <p>Allergies: {historyText(history?.allergy_status, history?.allergies)}</p>
       <p>Current medicines: {historyText(history?.medicine_status, history?.current_medicines)}</p>
-      <a href="#patient-medicine-history" className="inline-block font-semibold text-purple-700 underline">Review or correct saved patient history above</a>
+      <a href="#patient-medicine-history" className="inline-block font-semibold text-purple-700 underline" onClick={(event) => { if (onReviewHistory) { event.preventDefault(); onReviewHistory(); } }}>Review or correct saved patient history above</a>
       <p className="text-slate-600">Analysis findings are proposed for your review. Confirm them against this patient, correct anything inaccurate, and leave missing facts Unknown.</p>
       <dl className="grid gap-3 sm:grid-cols-2">
         {fields.filter((field) => !missingValue(clinical[field.key])).map((field) => <div key={field.key}><dt className="font-semibold">{field.label}</dt><dd>{selectLabel(field, clinical[field.key])}<span className="block text-slate-500">{field.key === "influenza_guideline" ? "Explicit guideline choice; confirm for this visit" : initial[field.key] === clinical[field.key] ? "From consultation analysis; confirm for this visit" : "Entered or corrected for this visit"}</span></dd></div>)}
@@ -56,7 +57,8 @@ export function QuickClinicalReview({ metadata, condition, clinical, initial, re
       </dl>
       {metadata.source_observations.red_flags.length > 0 && <p className="rounded-xl bg-rose-50 p-3 text-rose-900">Source red flags: {metadata.source_observations.red_flags.join("; ")}. Confirming this summary cannot clear reported red flags.</p>}
       {metadata.source_observations.severity === "severe" && <p className="text-rose-900">Severe disease is reported; the limited outpatient pathway cannot clear this context.</p>}
-      <p className={clinical.reviewed ? "font-semibold text-emerald-800" : "font-semibold text-amber-900"}>{clinical.reviewed ? "Summary reviewed for this visit. Unknown facts remain unknown." : "Not yet confirmed by you for this visit."}</p>
+      <p role="status" aria-live="polite" className={clinical.reviewed ? "font-semibold text-emerald-800" : "font-semibold text-amber-900"}>{clinical.reviewed ? "Summary reviewed for this visit. Unknown facts remain unknown." : "Not yet confirmed by you for this visit."}</p>
+      <button type="button" className={buttonStyle} disabled={disabled || clinical.reviewed} onClick={() => onConfirm(true)}>Confirm clinical summary</button>
     </div>
     <div className="space-y-4 rounded-2xl border border-slate-200 p-4" role="region" aria-label="Questions to clarify">
       <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-sm font-bold">{editingAll ? "Correct clinical details" : `Questions to clarify (${unknownCount})`}</h3><button type="button" className={buttonStyle} onClick={() => setEditingAll((old) => !old)}>{editingAll ? "Show missing questions only" : "Edit all clinical details"}</button></div>

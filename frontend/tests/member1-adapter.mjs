@@ -156,7 +156,7 @@ try {
   await page.getByRole('button', { name: 'Confirm Diagnosis', exact: true }).click();
   await visible(page.getByText('Doctor diagnosis confirmation is saved separately.', { exact: true }));
   assert.equal(diagnoses[0].condition_code, 'influenza');
-  assert.equal(await page.getByRole('button', { name: 'Generate Prescription Draft' }).isDisabled(), true);
+  assert.equal(await page.getByRole('button', { name: 'Continue to ML suggestions' }).isDisabled(), true);
   console.log('PASS: desktop/mobile output, refresh persistence and explicit reference-bound doctor confirmation; prescription generation remains disabled.');
 
   await page.getByLabel('Active encounter / consultation').selectOption(ids[1]);

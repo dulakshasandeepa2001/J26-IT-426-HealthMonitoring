@@ -9,6 +9,7 @@ from .models import PatientScreeningDraft, content_digest
 from .screening_contract import SixConditionPreviewSerializer, SixConditionSaveSerializer, SixConditionClinicalSerializer
 from .patient_screening import authorized_visit, draft_queryset, source_observations, preview, save, freshness
 from .screening_engine import ENGINE_VERSION
+from .screening_availability import screening_database_operation
 
 
 class ScreeningInputsView(DoctorAccess, APIView):
@@ -42,7 +43,9 @@ class ScreeningPreviewView(DoctorAccess, APIView):
     def post(self, request, consultation_id):
         contract = SixConditionPreviewSerializer(data=request.data)
         contract.is_valid(raise_exception=True)
-        return Response(preview(request.user, consultation_id, dict(contract.data)))
+        with screening_database_operation():
+            result = preview(request.user, consultation_id, dict(contract.data))
+        return Response(result)
 
 
 class ScreeningDraftSerializer(serializers.ModelSerializer):
@@ -60,8 +63,10 @@ class ScreeningSaveView(DoctorAccess, APIView):
     def post(self, request, consultation_id):
         contract = SixConditionSaveSerializer(data=request.data)
         contract.is_valid(raise_exception=True)
-        row, created = save(request.user, consultation_id, dict(contract.data))
-        return Response(ScreeningDraftSerializer(row, context={'request': request}).data, status=201 if created else 200)
+        with screening_database_operation():
+            row, created = save(request.user, consultation_id, dict(contract.data))
+            result = ScreeningDraftSerializer(row, context={'request': request}).data
+        return Response(result, status=201 if created else 200)
 
 
 class ScreeningDraftViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):

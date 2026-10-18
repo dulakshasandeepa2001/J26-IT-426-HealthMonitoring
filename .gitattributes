@@ -1,0 +1,12 @@
+# Frozen research artifacts and review bindings hash exact bytes. Keep their
+# original LF endings when Git checks them out on Windows.
+/backend/prescription_research/** text eol=lf
+/backend/medicine_knowledge/data/*.json text eol=lf
+/backend/prescription_drafts/data/*.json text eol=lf
+/backend/prescription_drafts/engine.py text eol=lf
+/backend/medicine_knowledge/additional_candidates.py text eol=lf
+/backend/medicine_knowledge/condition_knowledge.py text eol=lf
+/backend/medicine_knowledge/patient_screening.py text eol=lf
+/backend/medicine_knowledge/screening_*.py text eol=lf
+/backend/prescription_context/history_identity.py text eol=lf
+/docs/research/** text eol=lf

@@ -4,7 +4,7 @@ from io import StringIO
 from uuid import uuid4
 from unittest.mock import patch
 from django.core.management import call_command
-from django.db import connection
+from django.db import OperationalError, connection
 from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
@@ -111,6 +111,52 @@ class PatientScreeningTests(TestCase):
                 self.assertTrue(saved.data['current_state']['is_current'])
         self.assertEqual(PatientScreeningDraft.objects.count(), 6)
         self.assertEqual(PrescriptionDraft.objects.count(), 0)
+
+    def test_preview_database_lock_timeout_is_retryable_without_partial_candidates(self):
+        visit, body = self.case('influenza')
+        cause = Exception('Private database details must not reach the browser')
+        cause.pgcode = '55P03'
+        error = OperationalError('Internal database lock details')
+        error.__cause__ = cause
+        with patch('medicine_knowledge.screening_views.preview', side_effect=error):
+            response = self.preview(visit, body)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response['Retry-After'], '3')
+        self.assertIn('temporarily busy', str(response.data))
+        self.assertNotIn('Private', str(response.data))
+        self.assertNotIn('result', response.data)
+        self.assertEqual(PatientScreeningDraft.objects.count(), 0)
+        self.assertEqual(self.preview(visit, body).status_code, 200)
+
+    def test_database_disconnect_returns_safe_retry_message(self):
+        visit, body = self.case()
+        with patch('medicine_knowledge.screening_views.preview', side_effect=OperationalError('Private connection details')):
+            response = self.preview(visit, body)
+        self.assertEqual(response.status_code, 503)
+        self.assertIn('connection is temporarily unavailable', str(response.data))
+        self.assertNotIn('Private', str(response.data))
+        self.assertEqual(PatientScreeningDraft.objects.count(), 0)
+
+    def test_database_failure_after_save_rolls_back_and_same_request_can_retry(self):
+        from .patient_screening import save as actual_save
+        visit, body = self.case()
+        plan = self.preview(visit, body).data
+        cause = Exception('Statement timeout')
+        cause.pgcode = '57014'
+        error = OperationalError('Internal timeout details')
+        error.__cause__ = cause
+
+        def interrupted_save(*args):
+            actual_save(*args)
+            raise error
+
+        with patch('medicine_knowledge.screening_views.save', side_effect=interrupted_save):
+            response, request = self.save(visit, body, plan)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(PatientScreeningDraft.objects.count(), 0)
+        response = self.client.post(self.path(visit, 'drafts'), request, format='json')
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(PatientScreeningDraft.objects.count(), 1)
 
     def test_mumps_and_eye_alternatives_are_grouped_without_automatic_combination_or_ranking(self):
         for condition in ('mumps', 'viral_conjunctivitis'):

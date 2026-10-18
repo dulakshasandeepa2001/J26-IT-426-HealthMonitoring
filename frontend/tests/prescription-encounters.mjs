@@ -126,7 +126,7 @@ async function fillVisitReason(text) {
   await field.fill(text);
 }
 async function disabledActions() {
-  for (const name of ["Generate Prescription Draft", "Edit draft", "Revalidate edited version", "Reject", "Approve", "Publish Approved Version"]) {
+  for (const name of ["Continue to ML suggestions", "Edit draft", "Revalidate edited version", "Reject", "Approve", "Publish Approved Version"]) {
     const action = page.getByRole("button", { name, exact: true });
     if (await action.count()) assert.equal(await action.isDisabled(), true, name);
   }

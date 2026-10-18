@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, FlaskConical, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
+import { useCallback, useRef } from "react";
+import { AlertTriangle, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
-import { PatientContextForm } from "./PatientContextForm";
+import { PatientContextForm, type PatientHistoryEditorHandle } from "./PatientContextForm";
 import { AnalysisResult } from "./AnalysisResult";
 import { SixConditionDraftFlow } from "./SixConditionDraftFlow";
-import { ExperimentalMLPanel } from "./ExperimentalMLPanel";
 import { controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
 function Badge({ label, variant }: { label: string; variant: "green" | "amber" | "rose" | "slate" }) {
@@ -27,6 +27,8 @@ function Badge({ label, variant }: { label: string; variant: "green" | "amber" |
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function PrescriptionWorkspace({ requestedConsultation }: { requestedConsultation?: string }) {
   const rx = usePrescription(requestedConsultation);
+  const historyEditor = useRef<PatientHistoryEditorHandle>(null);
+  const reviewHistory = useCallback(() => historyEditor.current?.open(), []);
 
   // Derived flags
   const hasConsultation = !!rx.activeConsultation;
@@ -66,9 +68,9 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         <EncounterSelector key={rx.activePatient?.id ?? "none"} rx={rx} />
       </Section>
 
-      <Section id="patient-medicine-history" title="Patient allergies and current medicines" icon={ClipboardCheck}>
+      <Section id="patient-medicine-history" title="Patient allergies and current medicines" icon={ClipboardCheck} className="scroll-mt-24">
         {hasConsultation && rx.activePatient ? (
-          <PatientContextForm key={`${rx.activeConsultation!.id}:${rx.activePatientContext?.updated_at ?? "new"}`} rx={rx} />
+          <PatientContextForm key={`${rx.activeConsultation!.id}:${rx.activePatientContext?.updated_at ?? "new"}`} rx={rx} editorRef={historyEditor} />
         ) : (
           <Unavailable title="Select a patient and visit first">Choose an assigned patient and saved consultation to record allergies and current medicines.</Unavailable>
         )}
@@ -128,11 +130,8 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         </Section>
       </div>
 
-      <SixConditionDraftFlow key={screeningKey} rx={rx} />
+      <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} />
 
-      <Section title="Experimental ML" icon={FlaskConical}>
-        {rx.activeConsultation && !rx.accessDenied ? <ExperimentalMLPanel key={rx.activeConsultation.id} consultationId={rx.activeConsultation.id} isDemo={rx.activeConsultation.is_demo} /> : <Unavailable title="Select a patient and visit first">Choose an assigned synthetic research consultation to inspect provisional relevance predictions.</Unavailable>}
-      </Section>
       <Section title="Evidence and medicine identity" icon={BookOpen}>
         <p className="text-xs leading-relaxed text-slate-500">Saved drafts retain the patient inputs, original analysis, reviewed catalogue and safety profiles used for screening. Check current medicine identities in the patient form.</p>
         <Link href="/doctor/medicine-knowledge" className="mt-3 inline-block text-xs font-semibold text-purple-700 underline">Open Medicine Knowledge and safety rule review</Link>

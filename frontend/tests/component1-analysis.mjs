@@ -136,7 +136,7 @@ try {
   assert.equal(diagnoses.length, 1);
   assert.equal(diagnoses[0].condition_code, "influenza");
   assert.equal(await diagnosisInput().isDisabled(), true);
-  assert.equal(await page.getByRole("button", { name: "Generate Prescription Draft", exact: true }).isDisabled(), true);
+  assert.equal(await page.getByRole("button", { name: "Continue to ML suggestions", exact: true }).isDisabled(), true);
   console.log("PASS: refresh restores analysis; only explicit doctor confirmation stores the diagnosis, with the exact analysis reference.");
 
   await page.getByLabel("Assigned registered patient").selectOption("202");

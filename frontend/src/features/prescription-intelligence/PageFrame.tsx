@@ -16,9 +16,9 @@ export function PageFrame({ title, description, children }: { title: string; des
   );
 }
 
-export function Section({ title, icon: Icon, children, id }: { title: string; icon: LucideIcon; children: ReactNode; id?: string }) {
+export function Section({ title, icon: Icon, children, id, className = "" }: { title: string; icon: LucideIcon; children: ReactNode; id?: string; className?: string }) {
   return (
-    <section id={id} className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-label={title}>
+    <section id={id} className={`min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 ${className}`} aria-label={title}>
       <h2 className="mb-4 flex items-center gap-2.5 text-sm font-bold text-slate-900"><Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-purple-600" />{title}</h2>
       {children}
     </section>

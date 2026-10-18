@@ -35,7 +35,7 @@ if (!executablePath && !existsSync(chromium.executablePath()) && process.env.LOC
 const browser = await chromium.launch({ executablePath, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
 const page = await context.newPage(), errors = [], requests = [];
-let loseNextSave = false, held = null, holdNextPreview = false, notifyHeld;
+let loseNextSave = false, held = null, holdNextPreview = false, notifyHeld, failNextPreview = false;
 page.on('pageerror', (error) => errors.push(error.message));
 await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route) => {
   const request = route.request(), url = new URL(request.url()), method = request.method();
@@ -44,6 +44,10 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   const body = method === 'POST' ? request.postDataJSON() : undefined;
   if (method === 'POST' && url.pathname.includes('clinical-screening')) assert.ok(request.headers()['x-csrftoken'], 'Frontend supplies CSRF token');
   requests.push({ path: url.pathname, method, body });
+  if (failNextPreview && url.pathname.endsWith('/clinical-screening/preview/')) {
+    failNextPreview = false;
+    return route.fulfill({ status: 503, json: { detail: 'Screening is temporarily busy with another database operation. Wait a few seconds and try again. No new screening result was confirmed.' }, headers });
+  }
   const result = await ask({ method, path: url.pathname + url.search, body });
   if (holdNextPreview && url.pathname.endsWith('/clinical-screening/preview/')) {
     holdNextPreview = false;
@@ -55,10 +59,10 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   }
   return route.fulfill({ status: result.status, json: result.data, headers });
 });
-const section = () => page.getByRole('region', { name: 'Generate a prescription recommendation draft', exact: true });
-const saved = () => page.getByRole('region', { name: 'Saved six-condition screening draft', exact: true });
+const section = () => page.getByRole('region', { name: 'Patient safety screening', exact: true });
+const saved = () => page.getByRole('region', { name: 'Saved safety screening assessment', exact: true });
 const preview = () => section().getByRole('button', { name: 'Preview medicine candidates', exact: true });
-const save = () => section().getByRole('button', { name: /^(Generate Prescription Draft|Save assessment draft)$/ });
+const save = () => section().getByRole('button', { name: /^(Continue to ML suggestions|Save screening assessment)$/ });
 const result = () => section().getByRole('region', { name: 'Six-condition screening result', exact: true });
 const visible = (locator) => locator.waitFor({ state: 'visible' });
 async function choose(row) {
@@ -96,10 +100,11 @@ async function quickAssess(row) {
   }
   const remember = section().getByLabel('Remember my explicit influenza guideline choice for future reviews on this browser. Each visit still requires confirmation.', { exact: true });
   if (!await remember.isDisabled()) await remember.check();
+  assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), false, 'Changing clinical facts requires renewed summary confirmation');
   await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).check();
   assert.equal(await section().getByRole('button', { name: 'Edit all clinical details', exact: true }).count(), 1, 'Quick path did not open the full form');
 }
-async function acknowledge() { await section().getByLabel('I reviewed this preview, exclusions and any unresolved alternatives. Save as an unapproved screening draft.', { exact: true }).check(); }
+async function acknowledge() { await section().getByLabel('I reviewed this screening, exclusions and unresolved alternatives. Save this assessment to continue.', { exact: true }).check(); }
 const artifacts = join(tmpdir(), 'meditrack-six-condition-workspace');
 try {
   await page.goto(origin + '/doctor/prescription-workspace');
@@ -109,9 +114,41 @@ try {
     await visible(section().getByText('Not yet confirmed by you for this visit.', { exact: true }));
     assert.equal(await section().getByRole('button', { name: 'Edit all clinical details', exact: true }).count(), 1);
     assert.equal(await preview().isDisabled(), true);
+    await visible(section().getByText('Confirm the clinical summary above, or check the visit-review checkbox after your corrections.', { exact: true }));
     if (row.condition === 'influenza') {
-      await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).check();
+      const summary = section().getByRole('region', { name: 'Patient review summary', exact: true });
+      await summary.getByRole('link', { name: 'Review or correct saved patient history above', exact: true }).click();
+      await visible(page.getByLabel('Allergy status', { exact: true }));
+      await page.waitForFunction(() => document.activeElement?.id === 'allergy-status');
+      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), false, 'Opening patient history does not confirm the clinical summary');
+      await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).click();
+      await visible(summary.getByText('Summary reviewed for this visit. Unknown facts remain unknown.', { exact: true }));
+      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), true, 'Summary button and lower checkbox share the same confirmation');
+      assert.equal(await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).isDisabled(), true);
+      failNextPreview = true;
+      await preview().click();
+      const feedback = section().getByRole('group', { name: 'Medicine preview feedback', exact: true });
+      await visible(feedback.getByRole('alert').filter({ hasText: 'temporarily busy' }));
+      await page.waitForFunction(() => document.activeElement?.id === 'medicine-preview-feedback');
+      assert.equal(await result().count(), 0, 'Database failure never supplies partial candidates');
+      assert.equal(await preview().isEnabled(), true, 'Busy response allows retry without re-entering facts');
+      assert.equal(await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).isDisabled(), true, 'A transient preview failure retains confirmation');
+      await page.clock.install();
+      holdNextPreview = true;
+      const timedRequest = new Promise((resolve) => { notifyHeld = resolve; });
+      await preview().click(); await timedRequest;
+      await visible(feedback.getByRole('status').filter({ hasText: 'Waiting for the database response' }));
+      await page.clock.fastForward(30_100);
+      await visible(feedback.getByRole('alert').filter({ hasText: 'Screening took too long' }));
+      assert.equal(await preview().isEnabled(), true, 'A hung request is bounded and can be retried');
+      held(); held = null;
+      assert.equal(await result().count(), 0, 'An aborted late response never becomes a preview');
       await preview().click(); await visible(result());
+      await visible(feedback.getByRole('status').filter({ hasText: 'Screening complete: 0 medicine candidates' }));
+      await page.waitForFunction(() => document.activeElement?.id === 'medicine-preview-feedback');
+      const submitted = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
+      assert.equal(submitted.care_setting, 'unknown', 'Confirmation never invents assessed care setting');
+      assert.equal(submitted.renal_assessment, 'unknown', 'Confirmation never clears an unknown renal assessment');
       await visible(result().getByText(/^No medicine candidate is available\./));
       assert.equal(await ask({ action: 'count' }).then((value) => value.count), 0, 'Preview has no draft writes');
     }
@@ -125,7 +162,7 @@ try {
     if (row.condition === 'viral_gastroenteritis') {
       await visible(result().getByText(/^No medicine candidate is available\./));
       await visible(result().getByText(/^Exact ORS label\/composition\/dilution remains unresolved/));
-      assert.equal(await save().innerText(), 'Save assessment draft');
+      assert.equal(await save().innerText(), 'Save screening assessment');
     } else assert.ok(await result().getByRole('region', { name: 'Medicine candidates for this patient', exact: true }).getByRole('article').count());
     if (row.condition === 'mumps' || row.condition === 'viral_conjunctivitis') await visible(result().getByText(/^Alternatives for the same purpose:/));
     await acknowledge();
@@ -136,6 +173,14 @@ try {
     }
     await save().click(); await visible(saved());
     assert.equal((await ask({ action: 'count' })).count, cases.indexOf(row) + 1, 'Save retry is idempotent');
+    if (row.condition === 'viral_gastroenteritis') {
+      const ml = page.getByRole('region', { name: 'Experimental ML suggestions', exact: true });
+      await ml.getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).check();
+      await ml.getByRole('button', { name: 'Generate ML suggestions', exact: true }).click();
+      await visible(ml.getByText('Safety screening has made no medicine available. Review the exclusions and patient inputs before preparing a prescription draft.', { exact: true }));
+      assert.equal(await ml.getByRole('button', { name: 'Prepare doctor-review draft', exact: true }).isDisabled(), true);
+      assert.equal(await page.getByRole('region', { name: 'Doctor-review prescription draft', exact: true }).getByRole('button', { name: 'Approve selected medicines', exact: true }).count(), 0);
+    }
     await page.reload(); await visible(saved());
     assert.equal(await preview().isDisabled(), true, 'Refresh requires a new summary confirmation');
     if (row.condition === 'influenza') {

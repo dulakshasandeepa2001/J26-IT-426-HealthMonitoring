@@ -206,7 +206,7 @@ try {
   assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing recorded allergy');
   await page.getByLabel('Current medicines', { exact: true }).fill('paracetamol 500 mg tablet');
   assert.equal(await page.getByTestId('medicine-summary').textContent(), 'paracetamol 500 mg tablet');
-  assert.equal(await page.getByRole('button', { name: 'Generate Prescription Draft' }).isDisabled(), true);
+  assert.equal(await page.getByRole('button', { name: 'Continue to ML suggestions' }).isDisabled(), true);
   assert.deepEqual(patientContext.current_medicines, ['paracetamol']);
   assert.deepEqual(errors, []);
   console.log('PASS: compact history summary and optional editor do not save or change patient data automatically; generation remains disabled.');

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
 import type { ContextStatus } from "./prescriptionApi";
@@ -11,7 +11,9 @@ function statusOrUnknown(status: string | undefined): ContextStatus {
   return status === "confirmed" || status === "none" ? status : "unknown";
 }
 
-export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescription> }) {
+export interface PatientHistoryEditorHandle { open: () => void }
+
+export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof usePrescription>; editorRef?: Ref<PatientHistoryEditorHandle> }) {
   const context = rx.activePatientContext;
   const visit = rx.activeConsultation!, analysis = rx.activeAnalysis;
   const prefill = useMemo(() => patientHistoryPrefill(visit, analysis, context), [visit, analysis, context]);
@@ -19,6 +21,12 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
   const fields = draft ?? prefill.fields;
   const { allergyStatus, medicineStatus, allergyText, medicineText } = fields;
   const [editingOverride, setEditingOverride] = useState<boolean | null>(null);
+  const allergyStatusRef = useRef<HTMLSelectElement>(null);
+  useImperativeHandle(editorRef, () => ({ open() {
+    setEditingOverride(true);
+    document.getElementById("patient-medicine-history")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    window.requestAnimationFrame(() => allergyStatusRef.current?.focus({ preventScroll: true }));
+  } }), []);
   const editing = editingOverride ?? (draft !== null || allergyStatus === "unknown" && medicineStatus === "unknown");
   const [reviewedKey, setReviewedKey] = useState<string | null>(null);
   const inputKey = JSON.stringify([rx.activeConsultation?.id, context?.updated_at, rx.activeAnalysis?.id,
@@ -87,7 +95,7 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label htmlFor="allergy-status" className="text-xs font-semibold text-slate-700">Allergy status</label>
-            <select id="allergy-status" className={controlStyle} value={allergyStatus} onChange={(event) => edit({ allergyStatus: event.target.value as ContextStatus })}>
+            <select ref={allergyStatusRef} id="allergy-status" className={controlStyle} value={allergyStatus} onChange={(event) => edit({ allergyStatus: event.target.value as ContextStatus })}>
               <option value="unknown">Unknown / not established</option>
               <option value="none">None reported</option>
               <option value="confirmed">Known allergies</option>

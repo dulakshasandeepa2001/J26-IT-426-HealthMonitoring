@@ -38,7 +38,7 @@ function ManualVisitForm({ rx, onStatus }: { rx: Prescription; onStatus: (messag
   );
 }
 
-export function EncounterSelector({ rx }: { rx: Prescription }) {
+export function EncounterSelector({ rx, allowManualVisit = true }: { rx: Prescription; allowManualVisit?: boolean }) {
   const [savedMessage, setSavedMessage] = useState("");
   const visits = rx.consultations.filter((item) => item.patient === rx.activePatient?.id);
   const details = rx.activeConsultation ? visitDetails(rx.activeConsultation, rx.activeAnalysis) : null;
@@ -98,7 +98,7 @@ export function EncounterSelector({ rx }: { rx: Prescription }) {
             </dl>
           )}
 
-          <ManualVisitForm key={rx.activeConsultation?.id ?? "no-visit"} rx={rx} onStatus={setSavedMessage} />
+          {allowManualVisit && <ManualVisitForm key={rx.activeConsultation?.id ?? "no-visit"} rx={rx} onStatus={setSavedMessage} />}
           {savedMessage && <p role="status" className="flex gap-2 text-xs text-emerald-700"><Check className="h-4 w-4" aria-hidden="true" />{savedMessage}</p>}
 
         </>

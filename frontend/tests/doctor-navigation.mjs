@@ -133,8 +133,8 @@ try {
   assert.equal(await page.getByLabel("Authorized encounter", { exact: true }).isDisabled(), true);
   assert.equal(await page.getByLabel("Diagnosis context", { exact: true }).isDisabled(), true);
   assert.equal(await page.getByRole("checkbox", { name: "I confirm the diagnosis context for this authorized patient encounter." }).isDisabled(), true);
-  assert.equal(await page.getByRole("button", { name: "Generate Prescription Draft", exact: true }).count(), 1);
-  for (const label of ["Generate Prescription Draft", "Edit draft", "Revalidate edited version", "Reject", "Approve", "Publish Approved Version"]) {
+  assert.equal(await page.getByRole("button", { name: "Continue to ML suggestions", exact: true }).count(), 1);
+  for (const label of ["Continue to ML suggestions", "Edit draft", "Revalidate edited version", "Reject", "Approve", "Publish Approved Version"]) {
     assert.equal(await page.getByRole("button", { name: label, exact: true }).isDisabled(), true);
   }
   assert.deepEqual(await page.getByRole("list", { name: "Prescription workflow" }).locator("li").allTextContents(), [

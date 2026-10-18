@@ -1,5 +1,9 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+[Step 13](STEP13.md) organizes the connected prescription workflow as patient
+safety screening → Experimental ML suggestions → doctor-review draft. The
+separate fictional experiment is retained on its own research page.
+
 [Step 12](STEP12.md) adds readable consultation references, JSON history prefill
 and a compact history editor. Missing source history remains Unknown; the doctor
 explicitly reviews and saves patient history before screening.

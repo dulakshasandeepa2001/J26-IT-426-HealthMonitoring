@@ -46,7 +46,7 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
     || path.startsWith("/approve-doctor/") || path.startsWith("/reject-doctor/");
   if (protectedMutation && !["GET", "HEAD", "OPTIONS"].includes(method)) {
     // Fetch a fresh token: Django rotates it on login, and another tab may log in.
-    const session = await getSession();
+    const session = await getSession({ signal: options.signal });
     headers.set("X-CSRFToken", session.csrfToken);
   }
 
@@ -66,8 +66,8 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   return data;
 }
 
-export async function getSession(): Promise<{ user: SessionUser | null; csrfToken: string }> {
-  return apiRequest("/session/");
+export async function getSession(options: Pick<RequestInit, "signal"> = {}): Promise<{ user: SessionUser | null; csrfToken: string }> {
+  return apiRequest("/session/", options);
 }
 
 export async function logoutUser() {

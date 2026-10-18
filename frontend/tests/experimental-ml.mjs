@@ -87,7 +87,7 @@ async function predict() {
   await panel.getByRole('button', { name: 'Predict synthetic relevance' }).click();
 }
 try {
-  await page.goto(origin + '/doctor/prescription-workspace');
+  await page.goto(origin + '/doctor/ml-research');
   await page.getByLabel('Assigned registered patient').selectOption(String(patient.id));
   await page.getByLabel('Active encounter / consultation').selectOption(visits[0].id);
   await visible(checkbox());
