@@ -74,7 +74,7 @@ export function DraftFlow({ rx }: { rx: ReturnType<typeof usePrescription> }) {
   }, [visitId, reloadWorkspace, setLoading, setError, setProfiles, setDrafts, setSelected, setClinical]);
   const invalidate = useCallback(() => { sequence.current++; }, []);
   useEffect(() => { alive.current = true; const timer = setTimeout(() => { void load(); }, 0); return () => { alive.current = false; invalidate(); clearTimeout(timer); }; }, [load, invalidate, context?.updated_at, diagnosis?.id]);
-  const readyContext = context?.provenance.last_reviewed_consultation === visitId && context?.provenance.last_reviewed_by === visit?.doctor;
+  const readyContext = !rx.patientHistoryPending && context?.provenance.last_reviewed_consultation === visitId && context?.provenance.last_reviewed_by === visit?.doctor;
   const eligible = profiles.filter((profile) => profile.conditions.includes(condition) && profile.review_is_current && profile.catalogue_review_current);
   const received = useCallback(() => { setClinical((old) => ({ ...old, reviewed: false })); }, [setClinical]);
   const denied = useCallback((message: string) => { setError(message); setDrafts([]); setProfiles([]); setClinical(emptyClinical); void reloadWorkspace(); }, [reloadWorkspace, setError, setDrafts, setProfiles, setClinical]);

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { ApiError } from "@/lib/api";
@@ -21,7 +20,7 @@ export function SixConditionDraftFlow({ rx }: { rx: ReturnType<typeof usePrescri
   const visit = rx.activeConsultation, context = rx.activePatientContext;
   const diagnosis = rx.diagnoses.find((row) => row.consultation === visit?.id);
   const condition = diagnosis ? screeningCondition(diagnosis.condition_code, diagnosis.condition_label) : null;
-  const historyReviewed = !!visit && context?.provenance.last_reviewed_consultation === visit.id && context.provenance.last_reviewed_by === visit.doctor;
+  const historyReviewed = !rx.patientHistoryPending && !!visit && context?.provenance.last_reviewed_consultation === visit.id && context.provenance.last_reviewed_by === visit.doctor;
   const ready = !!visit && !!diagnosis && !!condition && historyReviewed && !rx.loading && !rx.accessDenied;
   const visitId = visit?.id, doctorId = visit?.doctor;
   const [metadata, setMetadata] = useState<ScreeningInputs | null>(null);
@@ -120,7 +119,7 @@ export function SixConditionDraftFlow({ rx }: { rx: ReturnType<typeof usePrescri
     <Section title="Generate a prescription recommendation draft" icon={Sparkles}>
       <div className="space-y-5">
         <p className="text-sm text-slate-600">Verify this visit, preview source-based candidates and exclusions, then save an unapproved screening draft. Medicines with incomplete product or safety coverage remain unavailable.</p>
-        <div className="flex flex-wrap gap-3"><button type="button" className={buttonStyle} disabled={!ready || loading || saving} onClick={load}>Refresh screening inputs and drafts</button><Link href="/doctor/medicine-knowledge" className="self-center text-xs font-semibold text-purple-700 underline">Review medicine knowledge and safety rules</Link></div>
+        <div className="flex flex-wrap gap-3"><button type="button" className={buttonStyle} disabled={!ready || loading || saving} onClick={load}>Refresh screening inputs and drafts</button></div>
         <ul className="space-y-1 text-xs text-amber-900">
           {!visit && <li>Select a patient and saved visit first.</li>}
           {visit && !diagnosis && <li>Confirm this visit diagnosis first.</li>}
@@ -149,8 +148,8 @@ export function SixConditionDraftFlow({ rx }: { rx: ReturnType<typeof usePrescri
           <ClinicalScreeningResult result={usablePlan.response.result} />
           {usablePlan.response.result.candidates.some((row) => row.checks.some((check) => ["allergy", "duplicate_ingredient", "interaction"].includes(check.category) && ["cannot_validate", "blocked", "warning"].includes(check.status))) &&
             <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              <p>History checks need attention. Resolve an unknown identity in the patient form; keep real allergies and current medicines recorded.</p>
-              <a href="#patient-medicine-history" className="font-bold underline">Review recorded allergy and medicine identities</a>
+              <p>History checks need attention. Review the recorded allergies and current medicines; unresolved identities remain unavailable for screening.</p>
+              <a href="#patient-medicine-history" className="font-bold underline">Review allergies and current medicines</a>
               <p>A recognized current medicine can still block duplicate treatment or need an independent interaction review. This prototype has no continuation/replacement or comprehensive interaction-clearance workflow.</p>
             </div>}
           <label className="flex items-start gap-2 text-xs"><input type="checkbox" disabled={saving} checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} />I reviewed this preview, exclusions and any unresolved alternatives. Save as an unapproved screening draft.</label>

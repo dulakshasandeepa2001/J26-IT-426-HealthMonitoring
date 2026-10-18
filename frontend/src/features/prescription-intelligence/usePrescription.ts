@@ -25,6 +25,7 @@ export interface PrescriptionState {
   activeConsultation: Consultation | null;
   activeAnalysis: ConsultationAnalysis | null;
   activePatientContext: PatientContext | null;
+  patientHistoryPending: boolean;
   step: WorkflowStep;
   diagnosisContext: string;
   diagnosisConfirmed: boolean;
@@ -37,6 +38,7 @@ export interface PrescriptionState {
 }
 
 const emptyReview = {
+  patientHistoryPending: true,
   step: 0 as WorkflowStep,
   diagnosisContext: "",
   diagnosisConfirmed: false,

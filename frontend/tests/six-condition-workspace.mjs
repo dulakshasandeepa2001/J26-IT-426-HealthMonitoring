@@ -173,36 +173,42 @@ try {
   mkdirSync(artifacts, { recursive: true });
   await page.screenshot({ path: join(artifacts, 'six-condition-records.png'), fullPage: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
+  // Seed an existing doctor-confirmed identity record only in the isolated fixture.
+  // The removed UI must not manufacture new decisions or discard this saved record.
+  const identityResponse = await ask({ method: 'GET', path: `/api/prescription/consultations/${cases[0].visit}/history-identities/` });
+  assert.equal(identityResponse.status, 200);
+  const product = identityResponse.data.products.find((row) => row.id === 'paracetamol-500mg-tablet');
+  const histories = await ask({ method: 'GET', path: '/api/prescription/patient-contexts/' });
+  const originalHistory = histories.data.find((row) => row.patient === cases[0].patient);
+  const identityDetails = { allergies: [{ recorded_text: 'Penicillin (Rash)', identity: 'penicillin', reaction: 'Rash', reaction_date: null, clarification_note: '' }],
+    medicines: [{ recorded_text: 'Paracetamol 500mg SOS', catalogue_id: product.id, expected_identity_hash: product.identity_hash,
+      schedule: 'SOS', clarification_note: 'Fictional fixture doctor confirmed the exact 500 mg tablet product.' }] };
+  const seeded = await ask({ method: 'POST', path: `/api/prescription/consultations/${cases[0].visit}/patient-context/`, body: {
+    allergy_status: 'confirmed', allergies: ['Penicillin (Rash)'], medicine_status: 'confirmed', current_medicines: ['Paracetamol 500mg SOS'],
+    reviewed: true, expected_updated_at: originalHistory.updated_at, history_details: identityDetails,
+  } });
+  assert.equal(seeded.status, 200);
   await page.goto(origin + '/doctor/prescription-workspace');
   await choose(cases[0]);
-  await page.getByLabel('Allergy status', { exact: true }).selectOption('confirmed');
-  await page.getByLabel('Allergies', { exact: true }).fill('Penicillin (Rash)');
-  await page.getByLabel('Current medicine status', { exact: true }).selectOption('confirmed');
-  await page.getByLabel('Current medicines', { exact: true }).fill('Paracetamol 500mg SOS');
-  await visible(page.getByLabel('Current medicine identity 1', { exact: true }));
-  assert.equal(await page.getByLabel('Allergen identity 1', { exact: true }).inputValue(), 'penicillin');
-  assert.equal(await page.getByLabel('Current medicine identity 1', { exact: true }).inputValue(), '', 'No strength stripping or product guessing');
-  await page.getByLabel('Current medicine identity 1', { exact: true }).selectOption('paracetamol-500mg-tablet');
-  await page.getByLabel('Current medicine schedule 1', { exact: true }).fill('SOS');
-  await page.getByLabel('Current medicine clarification 1', { exact: true }).fill('Patient confirmed the exact 500 mg tablet product.');
+  assert.equal(await page.getByText('Confirm recorded identities', { exact: true }).count(), 0);
+  assert.equal(await page.locator('[aria-label="Resolve recorded history identities"]').count(), 0);
+  assert.equal(await page.getByTestId('allergy-summary').textContent(), 'Penicillin (Rash)');
+  assert.equal(await page.getByTestId('medicine-summary').textContent(), 'Paracetamol 500mg SOS');
   await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
   await page.getByRole('button', { name: 'Save patient information', exact: true }).click();
   await visible(page.getByText(/^Patient information reviewed and saved for this visit\./));
   await page.reload();
-  await visible(page.getByLabel('Current medicine identity 1', { exact: true }));
-  assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Penicillin (Rash)');
-  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Paracetamol 500mg SOS');
-  assert.equal(await page.getByLabel('Allergen identity 1', { exact: true }).inputValue(), 'penicillin');
-  assert.equal(await page.getByLabel('Allergy reaction 1', { exact: true }).inputValue(), 'Rash');
-  assert.equal(await page.getByLabel('Current medicine identity 1', { exact: true }).inputValue(), 'paracetamol-500mg-tablet');
-  assert.equal(await page.getByLabel('Current medicine schedule 1', { exact: true }).inputValue(), 'SOS');
-  await page.locator('[aria-label="Resolve recorded history identities"]').screenshot({ path: join(artifacts, 'history-identities.png') });
+  await choose(cases[0]);
+  const savedHistories = await ask({ method: 'GET', path: '/api/prescription/patient-contexts/' });
+  const savedHistory = savedHistories.data.find((row) => row.patient === cases[0].patient);
+  assert.deepEqual(savedHistory.provenance.history_identity.details, identityDetails, 'An unchanged basic-form review retains saved identity, reaction and schedule');
+  assert.equal(requests.some((row) => /history-identities/.test(row.path)), false, 'Browser no longer fetches removed identity controls');
   await assess(cases[0]); await preview().click(); await visible(result());
   assert.equal(await result().getByText(/An allergy identity is unresolved|Unresolved current medicines prevent interaction clearance/).count(), 0);
   await visible(result().getByText('The candidate duplicates an ingredient in reported current medicines. Continuation/replacement needs a separate clinician decision.', { exact: true }));
-  await visible(section().getByRole('link', { name: 'Review recorded allergy and medicine identities', exact: true }));
+  await visible(section().getByRole('link', { name: 'Review allergies and current medicines', exact: true }));
   assert.equal((await ask({ action: 'count' })).count, 6, 'Resolving history and previewing do not publish or write another draft');
-  console.log('PASS: real history identity save/reload preserves penicillin reaction, original medicine text and schedule; duplicate/interaction controls remain.');
+  console.log('PASS: identity form removed; basic review/save/reload preserves existing identities, reaction and schedule; duplicate/interaction controls remain.');
   await page.goto(origin + '/doctor/prescription-records');
   await visible(page.getByLabel('Saved prescription draft', { exact: true }));
   await ask({ action: 'revoke' });

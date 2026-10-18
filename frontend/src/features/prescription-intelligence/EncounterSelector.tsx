@@ -6,6 +6,7 @@ import { Plus, Check, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
 import { buttonStyle, controlStyle, Unavailable } from "./PageFrame";
 import { visitDetails } from "./visitDetails";
+import { consultationReference } from "./consultationReference";
 
 type Prescription = ReturnType<typeof usePrescription>;
 function ManualVisitForm({ rx, onStatus }: { rx: Prescription; onStatus: (message: string) => void }) {
@@ -88,7 +89,9 @@ export function EncounterSelector({ rx }: { rx: Prescription }) {
 
           {rx.activeConsultation && (
             <dl className="grid gap-2 rounded-2xl border border-slate-200 p-3 text-xs sm:grid-cols-2">
-              <div><dt className="font-semibold text-slate-600">Consultation ID</dt><dd className="mt-1 break-all" data-testid="consultation-id">{rx.activeConsultation.id}</dd></div>
+              <div><dt className="font-semibold text-slate-600">Consultation ID</dt><dd className="mt-1 break-all font-mono font-semibold tracking-wide text-purple-700" data-testid="consultation-reference">{consultationReference(rx.activeConsultation.id)}</dd>
+                <details className="mt-2 text-slate-500"><summary className="cursor-pointer">Technical record ID</summary><p className="mt-1 break-all" data-testid="consultation-id">{rx.activeConsultation.id}</p></details>
+              </div>
               <div><dt className="font-semibold text-slate-600">Visit status</dt><dd className="mt-1">{rx.activeConsultation.is_demo ? "Synthetic research consultation" : "Saved encounter"}</dd></div>
               <div className="sm:col-span-2"><dt className="font-semibold text-slate-600">Recorded visit reason</dt><dd className="mt-1" data-testid="current-visit-reason">{details?.reason ? interfaceText(details.reason) : "Not recorded"}</dd></div>
               {details?.complaint && <div className="sm:col-span-2"><dt className="font-semibold text-slate-600">Reported chief complaint — confirm for this visit</dt><dd className="mt-1" data-testid="current-visit-complaint">{details.complaint}</dd></div>}
@@ -98,18 +101,6 @@ export function EncounterSelector({ rx }: { rx: Prescription }) {
           <ManualVisitForm key={rx.activeConsultation?.id ?? "no-visit"} rx={rx} onStatus={setSavedMessage} />
           {savedMessage && <p role="status" className="flex gap-2 text-xs text-emerald-700"><Check className="h-4 w-4" aria-hidden="true" />{savedMessage}</p>}
 
-          {rx.activePatientContext ? (
-            <div className="space-y-2 rounded-2xl border border-slate-200 p-3 text-xs text-slate-700">
-              <p className="font-bold">Saved patient context</p>
-              <p>Allergy status: {rx.activePatientContext.allergy_status}</p>
-              {rx.activePatientContext.allergies.length > 0 && <p>Allergies: {rx.activePatientContext.allergies.join(", ")}</p>}
-              <p>Current medicine status: {rx.activePatientContext.medicine_status}</p>
-              {rx.activePatientContext.current_medicines.length > 0 && <p>Current medicines: {rx.activePatientContext.current_medicines.join(", ")}</p>}
-              <p className="text-slate-500">Review and save this information for the current visit using the form below.</p>
-            </div>
-          ) : (
-            <Unavailable title="Patient context not recorded yet">Enter allergies and current medicines using the form below.</Unavailable>
-          )}
         </>
       )}
     </div>

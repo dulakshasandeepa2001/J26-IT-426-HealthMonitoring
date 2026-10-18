@@ -199,19 +199,17 @@ try {
 
   await page.goto(origin + '/doctor/prescription-workspace');
   await page.getByLabel('Assigned registered patient').selectOption('201');
-  await visible(page.getByRole('textbox', { name: 'Current medicines', exact: true }));
-  await page.getByRole('button', { name: 'Check medicine names' }).click();
-  await visible(page.getByText('Strength and formulation must be clarified.', { exact: true }));
-  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'paracetamol');
+  await visible(page.getByTestId('medicine-summary'));
+  assert.equal(await page.getByTestId('medicine-summary').textContent(), 'paracetamol');
+  assert.equal(await page.getByRole('button', { name: 'Check medicine names', exact: true }).count(), 0, 'Redundant form name-check is replaced by the identity editor');
+  await page.getByRole('button', { name: 'Edit allergies and current medicines', exact: true }).click();
   assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing recorded allergy');
   await page.getByLabel('Current medicines', { exact: true }).fill('paracetamol 500 mg tablet');
-  assert.equal(await page.getByText('Clarification required', { exact: true }).count(), 0);
-  await page.getByRole('button', { name: 'Check medicine names' }).click();
-  await visible(page.getByText('Exact product name recognized', { exact: true }));
+  assert.equal(await page.getByTestId('medicine-summary').textContent(), 'paracetamol 500 mg tablet');
   assert.equal(await page.getByRole('button', { name: 'Generate Prescription Draft' }).isDisabled(), true);
   assert.deepEqual(patientContext.current_medicines, ['paracetamol']);
   assert.deepEqual(errors, []);
-  console.log('PASS: current-medicine form supports name checks without saving or changing patient data; generation remains disabled.');
+  console.log('PASS: compact history summary and optional editor do not save or change patient data automatically; generation remains disabled.');
   console.log('Screenshot: ' + join(artifacts, 'medicine-catalogue.png'));
 } catch (err) {
   mkdirSync(artifacts, { recursive: true });

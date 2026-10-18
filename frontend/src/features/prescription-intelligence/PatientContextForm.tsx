@@ -1,44 +1,45 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
-import type { ContextStatus, HistoryDetails, HistoryIdentityRecord } from "./prescriptionApi";
+import type { ContextStatus } from "./prescriptionApi";
 import { buttonStyle, controlStyle } from "./PageFrame";
-import { MedicineNameCheck } from "./MedicineNameCheck";
-import { HistoryIdentityEditor } from "./HistoryIdentityEditor";
+import { patientHistoryPrefill, historyEntries as entries, type HistoryFields } from "./historyPrefill";
 
 function statusOrUnknown(status: string | undefined): ContextStatus {
   return status === "confirmed" || status === "none" ? status : "unknown";
 }
 
-function entries(text: string) {
-  return text.split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean);
-}
-
 export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescription> }) {
   const context = rx.activePatientContext;
-  const [allergyStatus, setAllergyStatus] = useState<ContextStatus>(statusOrUnknown(context?.allergy_status));
-  const [medicineStatus, setMedicineStatus] = useState<ContextStatus>(statusOrUnknown(context?.medicine_status));
-  const [allergyText, setAllergyText] = useState((context?.allergies ?? []).join("\n"));
-  const [medicineText, setMedicineText] = useState((context?.current_medicines ?? []).join("\n"));
-  const [reviewed, setReviewed] = useState(false);
-  const [historyDetails, setHistoryDetails] = useState<HistoryDetails | undefined>();
-  const recordedAllergies = useMemo(() => allergyStatus === "confirmed" ? entries(allergyText) : [], [allergyStatus, allergyText]);
-  const recordedMedicines = useMemo(() => medicineStatus === "confirmed" ? entries(medicineText) : [], [medicineStatus, medicineText]);
-  const savedIdentity = context?.provenance.history_identity as HistoryIdentityRecord | undefined;
-  const onDetails = useCallback((details: HistoryDetails) => { setHistoryDetails(details); setReviewed(false); }, []);
-  const loadAll = rx.loadAll;
-  const onDenied = useCallback(() => { void loadAll(); }, [loadAll]);
+  const visit = rx.activeConsultation!, analysis = rx.activeAnalysis;
+  const prefill = useMemo(() => patientHistoryPrefill(visit, analysis, context), [visit, analysis, context]);
+  const [draft, setDraft] = useState<HistoryFields | null>(null);
+  const fields = draft ?? prefill.fields;
+  const { allergyStatus, medicineStatus, allergyText, medicineText } = fields;
+  const [editingOverride, setEditingOverride] = useState<boolean | null>(null);
+  const editing = editingOverride ?? (draft !== null || allergyStatus === "unknown" && medicineStatus === "unknown");
+  const [reviewedKey, setReviewedKey] = useState<string | null>(null);
+  const inputKey = JSON.stringify([rx.activeConsultation?.id, context?.updated_at, rx.activeAnalysis?.id,
+    rx.activeAnalysis?.payload, fields]);
+  const reviewed = reviewedKey === inputKey;
   const submitting = useRef(false);
-  const reviewedForVisit = context?.provenance.last_reviewed_consultation === rx.activeConsultation?.id;
+  const reviewedForVisit = prefill.reviewedForVisit;
   const dirty = allergyStatus !== statusOrUnknown(context?.allergy_status)
     || medicineStatus !== statusOrUnknown(context?.medicine_status)
     || allergyText !== (context?.allergies ?? []).join("\n")
-    || medicineText !== (context?.current_medicines ?? []).join("\n")
-    || historyDetails != null && JSON.stringify(historyDetails) !== JSON.stringify(savedIdentity?.details);
+    || medicineText !== (context?.current_medicines ?? []).join("\n");
   const missingKnownEntry = (allergyStatus === "confirmed" && entries(allergyText).length === 0)
     || (medicineStatus === "confirmed" && entries(medicineText).length === 0);
+  const setField = rx.setField;
+  const pending = dirty || !reviewedForVisit, reportedPending = rx.patientHistoryPending;
+  useEffect(() => {
+    if (reportedPending !== pending) setField("patientHistoryPending", pending);
+  }, [pending, reportedPending, setField]);
+  function edit(patch: Partial<HistoryFields>) {
+    setDraft({ ...fields, ...patch }); setReviewedKey(null);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,7 +52,6 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
         medicine_status: medicineStatus,
         current_medicines: medicineStatus === "confirmed" ? entries(medicineText) : [],
         reviewed: true, expected_updated_at: context?.updated_at ?? null,
-        ...(historyDetails ? { history_details: historyDetails } : {}),
       });
     } finally {
       submitting.current = false;
@@ -60,16 +60,34 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <p className="text-xs leading-relaxed text-slate-500">Saved information is prefilled for this patient. Check it with the patient at each visit. Choose Unknown when the information has not been established.</p>
+      <p className="text-xs leading-relaxed text-slate-500">History is filled from this visit&apos;s reported analysis and saved patient history. Confirm it with the patient before saving. An empty or missing JSON list stays Unknown unless absence was confirmed.</p>
       {context && !reviewedForVisit && <p className="rounded-xl border border-purple-100 bg-purple-50 p-3 text-xs text-purple-900">
         Saved patient history loaded. Confirm what is still current and update any changes before saving for this visit.
         {context.provenance.last_reviewed_at && ` Last reviewed: ${new Date(context.provenance.last_reviewed_at).toLocaleString()}.`}
       </p>}
-      <fieldset disabled={rx.loading} className="grid gap-4 sm:grid-cols-2">
+      {prefill.hasReported && <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
+        <p className="font-semibold">Reported JSON history — doctor review required</p>
+        {prefill.reportedAllergies.length > 0 && <p className="mt-1">Reported allergies: {prefill.reportedAllergies.join(", ")}</p>}
+        {prefill.reportedMedicines.length > 0 && <p className="mt-1">Reported medicines: {prefill.reportedMedicines.join(", ")}</p>}
+        {draft && JSON.stringify(fields) !== JSON.stringify(prefill.fields) && <button type="button" className="mt-2 font-semibold underline" disabled={rx.loading} onClick={() => { setDraft(null); setReviewedKey(null); }}>Use reported and saved history</button>}
+        {reviewedForVisit && <p className="mt-1">Your saved review is retained. Edit the history if these reported details need correction or inclusion.</p>}
+      </div>}
+      <div className="grid gap-3 sm:grid-cols-2" aria-label="Patient history summary">
+        <div className="rounded-xl border border-slate-200 p-3 text-xs"><h3 className="font-semibold text-slate-700">Allergies</h3>
+          <p className="mt-1 whitespace-pre-line" data-testid="allergy-summary">{allergyStatus === "confirmed" ? allergyText : allergyStatus === "none" ? "None reported" : "Unknown / not established"}</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 p-3 text-xs"><h3 className="font-semibold text-slate-700">Current medicines</h3>
+          <p className="mt-1 whitespace-pre-line" data-testid="medicine-summary">{medicineStatus === "confirmed" ? medicineText : medicineStatus === "none" ? "None reported" : "Unknown / not established"}</p>
+        </div>
+      </div>
+      <button type="button" className={buttonStyle} aria-expanded={editing} aria-controls="history-edit-fields" disabled={rx.loading} onClick={() => setEditingOverride(!editing)}>{editing ? "Hide history editor" : "Edit allergies and current medicines"}</button>
+      <fieldset disabled={rx.loading} className="space-y-4">
+      <div id="history-edit-fields" hidden={!editing}>
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label htmlFor="allergy-status" className="text-xs font-semibold text-slate-700">Allergy status</label>
-            <select id="allergy-status" className={controlStyle} value={allergyStatus} onChange={(event) => { setAllergyStatus(event.target.value as ContextStatus); setReviewed(false); setHistoryDetails(undefined); }}>
+            <select id="allergy-status" className={controlStyle} value={allergyStatus} onChange={(event) => edit({ allergyStatus: event.target.value as ContextStatus })}>
               <option value="unknown">Unknown / not established</option>
               <option value="none">None reported</option>
               <option value="confirmed">Known allergies</option>
@@ -79,7 +97,7 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
             <div className="space-y-1.5">
               <label htmlFor="allergy-list" className="text-xs font-semibold text-slate-700">Allergies</label>
               <textarea id="allergy-list" className={controlStyle} rows={4} maxLength={10000} required value={allergyText}
-                onChange={(event) => { setAllergyText(event.target.value); setReviewed(false); setHistoryDetails(undefined); }} aria-describedby="allergy-help" />
+                onChange={(event) => edit({ allergyText: event.target.value })} aria-describedby="allergy-help" />
               <p id="allergy-help" className="text-xs text-slate-500">One allergy per line. Include the reaction if known.</p>
             </div>
           )}
@@ -87,7 +105,7 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label htmlFor="medicine-status" className="text-xs font-semibold text-slate-700">Current medicine status</label>
-            <select id="medicine-status" className={controlStyle} value={medicineStatus} onChange={(event) => { setMedicineStatus(event.target.value as ContextStatus); setReviewed(false); setHistoryDetails(undefined); }}>
+            <select id="medicine-status" className={controlStyle} value={medicineStatus} onChange={(event) => edit({ medicineStatus: event.target.value as ContextStatus })}>
               <option value="unknown">Unknown / not established</option>
               <option value="none">None reported</option>
               <option value="confirmed">Known current medicines</option>
@@ -97,19 +115,17 @@ export function PatientContextForm({ rx }: { rx: ReturnType<typeof usePrescripti
             <div className="space-y-1.5">
               <label htmlFor="current-medicine-list" className="text-xs font-semibold text-slate-700">Current medicines</label>
               <textarea id="current-medicine-list" className={controlStyle} rows={4} maxLength={10000} required value={medicineText}
-                onChange={(event) => { setMedicineText(event.target.value); setReviewed(false); setHistoryDetails(undefined); }} aria-describedby="medicine-help" />
+                onChange={(event) => edit({ medicineText: event.target.value })} aria-describedby="medicine-help" />
               <p id="medicine-help" className="text-xs text-slate-500">One medicine per line. Include the strength and schedule if known.</p>
-              <MedicineNameCheck key={medicineText} names={entries(medicineText)} disabled={rx.loading} onAccessDenied={() => { void rx.loadAll(); }} />
             </div>
           )}
         </div>
-        <HistoryIdentityEditor visit={rx.activeConsultation!.id} allergies={recordedAllergies} medicines={recordedMedicines}
-          saved={savedIdentity} value={historyDetails} onChange={onDetails} onDenied={onDenied} />
+      </div>
+      </div>
         <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-700 sm:col-span-2">
-          <input type="checkbox" checked={reviewed} className="mt-0.5 h-4 w-4 shrink-0 accent-purple-600" onChange={(event) => setReviewed(event.target.checked)} />
+          <input type="checkbox" checked={reviewed} className="mt-0.5 h-4 w-4 shrink-0 accent-purple-600" onChange={(event) => setReviewedKey(event.target.checked ? inputKey : null)} />
           I reviewed allergies and current medicines with the patient for this visit.
         </label>
-        {historyDetails && <p className="text-xs text-slate-600 sm:col-span-2">This confirmation includes the selected identities, reported reactions and schedules above. Unknown details remain unknown.</p>}
       </fieldset>
       <button type="submit" className={buttonStyle} disabled={rx.loading || !reviewed || missingKnownEntry}>
         {rx.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ClipboardCheck className="h-4 w-4" aria-hidden="true" />}

@@ -166,15 +166,15 @@ try {
   assert.equal(await page.getByTestId("consultation-id").textContent(), newId);
   assert.equal(await page.getByRole("textbox", { name: /^Diagnosis context/ }).inputValue(), "");
   assert.equal(await page.getByText("TEST-ANALYSIS-A", { exact: true }).count(), 0);
-  await visible(page.getByText("Allergies: Test allergy A", { exact: true }));
+  await visible(page.getByTestId("allergy-summary").filter({ hasText: "Test allergy A" }));
   await disabledActions();
   console.log("PASS: save failures keep the previous visit; new visits reset encounter data, retain patient context, and reject duplicate clicks.");
 
   await page.reload();
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   assert.equal(await page.getByTestId("consultation-id").textContent(), newId);
   assert.equal(await page.getByLabel("Assigned registered patient").inputValue(), "201");
-  await visible(page.getByText("Allergies: Test allergy A", { exact: true }));
+  await visible(page.getByTestId("allergy-summary").filter({ hasText: "Test allergy A" }));
   await page.getByLabel("Active encounter / consultation").selectOption(firstId);
   await visible(page.getByText("TEST-ANALYSIS-A", { exact: true }));
   await fillVisitReason("Unsaved A-specific reason");
@@ -183,7 +183,7 @@ try {
   assert.equal(await page.getByLabel("Reason for visit").inputValue(), "");
   assert.equal(await page.getByRole("textbox", { name: /^Diagnosis context/ }).inputValue(), "");
   assert.equal(await page.getByText("TEST-ANALYSIS-A", { exact: true }).count(), 0);
-  assert.equal(await page.getByText("Allergies: Test allergy A", { exact: true }).count(), 0);
+  assert.equal(await page.getByTestId("allergy-summary").filter({ hasText: "Test allergy A" }).count(), 0);
   assert.equal(await page.getByLabel("Active encounter / consultation").locator("option").count(), 2);
   await page.getByLabel("Assigned registered patient").selectOption("201");
   assert.equal(await page.getByTestId("consultation-id").textContent(), newId);
@@ -235,13 +235,14 @@ try {
 
   const profileIndex = contexts.findIndex((item) => item.patient === 202);
   contexts[profileIndex] = { ...contexts[profileIndex], allergy_status: "confirmed", allergies: ["Changed in another session"], updated_at: "2026-10-12T12:00:00Z", provenance: {} };
+  await page.getByRole("button", { name: "Edit allergies and current medicines", exact: true }).click();
   await page.getByLabel("Current medicines", { exact: true }).fill("Unsaved stale medicine change");
   await reviewCheckbox.check();
   await saveInformation.click();
   await visible(page.getByText("Patient information has changed. Refresh the workspace and review the latest values before saving.", { exact: true }));
   assert.deepEqual(contexts[profileIndex].current_medicines, ["Test medicine B"]);
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await page.getByLabel("Allergies", { exact: true }).waitFor({ state: "visible" });
+  await visible(page.getByTestId("allergy-summary").filter({ hasText: "Changed in another session" }));
   assert.equal(await page.getByLabel("Allergies", { exact: true }).inputValue(), "Changed in another session");
   assert.equal(await page.getByLabel("Current medicines", { exact: true }).inputValue(), "Test medicine B");
   await page.getByLabel("Assigned registered patient").selectOption("201");
@@ -252,7 +253,7 @@ try {
 
   const writesBeforeHandoff = [createRequests, contextWrites];
   await page.goto(origin + "/doctor/prescription-workspace?consultation=" + secondId);
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   assert.equal(await page.getByTestId("consultation-id").textContent(), secondId);
   assert.equal(await page.getByLabel("Assigned registered patient").inputValue(), "202");
   assert.equal(await page.getByLabel("Allergies", { exact: true }).inputValue(), "Changed in another session");
@@ -262,7 +263,7 @@ try {
   assert.equal(await page.getByLabel("Reason for visit").isVisible(), false);
   assert.equal(await page.getByTestId("current-visit-reason").textContent(), "Assigned first visit");
   await page.reload();
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   assert.equal(await page.getByTestId("consultation-id").textContent(), secondId);
   assert.deepEqual([createRequests, contextWrites], writesBeforeHandoff, "Opening/reloading a handoff never creates visits or marks history reviewed");
 
@@ -285,7 +286,7 @@ try {
   assert.equal(await page.getByLabel("Reason for visit").inputValue(), "", "Returning to a visit does not resurrect its discarded manual reason");
   await page.getByLabel("Active encounter / consultation").selectOption(firstId);
   await page.reload();
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   assert.equal(await page.getByTestId("consultation-id").textContent(), firstId, "Explicit selection replaces the appointment link for reload");
   console.log("PASS: appointment handoff selects the exact assigned visit and reuses patient history without writes; invalid/ambiguous links do not restore another patient; manual selections survive reload.");
 
@@ -300,17 +301,17 @@ try {
   await page.getByRole("button", { name: "Start new consultation", exact: true }).click();
   await visible(page.getByRole("link", { name: "Sign in as a doctor" }));
   assert.equal(await page.getByTestId("consultation-id").count(), 0);
-  assert.equal(await page.getByText("Allergies: Test allergy A", { exact: true }).count(), 0);
+  assert.equal(await page.getByTestId("allergy-summary").filter({ hasText: "Test allergy A" }).count(), 0);
   denyAccess = false;
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   denyAccess = true;
   await page.reload();
   await visible(page.getByRole("link", { name: "Sign in as a doctor" }));
   assert.equal(await page.getByTestId("consultation-id").count(), 0);
   denyAccess = false;
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole("button", { name: "Log out", exact: true }).click();
   await page.waitForURL(origin + "/login");

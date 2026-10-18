@@ -117,7 +117,7 @@ try {
   user = doctor;
   await page.goto(origin + "/doctor/prescription-workspace");
   await page.getByLabel("Assigned registered patient").selectOption("201");
-  await visible(page.getByTestId("consultation-id"));
+  await visible(page.getByTestId("consultation-reference"));
   assert.equal(await page.getByTestId("consultation-id").textContent(), savedId);
   console.log("PASS: the assigned first visit becomes selectable in the selected doctor's workspace.");
 

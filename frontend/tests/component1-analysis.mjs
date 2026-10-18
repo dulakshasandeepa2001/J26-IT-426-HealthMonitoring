@@ -124,7 +124,7 @@ try {
   assert.equal(await diagnosisInput().inputValue(), "Influenza");
   assert.equal(diagnoses.length, 0, "Import cannot confirm a diagnosis");
   assert.deepEqual(patientContexts, originalContext);
-  await visible(page.getByText("Allergies: Existing allergy A", { exact: true }));
+  await visible(page.getByTestId("allergy-summary").filter({ hasText: "Existing allergy A" }));
   assert.equal(await page.getByLabel("Current medicines", { exact: true }).inputValue(), "Existing current medicine A");
   console.log("PASS: supplied influenza JSON binds the selected visit, displays synthetic scores, survives import failures, and preserves manual patient context.");
 

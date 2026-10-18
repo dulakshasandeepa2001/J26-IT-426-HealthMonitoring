@@ -131,9 +131,11 @@ try {
   await visible(page.getByText('Reported extraction score: 96%', { exact: true }));
   await visible(page.getByText('Penicillin (Rash)', { exact: true }));
   await visible(page.getByText('Paracetamol 500mg SOS', { exact: true }));
-  assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing verified allergy');
-  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Existing verified medicine');
+  assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing verified allergy\nPenicillin (Rash)');
+  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Existing verified medicine\nParacetamol 500mg SOS');
   assert.equal(diagnoses.length, 0);
+  assert.equal(await page.getByText('Confirm recorded identities', { exact: true }).count(), 0);
+  assert.equal(await page.locator('[aria-label="Resolve recorded history identities"]').count(), 0);
   assert.equal(await page.getByTestId('current-visit-complaint').textContent(), wires[0].payload.extracted_clinical_notes.chief_complaint);
   await page.getByText('View structured clinical details', { exact: true }).click();
   const sourceDetails = page.locator('details').filter({ has: page.getByText('View structured clinical details', { exact: true }) });
@@ -160,8 +162,15 @@ try {
   await page.getByLabel('Active encounter / consultation').selectOption(ids[1]);
   assert.equal(await page.getByTestId('current-visit-complaint').count(), 0, 'A new visit cannot inherit the previous complaint');
   assert.equal(await page.getByLabel('Analysis scenario').count(), 0);
+  await page.getByRole('button', { name: 'Edit allergies and current medicines', exact: true }).click();
+  await page.getByLabel('Current medicines', { exact: true }).fill('Doctor typing before analysis arrives');
+  await page.getByRole('checkbox', { name: 'I reviewed allergies and current medicines with the patient for this visit.', exact: true }).check();
   analyses.push(result(1));
   await page.getByText('Producer URTI label', { exact: true }).waitFor({ state: 'visible', timeout: 12000 });
+  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Doctor typing before analysis arrives', 'Late JSON does not overwrite manual edits');
+  assert.equal(await page.getByRole('checkbox', { name: 'I reviewed allergies and current medicines with the patient for this visit.', exact: true }).isChecked(), false, 'New analysis invalidates unsaved review acknowledgement');
+  await page.getByRole('button', { name: 'Use reported and saved history', exact: true }).click();
+  assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Existing verified medicine\nParacetamol 500mg SOS');
   assert.equal(await page.getByTestId('current-visit-complaint').textContent(), wires[1].payload.extracted_clinical_notes.chief_complaint);
   assert.equal(await diagnosis().inputValue(), '');
   await visible(page.getByText('Influenza alternative', { exact: true }));
@@ -179,9 +188,13 @@ try {
   await visible(page.getByText('Chief complaint: <img src=x onerror="window.member1Injected=true">', { exact: true }));
   assert.equal(await page.evaluate(() => window.member1Injected), undefined);
   assert.equal(await page.locator('main img').count(), 0);
-  assert.equal(await page.getByLabel('Allergy status').inputValue(), 'unknown');
-  assert.equal(await page.getByLabel('Current medicine status').inputValue(), 'unknown');
-  assert.equal(await page.getByLabel('Allergies', { exact: true }).count(), 0);
+  assert.equal(await page.getByLabel('Allergy status').inputValue(), 'confirmed');
+  assert.equal(await page.getByLabel('Current medicine status').inputValue(), 'confirmed');
+  assert.equal(await page.getByTestId('allergy-summary').textContent(), 'Penicillin (Rash)');
+  assert.equal(await page.getByTestId('medicine-summary').textContent(), 'Paracetamol 500mg SOS');
+  assert.equal(await page.getByRole('checkbox', { name: 'I reviewed allergies and current medicines with the patient for this visit.', exact: true }).isChecked(), false);
+  assert.equal(await page.getByRole('button', { name: 'Save patient information', exact: true }).isDisabled(), true);
+  assert.equal(await page.getByLabel('Allergies', { exact: true }).isVisible(), false);
   assert.equal(await page.getByText('Producer URTI label', { exact: true }).count(), 0);
   assert.deepEqual(patientContext, before);
   accessDenied = true;
@@ -190,7 +203,7 @@ try {
   assert.equal(await page.getByText('Penicillin (Rash)', { exact: true }).count(), 0);
   assert.equal(await page.getByText('Seasonal Influenza (Flu A / H3N2)', { exact: true }).count(), 0);
   assert.deepEqual(errors, []);
-  console.log('PASS: patient isolation, empty context stays unknown, source HTML is rendered as text, and revoked access clears voice-derived information.');
+  console.log('PASS: patient isolation, JSON history prefill stays unreviewed, source HTML is rendered as text, and revoked access clears voice-derived information.');
   console.log('Screenshot: ' + join(artifacts, 'member1-voice-output.png'));
 } catch (err) {
   mkdirSync(artifacts, { recursive: true });

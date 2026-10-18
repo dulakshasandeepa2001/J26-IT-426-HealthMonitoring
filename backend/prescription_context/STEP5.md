@@ -1,5 +1,9 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+[Step 12](STEP12.md) adds readable consultation references, JSON history prefill
+and a compact history editor. Missing source history remains Unknown; the doctor
+explicitly reviews and saves patient history before screening.
+
 [Step 11](STEP11.md) adds exact consultation-link selection and a clearer
 returning-patient history prefill. The appointment service can open a saved visit;
 its upstream scheduling integration remains separate.
