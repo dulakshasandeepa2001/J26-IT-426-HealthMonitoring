@@ -126,6 +126,9 @@ class ConsultationViewSet(DoctorAccess, mixins.CreateModelMixin, viewsets.ReadOn
                     'detail': 'Patient information has changed. Refresh the workspace and review the latest values before saving.',
                 }, status=409)
             before = context_snapshot(context) if context else None
+            old_identity = context.provenance.get('history_identity') if context else None
+            if before is not None:
+                before['history_identity'] = old_identity
             if context is None:
                 context = PrescriptionContextPatientcontext(patient=patient)
             if patient.birthday is not None:
@@ -141,14 +144,31 @@ class ConsultationViewSet(DoctorAccess, mixins.CreateModelMixin, viewsets.ReadOn
                 'last_reviewed_by': request.user.pk,
                 'last_reviewed_at': timezone.now().isoformat(),
             }
+            from .history_identity import VERSION, validate_details
+            details = data.get('history_details')
+            if details is None and old_identity and before and all(before[field] == data[field] for field in ('allergies', 'current_medicines', 'allergy_status', 'medicine_status')):
+                details = validate_details(old_identity['details'], data)
+            if details is not None:
+                context.provenance['history_identity'] = {'version': VERSION, 'details': details,
+                    'reviewed_by': request.user.pk, 'reviewed_at': context.provenance['last_reviewed_at'],
+                    'consultation_id': str(consultation.pk)}
+            else:
+                context.provenance.pop('history_identity', None)
             context.save()
             after = context_snapshot(context)
+            after['history_identity'] = context.provenance.get('history_identity')
             PrescriptionContextContextrevision.objects.create(
                 consultation=consultation, doctor=request.user, context=context,
                 snapshot={'before': before, 'after': after, 'reviewed': True},
                 changed_fields=[key for key, value in after.items() if before is None or before.get(key) != value],
             )
         return Response(PatientContextSerializer(context).data)
+
+    @action(detail=True, methods=['get'], url_path='history-identities')
+    def history_identities(self, request, pk=None):
+        self.get_object()  # Same assigned-encounter access as patient-context writes.
+        from .history_identity import options
+        return Response(options())
 
     @action(detail=True, methods=['post'], url_path='demo-analysis')
     def load_demo_analysis(self, request, pk=None):

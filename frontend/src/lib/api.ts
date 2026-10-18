@@ -1,3 +1,5 @@
+import { interfaceText } from "./productLanguage";
+
 function apiBaseUrl() {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
   // Keep local frontend and backend on the same host for SameSite session cookies.
@@ -7,7 +9,7 @@ function apiBaseUrl() {
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
-    super(message);
+    super(interfaceText(message));
     this.name = "ApiError";
   }
 }

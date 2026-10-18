@@ -187,6 +187,10 @@ database settings, live catalogue/rule reviews, UI and saved model were preserve
 
 ## Next step: compact model comparison
 
+Implemented follow-up: [Step 8D](STEP8D.md) now contains the three-model comparison,
+frozen selected artifact, actual validation/test results and opt-in synthetic
+inference. This original dataset and its inspection report remain unchanged.
+
 Freeze this inspection artifact before fitting. Inspect available dependencies and
 compare three compact models on the same declared family partitions. Fit all
 preprocessing only on training families, choose the model/settings with validation,

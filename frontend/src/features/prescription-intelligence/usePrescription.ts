@@ -199,7 +199,7 @@ export function usePrescription() {
       const accessDenied = err instanceof ApiError && [401, 403].includes(err.status);
       setState((s) => ({
         ...(accessDenied ? initialState : s), loading: false, accessDenied,
-        error: err instanceof Error ? err.message : "Unable to load the demo result.",
+        error: err instanceof Error ? err.message : "Unable to load the analysis result.",
       }));
     } finally { saving.current = false; }
   }, [state.activeConsultation, state.loading, receiveAnalysis]);
@@ -301,9 +301,6 @@ export function usePrescription() {
     }
   }, [state.activeConsultation, state.loading]);
 
-  // Draft generation and persisted approval will be added in later steps.
-  const approvePrescription = useCallback(() => {}, []);
-  const rejectPrescription = useCallback(() => {}, []);
   const setField = useCallback(
     <K extends keyof PrescriptionState>(key: K, value: PrescriptionState[K]) => {
       setState((s) => ({ ...s, [key]: value }));
@@ -313,7 +310,7 @@ export function usePrescription() {
   return {
     ...state, loadAll, selectPatient, selectConsultation, startConsultation,
     loadDemo, refreshAnalysis,
-    confirmDiagnosis, reviewPatientContext, approvePrescription, rejectPrescription, setField,
+    confirmDiagnosis, reviewPatientContext, setField,
   };
 }
 

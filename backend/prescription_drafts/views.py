@@ -24,6 +24,11 @@ class SafetyProfileSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     conditions = serializers.SerializerMethodField()
     engine_version = serializers.SerializerMethodField()
+    history_identity_policy = serializers.SerializerMethodField()
+
+    def get_history_identity_policy(self, obj):
+        from prescription_context.history_identity import review_policy
+        return review_policy()
 
     def get_engine_version(self, obj):
         return ENGINE_VERSION
@@ -43,7 +48,7 @@ class SafetyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyProfile
         fields = ('medicine', 'generic_name', 'content', 'content_hash', 'medicine_content_hash', 'review_status',
-                  'review_is_current', 'catalogue_review_current', 'reviewer_name', 'reviewed_at', 'review_notes', 'updated_at', 'sources', 'product', 'conditions', 'engine_version')
+                  'review_is_current', 'catalogue_review_current', 'reviewer_name', 'reviewed_at', 'review_notes', 'updated_at', 'sources', 'product', 'conditions', 'engine_version', 'history_identity_policy')
 
 
 class SafetyProfileViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):

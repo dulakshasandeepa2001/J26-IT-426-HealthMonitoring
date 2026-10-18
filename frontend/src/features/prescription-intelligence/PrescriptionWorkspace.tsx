@@ -1,25 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, ArrowUpDown, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
+import { AlertTriangle, FlaskConical, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm } from "./PatientContextForm";
 import { AnalysisResult } from "./AnalysisResult";
-import { DraftFlow } from "./DraftFlow";
-import { prescriptionCondition } from "./analysisData";
+import { SixConditionDraftFlow } from "./SixConditionDraftFlow";
+import { ExperimentalMLPanel } from "./ExperimentalMLPanel";
 import { controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
-// ─── Workflow steps shown at the top ─────────────────────────────────────────
-const workflowSteps = [
-  "Encounter and voice analysis",
-  "Confirm diagnosis context",
-  "Generate and screen candidates",
-  "Clinician review and approval",
-  "Publish approved version",
-];
-
-// ─── Small helpers ────────────────────────────────────────────────────────────
 function Badge({ label, variant }: { label: string; variant: "green" | "amber" | "rose" | "slate" }) {
   const colours = {
     green: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -42,36 +32,13 @@ export default function PrescriptionWorkspace() {
   const hasConsultation = !!rx.activeConsultation;
   const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
   const diagnosis = rx.diagnoses.find((item) => item.consultation === rx.activeConsultation?.id);
-  const pendingTreatment = diagnosis && !prescriptionCondition(diagnosis.condition_code, diagnosis.condition_label);
+  const screeningKey = JSON.stringify([rx.activeConsultation?.id, rx.activePatient?.id, rx.activePatient?.birthday, rx.activePatientContext?.updated_at, rx.activeAnalysis?.payload, diagnosis]);
 
   return (
     <PageFrame
       title="Prescription Workspace"
       description="Use the encounter-linked analysis and clinician-confirmed diagnosis to save a prescription screening draft, with recorded clinical inputs, evidence and version history."
     >
-      {/* ── Workflow progress ── */}
-      <ol aria-label="Prescription workflow" className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-5">
-        {workflowSteps.map((step, index) => {
-          const active = index <= rx.step;
-          return (
-            <li key={step} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-600">
-              <span
-                aria-hidden="true"
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg font-bold ${
-                  active ? "bg-purple-600 text-white" : "bg-purple-50 text-purple-400"
-                }`}
-              >
-                {index + 1}
-              </span>
-              <span className={`pt-0.5 font-semibold ${active ? "text-slate-900" : "text-slate-400"}`}>
-                {step}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-
-      {/* ── Global error banner ── */}
       {rx.error && (
         <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -99,7 +66,7 @@ export default function PrescriptionWorkspace() {
         <EncounterSelector key={rx.activePatient?.id ?? "none"} rx={rx} />
       </Section>
 
-      <Section title="Patient allergies and current medicines" icon={ClipboardCheck}>
+      <Section id="patient-medicine-history" title="Patient allergies and current medicines" icon={ClipboardCheck}>
         {hasConsultation && rx.activePatient ? (
           <PatientContextForm key={`${rx.activeConsultation!.id}:${rx.activePatientContext?.updated_at ?? "new"}`} rx={rx} />
         ) : (
@@ -156,15 +123,15 @@ export default function PrescriptionWorkspace() {
           </fieldset>
           <p id="diagnosis-confirmation-help" className="mt-4 text-xs leading-relaxed text-slate-500">
             Review and correct the structured diagnosis context, then confirm it before generation.
-            A changed diagnosis requires renewed confirmation. The v2.1 handoff supports six conditions; medicine screening currently supports influenza and chickenpox.
+            A changed diagnosis requires renewed confirmation. All six handoff conditions have a screening pathway; medicine availability still depends on reviewed coverage and independently verified patient information.
           </p>
         </Section>
       </div>
 
-      {pendingTreatment ? <Unavailable title="Medicine support pending for this condition">Diagnosis confirmation is saved. Catalogue, deterministic safety rules and experimental model coverage must be developed before generating medicine recommendations for this condition.</Unavailable> : <DraftFlow key={rx.activeConsultation?.id ?? "none"} rx={rx} />}
+      <SixConditionDraftFlow key={screeningKey} rx={rx} />
 
-      <Section title="Eligible candidate ranking and explanations" icon={ArrowUpDown}>
-        <Unavailable title="ML ranking remains a later step">Step 6 shows unranked catalogue candidates and deterministic rule explanations. A trained ranking model and its evaluation are not connected.</Unavailable>
+      <Section title="Experimental ML" icon={FlaskConical}>
+        {rx.activeConsultation && !rx.accessDenied ? <ExperimentalMLPanel key={rx.activeConsultation.id} consultationId={rx.activeConsultation.id} isDemo={rx.activeConsultation.is_demo} /> : <Unavailable title="Select a patient and visit first">Choose an assigned synthetic research consultation to inspect provisional relevance predictions.</Unavailable>}
       </Section>
       <Section title="Evidence and medicine identity" icon={BookOpen}>
         <p className="text-xs leading-relaxed text-slate-500">Saved drafts retain the patient inputs, original analysis, reviewed catalogue and safety profiles used for screening. Check current medicine identities in the patient form.</p>

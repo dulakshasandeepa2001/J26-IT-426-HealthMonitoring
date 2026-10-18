@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from .experimental_ml import ExperimentalMLView
 from .views import (
     AdminAssignmentViewSet,
     PatientViewSet,
@@ -21,6 +22,7 @@ router.register(r'revisions', ContextRevisionViewSet, basename='contextrevision'
 router.register(r'diagnoses', DiagnosisConfirmationViewSet, basename='diagnosisconfirmation')
 
 urlpatterns = [
+    path('consultations/<uuid:consultation_id>/experimental-ml/', ExperimentalMLView.as_view(), name='experimental-ml'),
     path('component-1/results/', Component1ResultView.as_view(), name='component1-result'),
     path('', include(router.urls)),
 ]

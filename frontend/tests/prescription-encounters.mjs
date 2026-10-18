@@ -65,6 +65,8 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
     return send({ message: "Logged out" });
   }
   if (path.startsWith("/api/prescription/") && denyAccess) return send({ detail: "Access denied for this doctor." }, 403);
+  // Exercise graceful legacy-history editing when optional identity metadata fails.
+  if (path.endsWith('/history-identities/')) return send({ detail: 'Identity metadata temporarily unavailable in this fixture.' }, 503);
   if (path === "/api/prescription/patients/") { directoryRequests++; return send(patients); }
   const reviewPath = path.match(/^\/api\/prescription\/consultations\/([^/]+)\/patient-context\/$/);
   if (reviewPath) {

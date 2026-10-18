@@ -75,10 +75,11 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   if (path === '/api/prescription/patient-contexts/') return send([patientContext]);
   if (path === '/api/prescription/safety-profiles/' || path === '/api/prescription/drafts/') return send([]);
   if (path === '/api/prescription/analyses/') {
-    if (accessDenied) return send({ detail: 'Member 1 fixture access revoked.' }, 403);
+    if (accessDenied) return send({ detail: 'consultation analysis fixture access revoked.' }, 403);
     const id = url.searchParams.get('consultation');
     return send(id ? analyses.filter((item) => item.consultation === id) : analyses);
   }
+  if (path.endsWith('/history-identities/')) return send({ detail: 'Identity choices unavailable in this analysis fixture.' }, 503);
   const demo = path.match(/^\/api\/prescription\/consultations\/([^/]+)\/demo-analysis\/$/);
   if (demo) {
     demoRequests++;
@@ -110,13 +111,13 @@ try {
   await page.goto(origin + '/doctor/prescription-workspace');
   await page.getByLabel('Assigned registered patient').selectOption('201');
   await page.getByLabel('Active encounter / consultation').selectOption(ids[0]);
-  await page.getByLabel('Demo analysis scenario').selectOption('member1_influenza');
+  await page.getByLabel('Analysis scenario').selectOption('member1_influenza');
   failDemo = true;
-  await page.getByRole('button', { name: 'Load demo analysis' }).click();
-  await visible(page.getByText('Test Member 1 save failure.', { exact: true }));
+  await page.getByRole('button', { name: 'Load analysis' }).click();
+  await visible(page.getByText('Test consultation analysis save failure.', { exact: true }));
   assert.equal(analyses.length, 0);
   failDemo = false;
-  await page.getByRole('button', { name: 'Load demo analysis' }).evaluate((button) => { button.click(); button.click(); });
+  await page.getByRole('button', { name: 'Load analysis' }).evaluate((button) => { button.click(); button.click(); });
   await visible(page.getByText('Sample confidence: 94%', { exact: true }));
   assert.equal(demoRequests, 2);
   assert.equal(analyses.length, 1);
@@ -133,11 +134,12 @@ try {
   assert.equal(await page.getByLabel('Allergies', { exact: true }).inputValue(), 'Existing verified allergy');
   assert.equal(await page.getByLabel('Current medicines', { exact: true }).inputValue(), 'Existing verified medicine');
   assert.equal(diagnoses.length, 0);
-  await page.getByText('View original Component 1 output', { exact: true }).click();
-  const sourceDetails = page.locator('details').filter({ has: page.getByText('View original Component 1 output', { exact: true }) });
-  assert.deepEqual(JSON.parse(await sourceDetails.locator('pre').textContent()), wires[0]);
+  await page.getByText('View structured clinical details', { exact: true }).click();
+  const sourceDetails = page.locator('details').filter({ has: page.getByText('View structured clinical details', { exact: true }) });
+  assert.deepEqual(JSON.parse(await sourceDetails.locator('pre').textContent()), wires[0].payload);
+  assert.deepEqual(analyses[0].payload.member1.raw_output, wires[0], 'Original source provenance remains stored');
   assert.deepEqual(patientContext, before);
-  console.log('PASS: actual Python adapter output displays symptoms, scores, differentials and original JSON; failed/rapid imports are safe and do not change verified patient data.');
+  console.log('PASS: actual Python adapter displays clinical details with product labels and retains original provenance; failed/rapid imports preserve verified patient data.');
 
   mkdirSync(artifacts, { recursive: true });
   for (const width of [1440, 1024, 390]) {
@@ -155,7 +157,7 @@ try {
   console.log('PASS: desktop/mobile output, refresh persistence and explicit reference-bound doctor confirmation; prescription generation remains disabled.');
 
   await page.getByLabel('Active encounter / consultation').selectOption(ids[1]);
-  assert.equal(await page.getByLabel('Demo analysis scenario').count(), 0);
+  assert.equal(await page.getByLabel('Analysis scenario').count(), 0);
   analyses.push(result(1));
   await page.getByText('Producer URTI label', { exact: true }).waitFor({ state: 'visible', timeout: 12000 });
   assert.equal(await diagnosis().inputValue(), '');
@@ -169,8 +171,8 @@ try {
   console.log('PASS: automatic v2 producer delivery retains unsupported primary/differentials and uncertain durations without promoting a higher-scoring alternative.');
 
   await page.getByLabel('Assigned registered patient').selectOption('202');
-  await page.getByLabel('Demo analysis scenario').selectOption('member1_influenza');
-  await page.getByRole('button', { name: 'Load demo analysis' }).click();
+  await page.getByLabel('Analysis scenario').selectOption('member1_influenza');
+  await page.getByRole('button', { name: 'Load analysis' }).click();
   await visible(page.getByText('Chief complaint: <img src=x onerror="window.member1Injected=true">', { exact: true }));
   assert.equal(await page.evaluate(() => window.member1Injected), undefined);
   assert.equal(await page.locator('main img').count(), 0);
@@ -181,7 +183,7 @@ try {
   assert.deepEqual(patientContext, before);
   accessDenied = true;
   await page.reload();
-  await visible(page.getByText('Member 1 fixture access revoked.', { exact: true }));
+  await visible(page.getByText('consultation analysis fixture access revoked.', { exact: true }));
   assert.equal(await page.getByText('Penicillin (Rash)', { exact: true }).count(), 0);
   assert.equal(await page.getByText('Seasonal Influenza (Flu A / H3N2)', { exact: true }).count(), 0);
   assert.deepEqual(errors, []);

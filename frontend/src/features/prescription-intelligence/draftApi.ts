@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import type { IdentityPolicy } from "./HistoryIdentityPolicy";
 import type { EvidenceSource, MedicineReviewStatus, StandardMedicineConcept, MedicineNameResult } from "./medicineApi";
 
 export interface SafetyProfile {
@@ -7,6 +8,7 @@ export interface SafetyProfile {
   catalogue_review_current: boolean; reviewer_name: string | null; reviewed_at: string | null; review_notes: string; updated_at: string;
   sources: EvidenceSource[]; product: { strength: string; form: string; route: "oral" | "topical"; standard_concept: StandardMedicineConcept }; conditions: string[];
   engine_version?: string;
+  history_identity_policy?: IdentityPolicy;
 }
 export interface ClinicalDetails {
   reviewed: boolean; onset_hours: string | null; weight_kg: string | null;

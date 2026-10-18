@@ -16,7 +16,8 @@ PROFILE_IDS = {
 def engine_digest():
     root = Path(__file__).resolve().parent
     files = ('engine.py', 'profiles.py', 'contracts.py', 'services.py', 'models.py', 'data/safety_profiles.json',
-             '../medicine_knowledge/services.py', '../prescription_context/patient_data.py')
+             '../medicine_knowledge/services.py', '../prescription_context/patient_data.py',
+             '../prescription_context/history_identity.py', '../medicine_knowledge/screening_engine.py')
     return hashlib.sha256(b''.join((root / name).read_bytes() for name in files)).hexdigest()
 
 

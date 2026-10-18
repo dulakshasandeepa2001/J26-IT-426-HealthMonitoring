@@ -1,0 +1,90 @@
+{
+  "experiment_version": "six-condition-three-model-comparison-2026-10-16-v1",
+  "selected_model": "categorical_tree",
+  "criterion": {
+    "primary": "validation_novel_mapped_unique_macro_f1",
+    "secondary": "validation_novel_mapped_unique_prediction_coverage",
+    "tertiary": "validation_all_mapped_unique_agreement",
+    "remaining_tie": "declared_candidate_order",
+    "missing_class_policy": "require_all_three_provisional_classes_in_primary_validation_subset",
+    "refit_on_validation": false,
+    "test_policy": "evaluate_only_the_validation_selected_frozen_model; do_not_compare_test_models"
+  },
+  "selected_artifact_sha256": "40ed197dbb08ed00a413e003bd3cc979b1f86c45dd8fc4fc41022da6bfa1d753",
+  "test_used_for_selection": false,
+  "refitted_on_validation": false,
+  "fit_row_ids": [
+    "SIX-acute_multi_symptom-01::oseltamivir-75mg-capsule",
+    "SIX-acute_multi_symptom-01::paracetamol-500mg-tablet",
+    "SIX-acute_multi_symptom-02::acyclovir-800mg-tablet",
+    "SIX-acute_multi_symptom-02::calamine-zinc-oxide-lotion",
+    "SIX-acute_multi_symptom-02::paracetamol-500mg-tablet",
+    "SIX-acute_multi_symptom-03::paracetamol-500mg-tablet",
+    "SIX-acute_multi_symptom-04::paracetamol-500mg-tablet",
+    "SIX-acute_multi_symptom-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-acute_multi_symptom-06::ors-low-osmolarity-powder",
+    "SIX-resolved_symptoms-01::oseltamivir-75mg-capsule",
+    "SIX-resolved_symptoms-01::paracetamol-500mg-tablet",
+    "SIX-resolved_symptoms-02::acyclovir-800mg-tablet",
+    "SIX-resolved_symptoms-02::calamine-zinc-oxide-lotion",
+    "SIX-resolved_symptoms-02::paracetamol-500mg-tablet",
+    "SIX-resolved_symptoms-03::paracetamol-500mg-tablet",
+    "SIX-resolved_symptoms-04::paracetamol-500mg-tablet",
+    "SIX-resolved_symptoms-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-resolved_symptoms-06::ors-low-osmolarity-powder",
+    "SIX-incomplete_interview-01::oseltamivir-75mg-capsule",
+    "SIX-incomplete_interview-01::paracetamol-500mg-tablet",
+    "SIX-incomplete_interview-02::acyclovir-800mg-tablet",
+    "SIX-incomplete_interview-02::calamine-zinc-oxide-lotion",
+    "SIX-incomplete_interview-02::paracetamol-500mg-tablet",
+    "SIX-incomplete_interview-03::paracetamol-500mg-tablet",
+    "SIX-incomplete_interview-04::paracetamol-500mg-tablet",
+    "SIX-incomplete_interview-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-incomplete_interview-06::ors-low-osmolarity-powder"
+  ],
+  "validation_row_ids": [
+    "SIX-localized_complaint-01::oseltamivir-75mg-capsule",
+    "SIX-localized_complaint-01::paracetamol-500mg-tablet",
+    "SIX-localized_complaint-02::acyclovir-800mg-tablet",
+    "SIX-localized_complaint-02::calamine-zinc-oxide-lotion",
+    "SIX-localized_complaint-02::paracetamol-500mg-tablet",
+    "SIX-localized_complaint-03::paracetamol-500mg-tablet",
+    "SIX-localized_complaint-04::paracetamol-500mg-tablet",
+    "SIX-localized_complaint-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-localized_complaint-06::ors-low-osmolarity-powder",
+    "SIX-uncertain_target_history-01::oseltamivir-75mg-capsule",
+    "SIX-uncertain_target_history-01::paracetamol-500mg-tablet",
+    "SIX-uncertain_target_history-02::acyclovir-800mg-tablet",
+    "SIX-uncertain_target_history-02::calamine-zinc-oxide-lotion",
+    "SIX-uncertain_target_history-02::paracetamol-500mg-tablet",
+    "SIX-uncertain_target_history-03::paracetamol-500mg-tablet",
+    "SIX-uncertain_target_history-04::paracetamol-500mg-tablet",
+    "SIX-uncertain_target_history-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-uncertain_target_history-06::ors-low-osmolarity-powder",
+    "SIX-reported_concern-01::oseltamivir-75mg-capsule",
+    "SIX-reported_concern-01::paracetamol-500mg-tablet",
+    "SIX-reported_concern-02::acyclovir-800mg-tablet",
+    "SIX-reported_concern-02::calamine-zinc-oxide-lotion",
+    "SIX-reported_concern-02::paracetamol-500mg-tablet",
+    "SIX-reported_concern-04::paracetamol-500mg-tablet",
+    "SIX-reported_concern-05::cmc-sodium-05pct-ophthalmic-solution",
+    "SIX-reported_concern-06::ors-low-osmolarity-powder"
+  ],
+  "validation_results": {
+    "categorical_tree": {
+      "primary_macro_f1": 0.6188197767145135,
+      "primary_coverage": 1.0,
+      "all_unique_agreement": 0.9230769230769231
+    },
+    "categorical_naive_bayes": {
+      "primary_macro_f1": 0.5064102564102564,
+      "primary_coverage": 1.0,
+      "all_unique_agreement": 0.7307692307692307
+    },
+    "hamming_knn": {
+      "primary_macro_f1": 0.4603174603174603,
+      "primary_coverage": 1.0,
+      "all_unique_agreement": 0.5384615384615384
+    }
+  }
+}

@@ -22,7 +22,7 @@ export default function PatientAccess({ sampleMode, onSampleModeChange, onSample
         <button type="button" disabled={!onSampleModeChange} aria-expanded={sampleMode} aria-controls={`${id}-sample`} onClick={() => onSampleModeChange?.(!sampleMode)} className={buttonStyle}><FlaskConical aria-hidden="true" className="h-4 w-4 text-purple-600" />{sampleMode ? "Close sample preview" : "Preview with existing sample patients"}</button>
         {sampleMode && (
           <div id={`${id}-sample`} className="mt-4 space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-xs leading-relaxed text-amber-900"><strong>Sample data only.</strong> Reuses the overview’s demonstration patients. This preview provides no access to clinical records and has no authorized encounter.</p>
+            <p className="text-xs leading-relaxed text-amber-900"><strong>Sample data only.</strong> Reuses the overview’s illustrative patient data. This preview provides no access to clinical records and has no authorized encounter.</p>
             <div className="space-y-1.5"><label htmlFor={`${id}-sample-patient`} className="text-xs font-semibold text-amber-900">Sample patient from overview</label><select id={`${id}-sample-patient`} value={currentPatient?.id ?? ""} onChange={(event) => { selectSamplePatient(event.target.value); onSamplePatientChange?.(); }} className={controlStyle}>{queue.map((patient) => <option key={patient.id} value={patient.id}>{patient.name} · {patient.id}</option>)}</select></div>
           </div>
         )}

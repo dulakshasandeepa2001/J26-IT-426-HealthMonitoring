@@ -1,0 +1,38 @@
+{
+  "experiment_version": "six-condition-three-model-comparison-2026-10-16-v1",
+  "dataset_version": "six-condition-synthetic-relevance-2026-10-16-v1",
+  "presentation_label": "Experimental ML",
+  "clinical_review_status": "not_reviewed",
+  "label_method": "rule_derived",
+  "fit_population": "unique_condition_mapped_training_inputs_only",
+  "preprocessing": "categorical_tokens_and_vocabularies_fitted_only_on_training_inputs; explicit_null_is_not_false",
+  "candidates": [
+    {"id": "categorical_tree", "parameters": {"max_depth": 6, "min_split_samples": 2, "min_information_gain": 1e-12}},
+    {"id": "categorical_naive_bayes", "parameters": {"alpha": 1.0}},
+    {"id": "hamming_knn", "parameters": {"k": 3, "boundary_ties": "include_all_at_kth_distance", "class_ties": "alphabetical"}}
+  ],
+  "hyperparameter_search": "none; one predeclared configuration per learner",
+  "selection": {
+    "primary": "validation_novel_mapped_unique_macro_f1",
+    "secondary": "validation_novel_mapped_unique_prediction_coverage",
+    "tertiary": "validation_all_mapped_unique_agreement",
+    "remaining_tie": "declared_candidate_order",
+    "missing_class_policy": "require_all_three_provisional_classes_in_primary_validation_subset",
+    "refit_on_validation": false,
+    "test_policy": "evaluate_only_the_validation_selected_frozen_model; do_not_compare_test_models"
+  },
+  "prediction_policy": {
+    "unseen_training_category": "abstain",
+    "unknown_tree_branch": "abstain",
+    "unsupported_condition_or_unmapped_candidate": "abstain_outside_fitted_task",
+    "scores": "no_medical_confidence_or_calibrated_probability_is_exposed"
+  },
+  "interpretation": [
+    "All models are compact stdlib implementations; the existing information-gain tree is not scikit-learn CART.",
+    "The comparison measures imitation of provisional researcher-defined rules, not clinical accuracy or independent validation.",
+    "Contrast and unsupported-condition rows are audited as outside the fitted task, not used as easy negative training examples.",
+    "Duplicate inputs within each partition receive one vote in primary metrics; repeated inputs across partitions remain disclosed.",
+    "Mapped-purpose groups contain one candidate; constant antiviral labels and tiny per-group support do not establish ranking or discrimination.",
+    "Model prediction cannot clear safety blocks, resolve an unknown fact, mark content/rules reviewed, or approve/publish prescriptions."
+  ]
+}

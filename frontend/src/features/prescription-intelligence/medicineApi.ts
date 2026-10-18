@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import type { IdentityPolicy } from "./HistoryIdentityPolicy";
 
 export type MedicineReviewStatus = "pending" | "reviewed" | "rejected";
 export interface EvidenceSource {
@@ -45,4 +46,23 @@ export function reviewMedicine(entry: MedicineEntry, decision: MedicineReviewSta
 }
 export function checkMedicineNames(names: string[]): Promise<{ results: MedicineNameResult[]; safety_assessed: false }> {
   return apiRequest("/api/prescription/medicines/normalize/", { method: "POST", body: JSON.stringify({ names }) });
+}
+
+export interface ScopeReview {
+  status: MedicineReviewStatus; is_current: boolean; reason: string | null;
+  reviewer_name: string | null; reviewed_at: string | null; notes: string;
+}
+export interface ConditionScope {
+  id: string; medicine_id: string; condition: string; content_hash: string; rules_hash: string; updated_at: string;
+  content: { condition: string; display_name?: string; product: (Omit<MedicineEntry["content"], "standard_concept"> & { standard_concept: StandardMedicineConcept | null; reference_product_identifier?: string }) | null; identity_status: string; purpose: string; knowledge_version: string;
+    unresolved_product?: { gap: string; source_ids: string[]; source_urls: string[]; strength: null; rxcui: null; regimen: null } };
+  rules: { policy: { scope: string; concern_fields: string[]; target_symptoms: string[]; handler: string }; reference_profile: unknown; scope: string; implementation_source: string; implementation_bindings: Record<string, string>; history_identity_policy?: IdentityPolicy };
+  content_review: ScopeReview; safety_review: ScopeReview; live_screening_enabled: false;
+}
+export function fetchConditionKnowledge(): Promise<ConditionScope[]> { return apiRequest("/api/prescription/condition-knowledge/"); }
+export function reviewConditionScope(scope: ConditionScope, kind: "content" | "safety", decision: MedicineReviewStatus, notes: string, evidence: boolean): Promise<ConditionScope> {
+  return apiRequest(`/api/prescription/condition-knowledge/${encodeURIComponent(scope.id)}/review/${kind}/`, {
+    method: "POST", body: JSON.stringify({ decision, notes, evidence_checked: evidence,
+      expected_content_hash: kind === "content" ? scope.content_hash : scope.rules_hash, expected_updated_at: scope.updated_at }),
+  });
 }

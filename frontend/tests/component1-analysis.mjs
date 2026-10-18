@@ -72,6 +72,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
     if (id) analysisQueries.push(id);
     return send(id ? analyses.filter((item) => item.consultation === id) : analyses);
   }
+  if (path.endsWith('/history-identities/')) return send({ detail: 'Identity choices unavailable in this analysis fixture.' }, 503);
   const demoPath = path.match(/^\/api\/prescription\/consultations\/([^/]+)\/demo-analysis\/$/);
   if (demoPath) {
     demoRequests++;
@@ -107,18 +108,18 @@ try {
   await page.goto(origin + "/doctor/prescription-workspace");
   await page.getByLabel("Assigned registered patient").selectOption("201");
   await page.getByLabel("Active encounter / consultation").selectOption(ids[0]);
-  assert.equal(await page.getByRole("button", { name: "Load demo analysis" }).isDisabled(), true);
-  await page.getByLabel("Demo analysis scenario").selectOption("influenza");
+  assert.equal(await page.getByRole("button", { name: "Load analysis" }).isDisabled(), true);
+  await page.getByLabel("Analysis scenario").selectOption("influenza");
   failDemo = true;
-  await page.getByRole("button", { name: "Load demo analysis" }).click();
-  await visible(page.getByText("Test demo result save failure.", { exact: true }));
+  await page.getByRole("button", { name: "Load analysis" }).click();
+  await visible(page.getByText("Test research result save failure.", { exact: true }));
   assert.equal(analyses.length, 0);
   failDemo = false;
-  await page.getByRole("button", { name: "Load demo analysis" }).evaluate((button) => { button.click(); button.click(); });
+  await page.getByRole("button", { name: "Load analysis" }).evaluate((button) => { button.click(); button.click(); });
   await visible(page.getByText("Sample confidence: 82%", { exact: true }));
   assert.equal(demoRequests, 2);
   assert.equal(analyses.length, 1);
-  await visible(page.getByText("Synthetic demo data — supplied JSON sample", { exact: true }));
+  await visible(page.getByText("Synthetic consultation data — clinician review required", { exact: true }));
   await visible(page.getByText("Diagnosis has not been confirmed by the doctor.", { exact: true }));
   assert.equal(await diagnosisInput().inputValue(), "Influenza");
   assert.equal(diagnoses.length, 0, "Import cannot confirm a diagnosis");
@@ -140,8 +141,8 @@ try {
 
   await page.getByLabel("Assigned registered patient").selectOption("202");
   assert.equal(await diagnosisInput().inputValue(), "");
-  await page.getByLabel("Demo analysis scenario").selectOption("chickenpox");
-  await page.getByRole("button", { name: "Load demo analysis" }).click();
+  await page.getByLabel("Analysis scenario").selectOption("chickenpox");
+  await page.getByRole("button", { name: "Load analysis" }).click();
   await visible(page.getByText("Sample confidence: 79%", { exact: true }));
   assert.equal(await diagnosisInput().inputValue(), "Chickenpox");
   assert.equal(await page.getByText("Sample confidence: 82%", { exact: true }).count(), 0);
@@ -153,13 +154,13 @@ try {
 
   await page.getByLabel("Assigned registered patient").selectOption("201");
   await page.getByLabel("Active encounter / consultation").selectOption(ids[2]);
-  assert.equal(await page.getByLabel("Demo analysis scenario").count(), 0, "Real visits must not offer sample import");
+  assert.equal(await page.getByLabel("Analysis scenario").count(), 0, "Real visits must not offer sample import");
   await diagnosisInput().fill("Doctor's initial impression");
   const delivery = sampleResult(consultations[2], "influenza");
   delivery.analysis_reference = "producer-fixture-real-003";
   delivery.payload = { ...delivery.payload, analysis_reference: delivery.analysis_reference, source: "component_1", is_demo: false, model_version: "producer-test-fixture-v1" };
   analyses.push(delivery); // Simulate the receiver committing a result after the page opened.
-  await page.getByText("Component 1 result — clinician review required", { exact: true }).waitFor({ state: "visible", timeout: 12000 });
+  await page.getByText("Consultation analysis — clinician review required", { exact: true }).waitFor({ state: "visible", timeout: 12000 });
   assert.equal(await diagnosisInput().inputValue(), "Doctor's initial impression", "Automatic delivery must preserve the doctor's draft");
   assert.equal(await page.getByText("Reported model score: 82%", { exact: true }).count(), 1);
   assert.equal(await page.getByText("Sample confidence: 79%", { exact: true }).count(), 0);

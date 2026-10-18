@@ -7,6 +7,11 @@ prescription approval and publication remain later work.
 
 ## Demo flow
 
+Current content and safety-rule reviews are reused across visits and sessions;
+review each unchanged version once. Medicine Knowledge shows completed states
+and opens a new decision form only when needed or explicitly requested. See
+[Step 8F](STEP8F.md) for the additional condition scopes and their activation limits.
+
 1. Sign in as an approved doctor. In **Medicine Knowledge**, inspect each relevant
    medicine's product, warnings and full evidence. Record a **content review**.
 2. On that same medicine, inspect **Executable safety rules — separate review**,

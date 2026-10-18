@@ -1,0 +1,528 @@
+{
+  "artifact_version": "1.0",
+  "experiment_version": "six-condition-three-model-comparison-2026-10-16-v1",
+  "presentation_label": "Experimental ML",
+  "algorithm": "categorical_tree",
+  "learner": {
+    "learner_version": "stdlib-categorical-comparison-learners-v1",
+    "algorithm": "categorical_tree",
+    "feature_names": [
+      "condition",
+      "candidate_id",
+      "purpose",
+      "clinical_role",
+      "fever_present",
+      "body_aches_present",
+      "itching_present",
+      "jaw_pain_present",
+      "ocular_dryness_present",
+      "ocular_irritation_present",
+      "diarrhoea_present",
+      "vomiting_present",
+      "recent_fluid_loss_present"
+    ],
+    "labels": [
+      "not_relevant",
+      "relevant",
+      "undetermined"
+    ],
+    "parameters": {
+      "max_depth": 6,
+      "min_split_samples": 2,
+      "min_information_gain": 1e-12
+    },
+    "vocabulary": {
+      "condition": [
+        "string:chickenpox",
+        "string:influenza",
+        "string:measles",
+        "string:mumps",
+        "string:viral_conjunctivitis",
+        "string:viral_gastroenteritis"
+      ],
+      "candidate_id": [
+        "string:acyclovir-800mg-tablet",
+        "string:calamine-zinc-oxide-lotion",
+        "string:cmc-sodium-05pct-ophthalmic-solution",
+        "string:ors-low-osmolarity-powder",
+        "string:oseltamivir-75mg-capsule",
+        "string:paracetamol-500mg-tablet"
+      ],
+      "purpose": [
+        "string:antiviral",
+        "string:rehydration_support",
+        "string:symptom_relief"
+      ],
+      "clinical_role": [
+        "string:fever_or_aches_relief",
+        "string:fever_or_pain_relief",
+        "string:fever_relief",
+        "string:influenza_antiviral",
+        "string:itching_relief",
+        "string:ocular_dryness_or_irritation_relief",
+        "string:oral_fluid_electrolyte_replacement",
+        "string:varicella_antiviral"
+      ],
+      "fever_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "body_aches_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "itching_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "jaw_pain_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "ocular_dryness_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "ocular_irritation_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "diarrhoea_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "vomiting_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ],
+      "recent_fluid_loss_present": [
+        "bool:false",
+        "bool:true",
+        "null"
+      ]
+    },
+    "training_inputs": 27,
+    "state": {
+      "algorithm_version": "categorical-information-gain-v1",
+      "feature_names": [
+        "condition",
+        "candidate_id",
+        "purpose",
+        "clinical_role",
+        "fever_present",
+        "body_aches_present",
+        "itching_present",
+        "jaw_pain_present",
+        "ocular_dryness_present",
+        "ocular_irritation_present",
+        "diarrhoea_present",
+        "vomiting_present",
+        "recent_fluid_loss_present"
+      ],
+      "labels": [
+        "not_relevant",
+        "relevant",
+        "undetermined"
+      ],
+      "hyperparameters": {
+        "max_depth": 6,
+        "min_split_samples": 2,
+        "min_information_gain": 1e-12
+      },
+      "vocabulary": {
+        "condition": [
+          "string:chickenpox",
+          "string:influenza",
+          "string:measles",
+          "string:mumps",
+          "string:viral_conjunctivitis",
+          "string:viral_gastroenteritis"
+        ],
+        "candidate_id": [
+          "string:acyclovir-800mg-tablet",
+          "string:calamine-zinc-oxide-lotion",
+          "string:cmc-sodium-05pct-ophthalmic-solution",
+          "string:ors-low-osmolarity-powder",
+          "string:oseltamivir-75mg-capsule",
+          "string:paracetamol-500mg-tablet"
+        ],
+        "purpose": [
+          "string:antiviral",
+          "string:rehydration_support",
+          "string:symptom_relief"
+        ],
+        "clinical_role": [
+          "string:fever_or_aches_relief",
+          "string:fever_or_pain_relief",
+          "string:fever_relief",
+          "string:influenza_antiviral",
+          "string:itching_relief",
+          "string:ocular_dryness_or_irritation_relief",
+          "string:oral_fluid_electrolyte_replacement",
+          "string:varicella_antiviral"
+        ],
+        "fever_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "body_aches_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "itching_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "jaw_pain_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "ocular_dryness_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "ocular_irritation_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "diarrhoea_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "vomiting_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ],
+        "recent_fluid_loss_present": [
+          "bool:false",
+          "bool:true",
+          "null"
+        ]
+      },
+      "training_unique_inputs": 27,
+      "root": {
+        "class_counts": {
+          "not_relevant": 7,
+          "relevant": 13,
+          "undetermined": 7
+        },
+        "training_unique_inputs": 27,
+        "prediction": "relevant",
+        "feature": "fever_present",
+        "information_gain": 0.6102667204583561,
+        "branches": {
+          "bool:false": {
+            "class_counts": {
+              "not_relevant": 5,
+              "relevant": 2
+            },
+            "training_unique_inputs": 7,
+            "prediction": "not_relevant",
+            "feature": "candidate_id",
+            "information_gain": 0.863120568566631,
+            "branches": {
+              "string:acyclovir-800mg-tablet": {
+                "class_counts": {
+                  "relevant": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "relevant"
+              },
+              "string:calamine-zinc-oxide-lotion": {
+                "class_counts": {
+                  "not_relevant": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "not_relevant"
+              },
+              "string:oseltamivir-75mg-capsule": {
+                "class_counts": {
+                  "relevant": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "relevant"
+              },
+              "string:paracetamol-500mg-tablet": {
+                "class_counts": {
+                  "not_relevant": 4
+                },
+                "training_unique_inputs": 4,
+                "prediction": "not_relevant"
+              }
+            }
+          },
+          "bool:true": {
+            "class_counts": {
+              "relevant": 7
+            },
+            "training_unique_inputs": 7,
+            "prediction": "relevant"
+          },
+          "null": {
+            "class_counts": {
+              "not_relevant": 2,
+              "relevant": 4,
+              "undetermined": 7
+            },
+            "training_unique_inputs": 13,
+            "prediction": "undetermined",
+            "feature": "candidate_id",
+            "information_gain": 0.6880351443926179,
+            "branches": {
+              "string:acyclovir-800mg-tablet": {
+                "class_counts": {
+                  "relevant": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "relevant"
+              },
+              "string:calamine-zinc-oxide-lotion": {
+                "class_counts": {
+                  "undetermined": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "undetermined"
+              },
+              "string:cmc-sodium-05pct-ophthalmic-solution": {
+                "class_counts": {
+                  "not_relevant": 1,
+                  "relevant": 1,
+                  "undetermined": 1
+                },
+                "training_unique_inputs": 3,
+                "prediction": "not_relevant",
+                "feature": "ocular_dryness_present",
+                "information_gain": 1.584962500721156,
+                "branches": {
+                  "bool:false": {
+                    "class_counts": {
+                      "not_relevant": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "not_relevant"
+                  },
+                  "bool:true": {
+                    "class_counts": {
+                      "relevant": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "relevant"
+                  },
+                  "null": {
+                    "class_counts": {
+                      "undetermined": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "undetermined"
+                  }
+                }
+              },
+              "string:ors-low-osmolarity-powder": {
+                "class_counts": {
+                  "not_relevant": 1,
+                  "relevant": 1,
+                  "undetermined": 1
+                },
+                "training_unique_inputs": 3,
+                "prediction": "not_relevant",
+                "feature": "diarrhoea_present",
+                "information_gain": 1.584962500721156,
+                "branches": {
+                  "bool:false": {
+                    "class_counts": {
+                      "not_relevant": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "not_relevant"
+                  },
+                  "bool:true": {
+                    "class_counts": {
+                      "relevant": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "relevant"
+                  },
+                  "null": {
+                    "class_counts": {
+                      "undetermined": 1
+                    },
+                    "training_unique_inputs": 1,
+                    "prediction": "undetermined"
+                  }
+                }
+              },
+              "string:oseltamivir-75mg-capsule": {
+                "class_counts": {
+                  "relevant": 1
+                },
+                "training_unique_inputs": 1,
+                "prediction": "relevant"
+              },
+              "string:paracetamol-500mg-tablet": {
+                "class_counts": {
+                  "undetermined": 4
+                },
+                "training_unique_inputs": 4,
+                "prediction": "undetermined"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dataset_version": "six-condition-synthetic-relevance-2026-10-16-v1",
+  "dataset_manifest_sha256": "2aedbe13434460474e392eefa1a2e0a61c541552fb248de25c6c007cf7fc5acf",
+  "label_provenance": {
+    "label_method": "rule_derived",
+    "criteria_version": "six-condition-provisional-relevance-2026-10-16-v1",
+    "source": "researcher_defined_source_informed_criteria",
+    "independent_clinical_validation": false
+  },
+  "clinical_review_status": "not_reviewed",
+  "supported_conditions": [
+    "influenza",
+    "chickenpox",
+    "measles",
+    "mumps",
+    "viral_conjunctivitis",
+    "viral_gastroenteritis"
+  ],
+  "candidate_definitions": [
+    {
+      "candidate_id": "acyclovir-800mg-tablet",
+      "purpose": "antiviral",
+      "display_name": "Acyclovir",
+      "identity_status": "source_reference_product",
+      "strength": "800 mg",
+      "form": "tablet",
+      "route": "oral",
+      "standard_concept": {
+        "rxcui": "197313",
+        "name": "acyclovir 800 MG Oral Tablet",
+        "term_type": "SCD",
+        "source_id": "dailymed-acyclovir"
+      },
+      "policy_ids": [
+        "varicella-antiviral"
+      ],
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "candidate_id": "calamine-zinc-oxide-lotion",
+      "purpose": "symptom_relief",
+      "display_name": "Calamine + zinc oxide",
+      "identity_status": "source_reference_product",
+      "strength": "8% + 8%",
+      "form": "lotion",
+      "route": "topical",
+      "standard_concept": {
+        "rxcui": "617954",
+        "name": "calamine 80 MG/ML / zinc oxide 80 MG/ML Topical Lotion",
+        "term_type": "SCD",
+        "source_id": "dailymed-calamine"
+      },
+      "policy_ids": [
+        "varicella-itch"
+      ],
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+      "purpose": "symptom_relief",
+      "display_name": "Carboxymethylcellulose sodium",
+      "identity_status": "source_reference_product",
+      "strength": "0.5% (5 mg/mL)",
+      "form": "ophthalmic_solution",
+      "route": "ophthalmic",
+      "standard_concept": {
+        "rxcui": "1188426",
+        "name": "carboxymethylcellulose sodium 5 MG/ML Ophthalmic Solution",
+        "term_type": "SCD",
+        "source_id": "dailymed-cmc-05"
+      },
+      "policy_ids": [
+        "conjunctivitis-lubrication"
+      ],
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "candidate_id": "ors-low-osmolarity-powder",
+      "purpose": "rehydration_support",
+      "display_name": "ORS planning identity; exact product unresolved",
+      "identity_status": "unresolved_planning_identity",
+      "strength": null,
+      "form": null,
+      "route": null,
+      "standard_concept": null,
+      "policy_ids": [
+        "gastroenteritis-rehydration"
+      ],
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "candidate_id": "oseltamivir-75mg-capsule",
+      "purpose": "antiviral",
+      "display_name": "Oseltamivir",
+      "identity_status": "source_reference_product",
+      "strength": "75 mg",
+      "form": "capsule",
+      "route": "oral",
+      "standard_concept": {
+        "rxcui": "312122",
+        "name": "oseltamivir 75 MG Oral Capsule",
+        "term_type": "SCD",
+        "source_id": "dailymed-oseltamivir"
+      },
+      "policy_ids": [
+        "flu-antiviral"
+      ],
+      "clinical_review_status": "not_reviewed"
+    },
+    {
+      "candidate_id": "paracetamol-500mg-tablet",
+      "purpose": "symptom_relief",
+      "display_name": "Paracetamol (acetaminophen)",
+      "identity_status": "source_reference_product",
+      "strength": "500 mg",
+      "form": "tablet",
+      "route": "oral",
+      "standard_concept": {
+        "rxcui": "198440",
+        "name": "acetaminophen 500 MG Oral Tablet",
+        "term_type": "SCD",
+        "source_id": "dailymed-paracetamol"
+      },
+      "policy_ids": [
+        "flu-fever-aches",
+        "varicella-fever",
+        "measles-fever",
+        "mumps-fever-pain"
+      ],
+      "clinical_review_status": "not_reviewed"
+    }
+  ],
+  "medical_confidence_calibrated": false,
+  "deterministic_controls_required": true,
+  "synthetic_only": true,
+  "api_enabled": false,
+  "prescription_selection_enabled": false,
+  "approved": false,
+  "publication_enabled": false
+}

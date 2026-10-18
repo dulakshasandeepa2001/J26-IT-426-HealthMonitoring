@@ -50,6 +50,19 @@ export interface PatientContextReview {
   current_medicines: string[];
   reviewed: boolean;
   expected_updated_at: string | null;
+  history_details?: HistoryDetails;
+}
+
+export interface AllergyIdentity { recorded_text: string; identity: string; reaction: string; reaction_date: string | null; clarification_note: string }
+export interface MedicineIdentity { recorded_text: string; catalogue_id: string; expected_identity_hash: string; schedule: string; clarification_note: string }
+export interface HistoryDetails { allergies: AllergyIdentity[]; medicines: MedicineIdentity[] }
+export interface HistoryIdentityRecord { version: string; details: HistoryDetails; reviewed_by: number; reviewed_at: string; consultation_id: string }
+export interface HistoryIdentityOptions {
+  version: string; allergens: string[];
+  products: { id: string; name: string; strength: string; form: string; route: string; identity_hash: string; aliases: string[] }[];
+}
+export function fetchHistoryIdentityOptions(visit: string): Promise<HistoryIdentityOptions> {
+  return apiRequest(`/api/prescription/consultations/${visit}/history-identities/`);
 }
 
 export async function savePatientContext(

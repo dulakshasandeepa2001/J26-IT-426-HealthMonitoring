@@ -6,6 +6,7 @@ import type { usePrescription } from "./usePrescription";
 import { conditionLabel, HANDOFF_CONDITIONS, readComponent1Payload, symptomDuration, type DemoScenario } from "./analysisData";
 import { buttonStyle, controlStyle, Unavailable } from "./PageFrame";
 import { Member1Report } from "./Member1Report";
+import { clinicalAnalysisDetails, analysisRecordLabel } from "@/lib/productLanguage";
 
 export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> }) {
   const [scenario, setScenario] = useState<DemoScenario | "">("");
@@ -23,38 +24,37 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
     <div className="space-y-4">
       {rx.activeConsultation?.is_demo && !analysis && (
         <form onSubmit={load} className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <p className="flex items-center gap-2 text-xs font-bold text-amber-900"><FlaskConical className="h-4 w-4" aria-hidden="true" />Component 1 demo result</p>
-          <p className="text-xs leading-relaxed text-amber-900">Choose one of the supplied JSON examples. This loads synthetic sample data for this demo visit.</p>
-          <label htmlFor="demo-scenario" className="block text-xs font-semibold text-slate-700">Demo analysis scenario</label>
+          <p className="flex items-center gap-2 text-xs font-bold text-amber-900"><FlaskConical className="h-4 w-4" aria-hidden="true" />Load consultation analysis</p>
+          <p className="text-xs leading-relaxed text-amber-900">Choose a clinical scenario to load synthetic consultation data.</p>
+          <label htmlFor="demo-scenario" className="block text-xs font-semibold text-slate-700">Analysis scenario</label>
           <select id="demo-scenario" className={controlStyle} value={scenario} disabled={rx.loading || rx.diagnosisConfirmed}
             onChange={(event) => setScenario(event.target.value as DemoScenario | "")}>
-            <option value="">Select a demo scenario</option>
+            <option value="">Select an analysis scenario</option>
             <option value="influenza">Influenza</option>
             <option value="chickenpox">Chickenpox</option>
-            <option value="member1_influenza">Member 1 — Influenza voice JSON</option>
-            {HANDOFF_CONDITIONS.map((code) => <option key={code} value={`member1_v21_${code}`}>Member 1 v2.1 — {conditionLabel(code)}</option>)}
+            <option value="member1_influenza">Influenza — voice analysis</option>
+            {HANDOFF_CONDITIONS.map((code) => <option key={code} value={`member1_v21_${code}`}>Clinical analysis — {conditionLabel(code)}</option>)}
           </select>
-          <button type="submit" className={buttonStyle} disabled={rx.loading || rx.diagnosisConfirmed || !scenario}>Load demo analysis</button>
-          {rx.diagnosisConfirmed && <p className="text-xs text-amber-900">Diagnosis is already confirmed. Start a new demo visit to load another analysis.</p>}
+          <button type="submit" className={buttonStyle} disabled={rx.loading || rx.diagnosisConfirmed || !scenario}>Load analysis</button>
+          {rx.diagnosisConfirmed && <p className="text-xs text-amber-900">Diagnosis is already confirmed. Start a new research visit to load another analysis.</p>}
         </form>
       )}
 
       {!analysis ? (
         <Unavailable title="Structured voice-analysis result unavailable">
-          {rx.activeConsultation ? "Awaiting an encounter-linked Component 1 result. New results appear automatically while this visit is open." : "Select a consultation to load its analysis result."}
+          {rx.activeConsultation ? "Awaiting the consultation analysis. New results appear automatically while this visit is open." : "Select a consultation to load its analysis result."}
         </Unavailable>
       ) : (
         <>
           <dl className="grid gap-3 text-xs sm:grid-cols-2">
-            <div><dt className="font-semibold text-slate-600">Analysis reference</dt><dd className="mt-1 break-all">{analysis.analysis_reference}</dd></div>
+            <div><dt className="font-semibold text-slate-600">Analysis reference</dt><dd className="mt-1 break-all">{analysisRecordLabel(analysis.analysis_reference, analysis.id)}</dd></div>
             <div><dt className="font-semibold text-slate-600">Received at</dt><dd className="mt-1">{new Date(analysis.imported_at).toLocaleString()}</dd></div>
           </dl>
           {parsed && linked ? (
             <>
               <div className={`rounded-2xl border p-3 text-xs ${parsed.is_demo ? "border-amber-200 bg-amber-50 text-amber-900" : "border-purple-200 bg-purple-50 text-purple-900"}`}>
-                <p className="font-bold">{parsed.is_demo ? "Synthetic demo data — supplied JSON sample" : "Component 1 result — clinician review required"}</p>
-                <p className="mt-1">Model version: {parsed.model_version}</p>
-                <p className="mt-1">Handoff schema: {parsed.schema_version}</p>
+                <p className="font-bold">{parsed.is_demo ? "Synthetic consultation data — clinician review required" : "Consultation analysis — clinician review required"}</p>
+                <p className="mt-1">Analysis format version: {parsed.schema_version}</p>
                 <p className="mt-1">{parsed.is_demo ? "The scores are fixed sample values, not measured model performance." : "Reported model scores require clinician interpretation."}</p>
                 <p className="mt-1">{rx.diagnosisConfirmed ? "Doctor diagnosis confirmation is saved separately." : "Diagnosis has not been confirmed by the doctor."}</p>
               </div>
@@ -84,13 +84,13 @@ export function AnalysisResult({ rx }: { rx: ReturnType<typeof usePrescription> 
                   <p className="font-bold">Reported red flags</p>
                   <ul className="mt-1 list-inside list-disc">{parsed.severity.red_flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>
                 </div>
-              ) : <p className="text-xs text-slate-500">{parsed.member1?.red_flag_assessment === "not_assessed" ? "Red flags were not assessed in this output. Clinician assessment is required." : parsed.member1 ? "The producer reported an assessed red-flag list with no items. Clinician review is still required." : "No red flags were included in this payload."}</p>}
+              ) : <p className="text-xs text-slate-500">{parsed.member1?.red_flag_assessment === "not_assessed" ? "Red flags were not assessed in this output. Clinician assessment is required." : parsed.member1 ? "The analysis includes an assessed red-flag list with no items. Clinician review is still required." : "No red flags were included in this payload."}</p>}
               {parsed.member1 && <Member1Report details={parsed.member1} />}
             </>
           ) : <p className="text-xs text-amber-800">{parsed ? "The payload IDs do not match this patient and visit." : "Saved analysis uses a legacy format. Its original payload is available below."}</p>}
           <details className="rounded-xl border border-slate-200 p-3">
-            <summary className="cursor-pointer text-xs font-semibold text-slate-600">View analysis JSON</summary>
-            <pre className="mt-3 max-h-60 overflow-auto whitespace-pre-wrap break-words text-[11px] text-slate-600">{JSON.stringify(analysis.payload, null, 2)}</pre>
+            <summary className="cursor-pointer text-xs font-semibold text-slate-600">View clinical analysis details</summary>
+            <pre className="mt-3 max-h-60 overflow-auto whitespace-pre-wrap break-words text-[11px] text-slate-600">{JSON.stringify(clinicalAnalysisDetails(analysis.payload), null, 2)}</pre>
           </details>
         </>
       )}

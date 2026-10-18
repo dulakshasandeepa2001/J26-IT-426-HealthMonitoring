@@ -1,4 +1,5 @@
 "use client";
+import { interfaceText } from "@/lib/productLanguage";
 
 import { useState, type FormEvent } from "react";
 import { Plus, Check, Loader2 } from "lucide-react";
@@ -36,7 +37,7 @@ export function EncounterSelector({ rx }: { rx: ReturnType<typeof usePrescriptio
 
       {!rx.loading && !rx.error && rx.patients.length === 0 && (
         <Unavailable title="No patients assigned yet">
-          Ask an administrator to assign a registered patient for the PP1 demo. Appointment assignments from Component 1 will be connected later.
+          Ask an administrator to assign a registered patient and create a consultation.
         </Unavailable>
       )}
 
@@ -57,7 +58,7 @@ export function EncounterSelector({ rx }: { rx: ReturnType<typeof usePrescriptio
               <option value="">Select a saved visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>
-                  {new Date(visit.started_at).toLocaleString()} · {visit.reason}{visit.is_demo ? " · PP1 demo" : ""}
+                  {new Date(visit.started_at).toLocaleString()} · {interfaceText(visit.reason)}{visit.is_demo ? " · Synthetic research" : ""}
                 </option>
               ))}
             </select>
@@ -66,7 +67,7 @@ export function EncounterSelector({ rx }: { rx: ReturnType<typeof usePrescriptio
           {rx.activeConsultation && (
             <dl className="grid gap-2 rounded-2xl border border-slate-200 p-3 text-xs sm:grid-cols-2">
               <div><dt className="font-semibold text-slate-600">Consultation ID</dt><dd className="mt-1 break-all" data-testid="consultation-id">{rx.activeConsultation.id}</dd></div>
-              <div><dt className="font-semibold text-slate-600">Visit status</dt><dd className="mt-1">{rx.activeConsultation.is_demo ? "PP1 demo encounter" : "Saved encounter"}</dd></div>
+              <div><dt className="font-semibold text-slate-600">Visit status</dt><dd className="mt-1">{rx.activeConsultation.is_demo ? "Synthetic research consultation" : "Saved encounter"}</dd></div>
             </dl>
           )}
 

@@ -20,7 +20,7 @@ export default function MedicationHistory() {
           </Section>
           <Section title="Current medicines" icon={Pill}><Unavailable title="Current medication list unavailable">The existing overview contains historical sample prescriptions, not a reconciled current medication list. Current medicines cannot be inferred from those prescriptions.</Unavailable></Section>
         </div>
-        {sampleMode ? <PrescriptionHistory /> : <Section title="Previous prescriptions" icon={Pill}><Unavailable title="Prescription history unavailable">Clinical prescriptions can be loaded only after server verification of patient access. Use the sample preview to view the existing overview’s demonstration history.</Unavailable></Section>}
+        {sampleMode ? <PrescriptionHistory /> : <Section title="Previous prescriptions" icon={Pill}><Unavailable title="Prescription history unavailable">Clinical prescriptions can be loaded only after server verification of patient access. Use the sample preview to view the existing overview’s illustrative history.</Unavailable></Section>}
       </div>
     </PageFrame>
   );

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'accounts',
     'taskcreate',
     'prescription_context',
+    'prescription_review',
     'medicine_knowledge',
     'prescription_drafts',
 ]
@@ -154,3 +155,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # privileges are needed. Empty defaults leave server-to-server ingestion disabled.
 COMPONENT1_API_KEY = config('COMPONENT1_API_KEY', default='')
 COMPONENT1_SERVICE_USER_ID = config('COMPONENT1_SERVICE_USER_ID', default=0, cast=int)
+
+# Optional read-only demonstration of frozen synthetic research fixtures.
+# Never enables real-patient model inputs, training, reviews or publication.
+PRESCRIPTION_EXPERIMENTAL_ML_ENABLED = config('PRESCRIPTION_EXPERIMENTAL_ML_ENABLED', default=False, cast=bool)

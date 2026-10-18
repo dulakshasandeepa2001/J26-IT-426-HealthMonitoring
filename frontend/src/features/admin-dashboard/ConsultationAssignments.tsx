@@ -1,4 +1,5 @@
 "use client";
+import { interfaceText } from "@/lib/productLanguage";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -137,7 +138,7 @@ export default function ConsultationAssignments({ refreshVersion = 0 }: { refres
           </div>
           <label className="flex items-center gap-2 text-xs text-slate-700 md:col-span-2">
             <input type="checkbox" checked={isDemo} onChange={(event) => setIsDemo(event.target.checked)} className="h-4 w-4 accent-blue-600" />
-            PP1 demo encounter
+            Synthetic research consultation
           </label>
         </fieldset>
         <button type="submit" disabled={busy || accessDenied || !doctor || !patient || !reason.trim()}
@@ -164,9 +165,9 @@ export default function ConsultationAssignments({ refreshVersion = 0 }: { refres
             <li key={visit.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-bold text-slate-800">{visit.patient_name} → {visit.doctor_name}</p>
-                <span className="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700">{visit.is_demo ? "PP1 demo" : "Consultation"}</span>
+                <span className="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700">{visit.is_demo ? "Synthetic research" : "Consultation"}</span>
               </div>
-              <p className="mt-1 break-words">{visit.reason}</p>
+              <p className="mt-1 break-words">{interfaceText(visit.reason)}</p>
               <p className="mt-1">{new Date(visit.started_at).toLocaleString()}</p>
               <p className="mt-1 break-all text-[11px] text-slate-500">{visit.id}</p>
             </li>

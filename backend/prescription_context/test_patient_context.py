@@ -85,6 +85,72 @@ class PatientContextReviewTests(TestCase):
         self.assertIsNone(revision.snapshot['before'])
         self.assertEqual(revision.snapshot['after']['allergies'], ['Test allergy'])
 
+    def test_explicit_identity_resolution_keeps_raw_history_and_server_audit(self):
+        from medicine_knowledge.services import seed_catalogue
+        seed_catalogue()
+        choices = self.client.get(self.endpoint().replace('patient-context/', 'history-identities/')).json()
+        product = next(row for row in choices['products'] if row['id'] == 'paracetamol-500mg-tablet')
+        details = {'allergies': [{'recorded_text': 'Penicillin (Rash)', 'identity': 'penicillin', 'reaction': 'Rash', 'reaction_date': None, 'clarification_note': ''}],
+            'medicines': [{'recorded_text': 'Paracetamol 500mg SOS', 'catalogue_id': product['id'], 'expected_identity_hash': product['identity_hash'], 'schedule': 'SOS', 'clarification_note': 'Product name, tablet and strength confirmed with patient.'}]}
+        body = {**self.payload(), 'allergies': ['Penicillin (Rash)'], 'current_medicines': ['Paracetamol 500mg SOS'], 'history_details': details}
+        response = self.save(body)
+        self.assertEqual(response.status_code, 200, response.data)
+        record = response.json()
+        self.assertEqual(record['allergies'], body['allergies'])
+        self.assertEqual(record['current_medicines'], body['current_medicines'])
+        identity = record['provenance']['history_identity']
+        self.assertEqual(identity['reviewed_by'], self.doctor.pk)
+        self.assertEqual(identity['consultation_id'], str(self.consultation.pk))
+        self.assertEqual(identity['details'], details)
+        self.assertEqual(Revision.objects.get().snapshot['after']['history_identity'], identity)
+        for field, value in [('recorded_text', 'Changed text'), ('identity', 'unsupported allergy')]:
+            from copy import deepcopy
+            bad = deepcopy(body); bad['expected_updated_at'] = record['updated_at']
+            bad['history_details']['allergies'][0][field] = value
+            self.assertEqual(self.save(bad).status_code, 400)
+        self.assertEqual(self.client.get(self.endpoint(self.other_consultation).replace('patient-context/', 'history-identities/')).status_code, 404)
+
+    def test_identity_selection_cannot_relabel_known_allergy_or_forge_a_review(self):
+        details = {'allergies': [{'recorded_text': 'Paracetamol (Rash)', 'identity': 'penicillin', 'reaction': 'Rash', 'reaction_date': None, 'clarification_note': 'Arbitrary replacement attempt'}], 'medicines': []}
+        body = {**self.payload(), 'allergies': ['Paracetamol (Rash)'], 'medicine_status': 'none', 'current_medicines': [], 'history_details': details}
+        self.assertEqual(self.save(body).status_code, 400)
+        details['allergies'][0]['identity'] = 'paracetamol'
+        details['reviewed_by'] = self.other_doctor.pk
+        self.assertEqual(self.save(body).status_code, 400)
+        details.pop('reviewed_by')
+        details['allergies'][0]['reaction_date'] = 'unknown'
+        self.assertEqual(self.save(body).status_code, 400)
+        self.assertFalse(PatientContext.objects.exists())
+
+    def test_medicine_resolution_requires_current_identity_and_explicit_clarification(self):
+        from medicine_knowledge.services import seed_catalogue
+        from copy import deepcopy
+        seed_catalogue()
+        options = self.client.get(self.endpoint().replace('patient-context/', 'history-identities/')).json()
+        product = next(row for row in options['products'] if row['id'] == 'paracetamol-500mg-tablet')
+        self.assertNotIn('paracetamol', [name.casefold() for name in product['aliases']], 'Ingredient names cannot propose a formulation')
+        row = {'recorded_text': 'Paracetamol', 'catalogue_id': product['id'], 'expected_identity_hash': product['identity_hash'], 'schedule': '', 'clarification_note': ''}
+        body = {**self.payload(), 'allergy_status': 'none', 'allergies': [], 'current_medicines': ['Paracetamol'], 'history_details': {'allergies': [], 'medicines': [row]}}
+        self.assertEqual(self.save(body).status_code, 400, 'Ingredient name does not establish strength/form')
+        row['clarification_note'] = 'Patient confirmed strength and tablet formulation.'
+        for field, invalid in [('catalogue_id', 'unknown-product'), ('expected_identity_hash', '0' * 64)]:
+            bad = deepcopy(body); bad['history_details']['medicines'][0][field] = invalid
+            self.assertEqual(self.save(bad).status_code, 400)
+        self.assertEqual(self.save(body).status_code, 200)
+
+    def test_changed_raw_history_drops_previous_identity_resolution(self):
+        details = {'allergies': [{'recorded_text': 'Penicillin (Rash)', 'identity': 'penicillin', 'reaction': 'Rash', 'reaction_date': None, 'clarification_note': ''}], 'medicines': []}
+        body = {**self.payload(), 'allergies': ['Penicillin (Rash)'], 'medicine_status': 'none', 'current_medicines': [], 'history_details': details}
+        first = self.save(body).json()
+        changed = {**body, 'expected_updated_at': first['updated_at'], 'allergies': ['Unresolved new allergy']}
+        changed.pop('history_details')
+        response = self.save(changed)
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertNotIn('history_identity', response.json()['provenance'])
+        revision = Revision.objects.latest('id')
+        self.assertEqual(revision.snapshot['before']['history_identity']['details'], details)
+        self.assertIn('history_identity', revision.changed_fields)
+
     def test_next_visit_loads_same_patient_data_and_can_record_a_new_review(self):
         first = self.save().json()
         next_visit = self.client.post('/api/prescription/consultations/', {'patient': self.patient.pk, 'reason': 'Return visit'}, format='json').json()

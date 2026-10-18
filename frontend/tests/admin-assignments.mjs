@@ -88,7 +88,7 @@ try {
   await visible(page.getByRole("heading", { name: "Assign patient to doctor" }));
   await page.getByLabel("Approved doctor", { exact: true }).selectOption("101");
   await page.getByLabel("Registered patient", { exact: true }).selectOption("201");
-  assert.equal(await page.getByRole("checkbox", { name: "PP1 demo encounter" }).isChecked(), true);
+  assert.equal(await page.getByRole("checkbox", { name: "Synthetic research consultation" }).isChecked(), true);
   assert.equal(await submit().isDisabled(), true);
   await page.getByLabel("Visit reason", { exact: true }).fill("   ");
   assert.equal(await submit().isDisabled(), true);

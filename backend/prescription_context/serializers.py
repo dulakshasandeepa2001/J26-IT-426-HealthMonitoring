@@ -103,6 +103,37 @@ class PatientContextSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+from .analysis_contract import StrictSerializer
+
+
+class AllergyIdentitySerializer(StrictSerializer):
+    recorded_text = serializers.CharField(max_length=200)
+    identity = serializers.CharField(max_length=100, allow_blank=True)
+    reaction = serializers.CharField(max_length=300, allow_blank=True)
+    reaction_date = serializers.DateField(allow_null=True)
+    clarification_note = serializers.CharField(max_length=500, allow_blank=True)
+
+    def validate_reaction_date(self, value):
+        from django.utils import timezone
+        from zoneinfo import ZoneInfo
+        if value and value > timezone.localdate(timezone=ZoneInfo('Asia/Colombo')):
+            raise serializers.ValidationError('A recorded past reaction cannot have a future date; leave an unknown date blank.')
+        return value
+
+
+class MedicineIdentitySerializer(StrictSerializer):
+    recorded_text = serializers.CharField(max_length=200)
+    catalogue_id = serializers.CharField(max_length=100, allow_blank=True)
+    expected_identity_hash = serializers.CharField(max_length=64, allow_blank=True)
+    schedule = serializers.CharField(max_length=300, allow_blank=True)
+    clarification_note = serializers.CharField(max_length=500, allow_blank=True)
+
+
+class HistoryDetailsSerializer(StrictSerializer):
+    allergies = AllergyIdentitySerializer(many=True, max_length=50)
+    medicines = MedicineIdentitySerializer(many=True, max_length=50)
+
+
 class PatientContextReviewSerializer(serializers.Serializer):
     allergy_status = serializers.ChoiceField(choices=('confirmed', 'none', 'unknown'))
     allergies = serializers.ListField(
@@ -114,6 +145,7 @@ class PatientContextReviewSerializer(serializers.Serializer):
     )
     reviewed = serializers.BooleanField()
     expected_updated_at = serializers.DateTimeField(allow_null=True)
+    history_details = HistoryDetailsSerializer(required=False)
 
     def to_internal_value(self, data):
         if isinstance(data, dict):
@@ -143,6 +175,10 @@ class PatientContextReviewSerializer(serializers.Serializer):
             data[list_field] = normalized
         if errors:
             raise serializers.ValidationError(errors)
+        if 'history_details' in data:
+            from .history_identity import validate_details
+            data['history_details'] = dict(HistoryDetailsSerializer(data['history_details']).data)
+            validate_details(data['history_details'], data)
         return data
 
 class ContextRevisionSerializer(serializers.ModelSerializer):

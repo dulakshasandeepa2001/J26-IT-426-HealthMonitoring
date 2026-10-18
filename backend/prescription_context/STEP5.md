@@ -1,5 +1,11 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+Current page update: [Step 8F](STEP8F.md) adds the remaining four condition scopes
+to Medicine Knowledge and reuses completed content/safety reviews. Existing
+reviewed pilot entries are preserved; new scopes have independent real review
+records, and unresolved ORS cannot receive safety acceptance. Live encounter
+screening remains the two-condition pilot.
+
 Later offline research work is documented in [Step 7A](STEP7A.md) (initial
 synthetic batch) and [Step 7B](STEP7B.md) (experimental fitted model). Neither
 provides independent clinical validation. The
@@ -8,8 +14,8 @@ documents the proposed four-condition expansion; it does not enable new uses
 or change catalogue/rule reviews.
 
 [Step 8A](STEP8A.md) implements the six-condition **2.1 analysis handoff** and
-synthetic doctor demos. Medicine screening and the saved experimental model still
-cover the original two conditions; the new four show treatment support pending.
+synthetic doctor demos. Live medicine screening covers the original two
+conditions; the new four show treatment support pending.
 
 [Step 8B](STEP8B.md) stages the expanded catalogue and explicit deterministic
 rules **offline**, with source provenance, unknown handling and an unresolved ORS
@@ -19,6 +25,16 @@ identity block. It does not import pending content into the live doctor workflow
 60 contexts / 360 candidate rows, provisional rule-derived labels, independent
 safety outcomes, family splits and explicit input-overlap reports. No model is
 fitted or live workflow enabled by this dataset stage.
+
+[Step 8D](STEP8D.md) trains and compares three compact offline models, freezes the
+validation-selected categorical tree and reports held-out errors/overlap. The
+saved artifacts and opt-in synthetic CLI remain Experimental ML / not_reviewed;
+the doctor UI and clinical publication flow are not enabled by this comparison.
+
+[Step 8E](STEP8E.md) adds a default-off, read-only **Experimental ML** panel for
+assigned synthetic demo consultations. It loads the frozen six-condition model
+for fictional fixtures only, with provenance, limits and unchanged independent
+deterministic findings. It does not use the registered patient's clinical inputs.
 
 The Medicine Knowledge page now reads a persisted pilot catalogue from Django.
 The initial four entries cover influenza/chickenpox and all start **Pending review**.
@@ -163,3 +179,20 @@ Next: [Step 6](STEP6.md) connects reviewed catalogue entries and separately
 reviewed executable rules to saved screening drafts and version history.
 [Step 6C](STEP6C.md) documents the current automatic patient-specific medicine plan.
 ML ranking and prescription approval remain separate later work.
+
+[Step 9](STEP9.md) adds the expanded 16-entry catalogue and a separate
+six-condition backend preview/save pathway; it documents pending product/rule
+coverage and the remaining Workspace integration.
+
+[Step 9A](STEP9A.md) completes the six-condition Workspace preview/save flow and
+connects both new and existing drafts to Prescription Records.
+
+[Step 9B](STEP9B.md) adds a prepared patient summary, missing-question quick
+review, full correction editor and explicit per-visit confirmation.
+
+[Step 9C](STEP9C.md) adds separate doctor-confirmed history identities,
+reaction/schedule details, provenance and current-version safety review bindings.
+
+[Step 10](STEP10.md) connects saved screening drafts to synthetic Experimental ML
+proposals, recorded doctor edit/approve/reject decisions and an approved-only A6
+research-demo print view.

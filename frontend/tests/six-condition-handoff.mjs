@@ -90,8 +90,8 @@ try {
   await page.getByLabel('Assigned registered patient').selectOption(String(patient.id));
   for (let index = 0; index < codes.length; index++) {
     await page.getByLabel('Active encounter / consultation').selectOption(visits[index].id);
-    await page.getByLabel('Demo analysis scenario').selectOption('member1_v21_' + codes[index]);
-    await page.getByRole('button', { name: 'Load demo analysis' }).click();
+    await page.getByLabel('Analysis scenario').selectOption('member1_v21_' + codes[index]);
+    await page.getByRole('button', { name: 'Load analysis' }).click();
     await visible(page.getByText('Handoff schema: 2.1', { exact: true }));
     assert.equal(await page.getByRole('textbox', { name: /^Diagnosis context/ }).inputValue(), labels[index]);
     await visible(page.getByText('vomiting · Unknown', { exact: true }));
@@ -107,23 +107,15 @@ try {
       assert.equal(await page.evaluate(() => window.handoffInjected), undefined);
       assert.equal(await page.locator('main img').count(), 0);
     }
-    await page.getByText('View original Component 1 output', { exact: true }).click();
-    const raw = page.locator('details').filter({ has: page.getByText('View original Component 1 output', { exact: true }) }).locator('pre');
+    await page.getByText('View structured clinical details', { exact: true }).click();
+    const raw = page.locator('details').filter({ has: page.getByText('View structured clinical details', { exact: true }) }).locator('pre');
     assert.deepEqual(JSON.parse(await raw.textContent()), wires[index]);
     await page.getByRole('button', { name: 'Confirm Diagnosis', exact: true }).click();
     await visible(page.getByText('Doctor diagnosis confirmation is saved separately.', { exact: true }));
     assert.equal(diagnoses[index].condition_code, codes[index]);
-    if (index === 0) {
-      assert.equal(await page.getByLabel('Fever: verified duration (hours)', { exact: true }).inputValue(), '12');
-      assert.equal(await page.getByLabel('Body aches requires symptom relief', { exact: true }).isChecked(), false);
-      assert.equal(await page.getByLabel('Hours since influenza symptom onset', { exact: true }).inputValue(), '');
-      assert.equal(await page.getByRole('combobox', { name: /^Red-flag assessment/ }).inputValue(), 'unknown');
-      assert.equal(await page.getByLabel('I verified these symptom targets and durations for this visit.', { exact: true }).isChecked(), false);
-    }
-    if (index >= 2) {
-      await visible(page.getByText('Medicine support pending for this condition', { exact: true }));
-      assert.equal(await page.getByRole('button', { name: 'Refresh drafts and rules', exact: true }).count(), 0);
-    }
+    await visible(page.getByText('Review/save allergies and current medicines for this visit first.', { exact: true }));
+    assert.equal(await page.getByRole('button', { name: 'Generate Prescription Draft', exact: true }).isDisabled(), true);
+    assert.equal(await page.getByRole('button', { name: 'Preview medicine candidates', exact: true }).isDisabled(), true);
     console.log('PASS: v2.1 ' + codes[index] + ' loads and confirms separately; source facts stay unverified.');
   }
   assert.deepEqual(patientContext, before);
@@ -135,7 +127,7 @@ try {
   mkdirSync(artifacts, { recursive: true });
   await page.screenshot({ path: join(artifacts, 'six-condition-handoff.png'), fullPage: true });
   await page.reload();
-  await visible(page.getByText('Medicine support pending for this condition', { exact: true }));
+  await visible(page.getByText('Review/save allergies and current medicines for this visit first.', { exact: true }));
   const bad = structuredClone(normalized[0]);
   bad.consultation_id = visits[6].id;
   bad.member1.raw_output.consultation_id = visits[6].id;

@@ -42,7 +42,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   const send = (json, status = 200) => route.fulfill({ json, status, headers });
   if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
   if (path === '/session/') return send({ user: signedIn ? doctor : null, csrfToken: 'test-csrf-token' });
-  if (path === '/api/prescription/safety-profiles/' || path === '/api/prescription/drafts/') return send([]);
+  if (path === '/api/prescription/safety-profiles/' || path === '/api/prescription/drafts/' || path === '/api/prescription/condition-knowledge/') return send([]);
   if (path === '/api/prescription/medicines/') {
     catalogueRequests++;
     return catalogueDenied ? send({ detail: 'Doctor approval revoked.' }, 403) : send(entries);
@@ -86,11 +86,14 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   if (path === '/api/prescription/consultations/') return send([visit]);
   if (path === '/api/prescription/patient-contexts/') return send([patientContext]);
   if (path === '/api/prescription/analyses/' || path === '/api/prescription/diagnoses/') return send([]);
+  if (path.endsWith('/history-identities/')) return send({ detail: 'Identity metadata unavailable in this catalogue fixture.' }, 503);
   throw new Error('Unmocked backend request: ' + request.method() + ' ' + path);
 });
-const detail = () => page.getByRole('region', { name: 'Evidence and content review' });
+const knowledge = () => page.getByRole('region', { name: 'Additional condition knowledge', exact: true });
+const detail = () => knowledge().getByRole('article', { name: / medicine knowledge$/ });
 const catalogue = () => page.getByRole('region', { name: 'Medicine catalogue' });
 const reviewNotes = () => page.getByRole('textbox', { name: 'Review notes' });
+const reviewedTotal = () => page.getByRole('region', { name: 'Catalogue coverage', exact: true }).getByText('Content reviewed', { exact: true }).locator('..').locator('p').last();
 async function visible(locator) { await locator.waitFor({ state: 'visible' }); }
 async function pick(name) { await catalogue().getByRole('button', { name: new RegExp('^' + name) }).click(); }
 
@@ -104,8 +107,13 @@ try {
   await page.getByRole('button', { name: 'Refresh catalogue' }).click();
   await visible(catalogue());
   assert.equal(await catalogue().getByRole('button').count(), 4);
+  assert.equal(await reviewedTotal().textContent(), '0');
   await pick('Acyclovir');
+  await visible(knowledge());
+  assert.equal(await page.getByRole('region', { name: 'Evidence and content review' }).count(), 0);
+  await visible(detail().getByRole('heading', { name: 'Content review · Pending review', exact: true }));
   await visible(detail().getByText('No clinician has reviewed this version.', { exact: true }));
+  await detail().getByText('Condition evidence references', { exact: true }).click();
   const label = detail().getByRole('link', { name: /^Acyclovir tablets — 400 mg and 800 mg/ });
   assert.match(await label.getAttribute('href'), /^https:\/\/dailymed\.nlm\.nih\.gov\//);
   console.log('PASS: server session controls catalogue access; four source-linked entries begin pending and expose warnings and scope.');
@@ -127,7 +135,8 @@ try {
   assert.equal(entries.find((row) => row.id === 'oseltamivir-75mg-capsule').review_status, 'pending');
   failedReview = 0;
   await page.getByRole('button', { name: 'Save content review' }).evaluate((button) => { button.click(); button.click(); });
-  await visible(page.getByText('Content review saved. Executable safety rules need a separate current review before screening.', { exact: true }));
+  await visible(page.getByText('Content review saved.', { exact: true }));
+  assert.equal(await reviewedTotal().textContent(), '1', 'Pilot content review updates the shared total');
   assert.equal(reviewRequests, 2);
   await page.getByRole('button', { name: 'Load review history' }).click();
   await visible(page.getByText('Content reviewed · knowledge_test_doctor', { exact: true }));
@@ -136,10 +145,13 @@ try {
   await page.reload();
   await visible(catalogue());
   await pick('Oseltamivir');
-  await visible(detail().getByText('Checked product identity, label and pilot scope.', { exact: true }));
+  await visible(detail().getByRole('region', { name: 'Content review', exact: true }).getByText('Checked product identity, label and pilot scope.', { exact: false }));
+  await visible(detail().getByRole('heading', { name: 'Content review · Completed for this version', exact: true }));
   await page.getByLabel('Review status filter').selectOption('reviewed');
   assert.equal(await catalogue().getByRole('button').count(), 1);
   await page.getByLabel('Review status filter').selectOption('all');
+  assert.equal(await reviewNotes().count(), 0, 'A current content review must not be requested again');
+  await page.getByRole('button', { name: 'Change content review', exact: true }).click();
   failedReview = 409;
   await reviewNotes().fill('Another draft review must not replace newer data.');
   await page.getByRole('checkbox', { name: /I reviewed the listed evidence/ }).check();
@@ -150,6 +162,7 @@ try {
   await page.getByLabel('Review decision').selectOption('rejected');
   await page.getByRole('button', { name: 'Save content review' }).click();
   await visible(detail().getByText('Rejected', { exact: true }));
+  assert.equal(await reviewedTotal().textContent(), '0');
   console.log('PASS: saved review survives refresh; stale responses preserve edits; rejection removes reviewed status.');
 
   const names = page.getByRole('textbox', { name: 'Medicine names to check' });

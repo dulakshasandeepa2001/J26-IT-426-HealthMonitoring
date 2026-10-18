@@ -1,0 +1,864 @@
+[
+  {
+    "row_id": "SIX-resolved_symptoms-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-resolved_symptoms-05",
+    "template_family": "resolved_symptoms",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "c880ea7bdde6ad48bec0873688b62e13b119f92613cc9a069afc7cb81bd29905",
+    "expected": "not_relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "train",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-acute_multi_symptom-06",
+    "template_family": "acute_multi_symptom",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "e71e5c37b0ad12458c37d59625122cf98bf05917710e8873abbbca881ce0689d",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "train",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-acute_multi_symptom-05",
+    "template_family": "acute_multi_symptom",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "5a60ffe139a67d2fce0d2f56a6e478cb343a930c9ef85e9f6c40952fc2f9e190",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "train",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-incomplete_interview-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-incomplete_interview-06",
+    "template_family": "incomplete_interview",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "95e9df4f23c045fab51d84a68228fad95aeb4bdcff99d7eb3a97822b2d7a9c5f",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-incomplete_interview-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-incomplete_interview-05",
+    "template_family": "incomplete_interview",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "4262e612c92edbfed9637304428f50d815c17ce20d0e47222076ba0ca9e33d31",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-acute_multi_symptom-06",
+    "template_family": "acute_multi_symptom",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "e71e5c37b0ad12458c37d59625122cf98bf05917710e8873abbbca881ce0689d",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-acute_multi_symptom-05",
+    "template_family": "acute_multi_symptom",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "5a60ffe139a67d2fce0d2f56a6e478cb343a930c9ef85e9f6c40952fc2f9e190",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-03::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-acute_multi_symptom-03",
+    "template_family": "acute_multi_symptom",
+    "condition": "measles",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "measles::symptom_relief::fever_relief",
+    "feature_sha256": "3ae2d100b1b72d905be5a0fc5a0a7b33af6f1fe5fb36fe9feebf096b8f93871c",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 1,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-acute_multi_symptom-01::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-acute_multi_symptom-01",
+    "template_family": "acute_multi_symptom",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "influenza::symptom_relief::fever_or_aches_relief",
+    "feature_sha256": "472604bca82cf0a1009f2c76f871c8ff64bdd371949e7983c0ae9b023065ad61",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "train",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-uncertain_target_history-02",
+    "template_family": "uncertain_target_history",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "57d9f99af08f7ade1add02116ef59d1716dd2af20dad8cdac151adffb0a5d314",
+    "expected": "not_relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": null,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "calamine-zinc-oxide-lotion",
+          "node_training_unique_inputs": 13
+        }
+      ],
+      "leaf_training_support": 1
+    },
+    "split": "validation",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-localized_complaint-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-localized_complaint-02",
+    "template_family": "localized_complaint",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "d2de01150b39baa683095054ee525700968f3eec0fa365f8ce971d40fc49c346",
+    "expected": "not_relevant",
+    "predicted": "relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": true,
+          "node_training_unique_inputs": 27
+        }
+      ],
+      "leaf_training_support": 7
+    },
+    "split": "validation",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-reported_concern-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-reported_concern-06",
+    "template_family": "reported_concern",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "e71e5c37b0ad12458c37d59625122cf98bf05917710e8873abbbca881ce0689d",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-reported_concern-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-reported_concern-05",
+    "template_family": "reported_concern",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "5a60ffe139a67d2fce0d2f56a6e478cb343a930c9ef85e9f6c40952fc2f9e190",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-uncertain_target_history-02",
+    "template_family": "uncertain_target_history",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "57d9f99af08f7ade1add02116ef59d1716dd2af20dad8cdac151adffb0a5d314",
+    "expected": "not_relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-localized_complaint-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-localized_complaint-06",
+    "template_family": "localized_complaint",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "82ebbe58df54ea041dffa51575789e481dec683ba31a57994a1fbccfc998335b",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-localized_complaint-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-localized_complaint-05",
+    "template_family": "localized_complaint",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "20485af1b8ea79760ac3c029fa036d0b1c34e0a46a9ce413931f06bd48cca86e",
+    "expected": "relevant",
+    "predicted": "undetermined",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-localized_complaint-04::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-localized_complaint-04",
+    "template_family": "localized_complaint",
+    "condition": "mumps",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "mumps::symptom_relief::fever_or_pain_relief",
+    "feature_sha256": "d10167f3832e2a9ca6c84609747184103d3201a8f9ac396c3b0c3054a6d1c6f7",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 7,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-localized_complaint-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-localized_complaint-02",
+    "template_family": "localized_complaint",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "d2de01150b39baa683095054ee525700968f3eec0fa365f8ce971d40fc49c346",
+    "expected": "not_relevant",
+    "predicted": "relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_categorical_naive_bayes",
+    "evidence": {
+      "class_training_support": 13,
+      "scores_exposed": false
+    },
+    "split": "validation",
+    "model": "categorical_naive_bayes"
+  },
+  {
+    "row_id": "SIX-reported_concern-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-reported_concern-06",
+    "template_family": "reported_concern",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "e71e5c37b0ad12458c37d59625122cf98bf05917710e8873abbbca881ce0689d",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-reported_concern-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-reported_concern-05",
+    "template_family": "reported_concern",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "5a60ffe139a67d2fce0d2f56a6e478cb343a930c9ef85e9f6c40952fc2f9e190",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-localized_complaint-03::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-localized_complaint-03",
+    "template_family": "localized_complaint",
+    "condition": "measles",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "measles::symptom_relief::fever_relief",
+    "feature_sha256": "3ae2d100b1b72d905be5a0fc5a0a7b33af6f1fe5fb36fe9feebf096b8f93871c",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 1,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-reported_concern-01::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-reported_concern-01",
+    "template_family": "reported_concern",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "influenza::symptom_relief::fever_or_aches_relief",
+    "feature_sha256": "472604bca82cf0a1009f2c76f871c8ff64bdd371949e7983c0ae9b023065ad61",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-uncertain_target_history-06",
+    "template_family": "uncertain_target_history",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "657a2a9a77451b78fabcc9c6c119f2eccf820b0c21bdd8fdaf3cb0fe4968e078",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-uncertain_target_history-05",
+    "template_family": "uncertain_target_history",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "9b7ef130927223bcf9d287a479409f011c73e928e059619560fa382e1904c2b4",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-04::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-uncertain_target_history-04",
+    "template_family": "uncertain_target_history",
+    "condition": "mumps",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "mumps::symptom_relief::fever_or_pain_relief",
+    "feature_sha256": "316ee3b7ba73a169b31ec8b9e88c7d840a7f5625a5b0a68e8bf6dc797b406ad2",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-uncertain_target_history-01::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-uncertain_target_history-01",
+    "template_family": "uncertain_target_history",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "influenza::symptom_relief::fever_or_aches_relief",
+    "feature_sha256": "2eb1eed8a14b0bc8324e86e956663cbad732625df76fb4882d81be792b873f48",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-localized_complaint-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-localized_complaint-06",
+    "template_family": "localized_complaint",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "82ebbe58df54ea041dffa51575789e481dec683ba31a57994a1fbccfc998335b",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-localized_complaint-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-localized_complaint-05",
+    "template_family": "localized_complaint",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "20485af1b8ea79760ac3c029fa036d0b1c34e0a46a9ce413931f06bd48cca86e",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-localized_complaint-04::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-localized_complaint-04",
+    "template_family": "localized_complaint",
+    "condition": "mumps",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "mumps::symptom_relief::fever_or_pain_relief",
+    "feature_sha256": "d10167f3832e2a9ca6c84609747184103d3201a8f9ac396c3b0c3054a6d1c6f7",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 3,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-localized_complaint-01::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-localized_complaint-01",
+    "template_family": "localized_complaint",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "influenza::symptom_relief::fever_or_aches_relief",
+    "feature_sha256": "bb54edc4fc96b6d8774cd847ebb5ebd2b6cd39045fdc24377b638cac57aadc78",
+    "expected": "relevant",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_hamming_neighbor_vote",
+    "evidence": {
+      "neighbor_count": 3,
+      "boundary_mismatches": 2,
+      "label_support_counts": {
+        "not_relevant": 1,
+        "relevant": 1,
+        "undetermined": 1
+      }
+    },
+    "split": "validation",
+    "model": "hamming_knn"
+  },
+  {
+    "row_id": "SIX-unresolved_target_report-06::ors-low-osmolarity-powder",
+    "scenario_id": "SIX-unresolved_target_report-06",
+    "template_family": "unresolved_target_report",
+    "condition": "viral_gastroenteritis",
+    "candidate_id": "ors-low-osmolarity-powder",
+    "group_key": "viral_gastroenteritis::rehydration_support::oral_fluid_electrolyte_replacement",
+    "feature_sha256": "89140fb64abb6be619fbf8c35e5b149284d503a3b34c8beef34b7b602464d86c",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": null,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "ors-low-osmolarity-powder",
+          "node_training_unique_inputs": 13
+        },
+        {
+          "feature": "diarrhoea_present",
+          "value": false,
+          "node_training_unique_inputs": 3
+        }
+      ],
+      "leaf_training_support": 1
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-unresolved_target_report-05::cmc-sodium-05pct-ophthalmic-solution",
+    "scenario_id": "SIX-unresolved_target_report-05",
+    "template_family": "unresolved_target_report",
+    "condition": "viral_conjunctivitis",
+    "candidate_id": "cmc-sodium-05pct-ophthalmic-solution",
+    "group_key": "viral_conjunctivitis::symptom_relief::ocular_dryness_or_irritation_relief",
+    "feature_sha256": "042636570d81278065701a9bff083f1879485d403972b666e8224a624e7e6f5d",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": null,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "cmc-sodium-05pct-ophthalmic-solution",
+          "node_training_unique_inputs": 13
+        },
+        {
+          "feature": "ocular_dryness_present",
+          "value": false,
+          "node_training_unique_inputs": 3
+        }
+      ],
+      "leaf_training_support": 1
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-unresolved_target_report-04::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-unresolved_target_report-04",
+    "template_family": "unresolved_target_report",
+    "condition": "mumps",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "mumps::symptom_relief::fever_or_pain_relief",
+    "feature_sha256": "09aa01d64fa4e1d7fcb525e76a0ac6537adc8ee52e7e76372984b96d8a4ceba2",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": false,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "paracetamol-500mg-tablet",
+          "node_training_unique_inputs": 7
+        }
+      ],
+      "leaf_training_support": 4
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-unresolved_target_report-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-unresolved_target_report-02",
+    "template_family": "unresolved_target_report",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "85eeab27fadd0dfc1fa7319d732294f6674857c0683d04a639bc5909965fa329",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": false,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "calamine-zinc-oxide-lotion",
+          "node_training_unique_inputs": 7
+        }
+      ],
+      "leaf_training_support": 1
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-unresolved_target_report-01::paracetamol-500mg-tablet",
+    "scenario_id": "SIX-unresolved_target_report-01",
+    "template_family": "unresolved_target_report",
+    "condition": "influenza",
+    "candidate_id": "paracetamol-500mg-tablet",
+    "group_key": "influenza::symptom_relief::fever_or_aches_relief",
+    "feature_sha256": "e1c4bcf109b99d48d476df9ca8b00edc9ba58f266bdeaeebc92bfc0d2daabd81",
+    "expected": "undetermined",
+    "predicted": "not_relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": false,
+          "node_training_unique_inputs": 27
+        },
+        {
+          "feature": "candidate_id",
+          "value": "paracetamol-500mg-tablet",
+          "node_training_unique_inputs": 7
+        }
+      ],
+      "leaf_training_support": 4
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  },
+  {
+    "row_id": "SIX-mixed_positive_unknown-02::calamine-zinc-oxide-lotion",
+    "scenario_id": "SIX-mixed_positive_unknown-02",
+    "template_family": "mixed_positive_unknown",
+    "condition": "chickenpox",
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "group_key": "chickenpox::symptom_relief::itching_relief",
+    "feature_sha256": "e161420f6da42ba94a209979599addfbfb061393d1cf9d255ebb8a5b8d714e2b",
+    "expected": "undetermined",
+    "predicted": "relevant",
+    "prediction_status": "predicted",
+    "reason": "learned_training_leaf",
+    "evidence": {
+      "learned_path": [
+        {
+          "feature": "fever_present",
+          "value": true,
+          "node_training_unique_inputs": 27
+        }
+      ],
+      "leaf_training_support": 7
+    },
+    "split": "test",
+    "model": "categorical_tree"
+  }
+]

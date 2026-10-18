@@ -184,7 +184,7 @@ export default function DoctorDashboard() {
         <h1 className="text-2xl font-extrabold tracking-tight">Doctor Dashboard</h1>
         <p className="mt-1 text-xs text-slate-500">Patient details, consultation notes, prescription history and clinical schedule.</p>
         <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-          <strong>Sample patient overview.</strong> Queue, patient details, notes and past prescriptions use the existing demonstration data. Voice input is a simulation. The schedule uses the existing backend.
+          <strong>Sample patient overview.</strong> Queue, patient details, notes and past prescriptions use the illustrative data. Voice input is a simulation. The schedule uses the existing backend.
         </p>
       </div>
 
