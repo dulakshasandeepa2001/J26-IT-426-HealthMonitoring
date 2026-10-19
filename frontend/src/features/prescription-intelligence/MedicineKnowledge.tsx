@@ -130,6 +130,7 @@ export default function MedicineKnowledge() {
       if (catalogue.status === "rejected") throw catalogue.reason;
       if (additions.status === "rejected" && additions.reason instanceof ApiError && [401, 403].includes(additions.reason.status)) throw additions.reason;
       setEntries(catalogue.value);
+      setSelected((previous) => previous || new URLSearchParams(window.location.search).get("medicine") || "");
       setScopes(additions.status === "fulfilled" ? additions.value : []);
       if (additions.status === "rejected") setScopeError("Additional condition knowledge could not be loaded. Refresh the catalogue after its setup is available.");
       setDenied(false); setLoading(false);

@@ -50,6 +50,8 @@ class DatabaseConfigurationTests(unittest.TestCase):
             database = build_database_config(self.config(), Path('/unit-test'))
         self.assertEqual(database['ENGINE'], 'django.db.backends.postgresql')
         self.assertEqual(database['OPTIONS'], {'sslmode': 'require', 'connect_timeout': 10})
+        self.assertEqual(database['CONN_MAX_AGE'], 60)
+        self.assertIs(database['CONN_HEALTH_CHECKS'], True)
 
     def test_missing_pooler_details_fail_instead_of_selecting_sqlite(self):
         with self.assertRaises(ImproperlyConfigured) as error:

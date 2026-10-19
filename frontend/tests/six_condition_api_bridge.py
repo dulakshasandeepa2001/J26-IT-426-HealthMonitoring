@@ -68,6 +68,18 @@ try:
                 row.save()  # Real updated_at change, same verified visit history.
                 emit({'changed': True})
                 continue
+            if message.get('action') == 'pending_safety_review':
+                from prescription_drafts.models import SafetyProfile
+                SafetyProfile.objects.filter(pk=message['medicine']).update(review_status='pending')
+                emit({'pending': True})
+                continue
+            if message.get('action') == 'reported_severe':
+                from prescription_context.models import PrescriptionContextConsultationanalysis as Analysis
+                row = Analysis.objects.get(consultation_id=message['visit'])
+                row.payload['severity']['level'] = 'severe'
+                row.save()
+                emit({'changed': True})
+                continue
             if message.get('action') == 'revoke':
                 User.objects.filter(pk=fixture.doctor.pk).update(is_approved=False)
                 emit({'revoked': True})

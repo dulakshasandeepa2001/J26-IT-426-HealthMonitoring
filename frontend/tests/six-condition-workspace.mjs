@@ -138,18 +138,32 @@ try {
       const timedRequest = new Promise((resolve) => { notifyHeld = resolve; });
       await preview().click(); await timedRequest;
       await visible(feedback.getByRole('status').filter({ hasText: 'Waiting for the database response' }));
-      await page.clock.fastForward(30_100);
+      await page.clock.fastForward(31_000);
+      await visible(feedback.getByRole('status').filter({ hasText: 'Screening is still running against the cloud database' }));
+      assert.equal(await feedback.getByRole('alert').count(), 0, 'A cloud request is no longer aborted at the old 30-second boundary');
+      held(); held = null;
+      await visible(result());
+      holdNextPreview = true;
+      const hungRequest = new Promise((resolve) => { notifyHeld = resolve; });
+      await preview().click(); await hungRequest;
+      await page.clock.fastForward(75_100);
       await visible(feedback.getByRole('alert').filter({ hasText: 'Screening took too long' }));
       assert.equal(await preview().isEnabled(), true, 'A hung request is bounded and can be retried');
       held(); held = null;
       assert.equal(await result().count(), 0, 'An aborted late response never becomes a preview');
-      await preview().click(); await visible(result());
+      await feedback.getByRole('button', { name: 'Try preview again', exact: true }).click(); await visible(result());
       await visible(feedback.getByRole('status').filter({ hasText: 'Screening complete: 0 medicine candidates' }));
       await page.waitForFunction(() => document.activeElement?.id === 'medicine-preview-feedback');
       const submitted = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
       assert.equal(submitted.care_setting, 'unknown', 'Confirmation never invents assessed care setting');
       assert.equal(submitted.renal_assessment, 'unknown', 'Confirmation never clears an unknown renal assessment');
       await visible(result().getByText(/^No medicine candidate is available\./));
+      const nextActions = section().getByRole('region', { name: 'Screening next actions', exact: true });
+      await nextActions.getByRole('button', { name: 'Review clinical details', exact: true }).click();
+      await visible(section().getByRole('button', { name: 'Show missing questions only', exact: true }));
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-clinical-field') === 'care_setting');
+      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), true, 'Opening clinical correction does not invent or alter facts');
+      await section().getByRole('button', { name: 'Show missing questions only', exact: true }).click();
       assert.equal(await ask({ action: 'count' }).then((value) => value.count), 0, 'Preview has no draft writes');
     }
     if (row.condition === 'influenza') await quickAssess(row); else await assess(row);
@@ -158,6 +172,14 @@ try {
       await section().getByRole('group', { name: 'Quick clinical review', exact: true }).screenshot({ path: join(artifacts, 'quick-review.png') });
     }
     await preview().click(); await visible(result());
+    if (row.condition === 'influenza') {
+      const original = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
+      await section().getByRole('button', { name: 'Refresh medicine reviews', exact: true }).click();
+      await visible(section().getByText(/^Medicine review status refreshed\./));
+      assert.equal(await result().count(), 0, 'Changed review coverage invalidates the old preview');
+      await preview().click(); await visible(result());
+      assert.deepEqual(requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical, original, 'Refreshing reviews preserves all confirmed clinical entries');
+    }
     assert.equal(await save().isDisabled(), true, 'Preview needs separate acknowledgement');
     if (row.condition === 'viral_gastroenteritis') {
       await visible(result().getByText(/^No medicine candidate is available\./));
@@ -218,8 +240,7 @@ try {
   mkdirSync(artifacts, { recursive: true });
   await page.screenshot({ path: join(artifacts, 'six-condition-records.png'), fullPage: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
-  // Seed an existing doctor-confirmed identity record only in the isolated fixture.
-  // The removed UI must not manufacture new decisions or discard this saved record.
+  // Save raw history without identities, then resolve it through the actual UI.
   const identityResponse = await ask({ method: 'GET', path: `/api/prescription/consultations/${cases[0].visit}/history-identities/` });
   assert.equal(identityResponse.status, 200);
   const product = identityResponse.data.products.find((row) => row.id === 'paracetamol-500mg-tablet');
@@ -230,7 +251,7 @@ try {
       schedule: 'SOS', clarification_note: 'Fictional fixture doctor confirmed the exact 500 mg tablet product.' }] };
   const seeded = await ask({ method: 'POST', path: `/api/prescription/consultations/${cases[0].visit}/patient-context/`, body: {
     allergy_status: 'confirmed', allergies: ['Penicillin (Rash)'], medicine_status: 'confirmed', current_medicines: ['Paracetamol 500mg SOS'],
-    reviewed: true, expected_updated_at: originalHistory.updated_at, history_details: identityDetails,
+    reviewed: true, expected_updated_at: originalHistory.updated_at,
   } });
   assert.equal(seeded.status, 200);
   await page.goto(origin + '/doctor/prescription-workspace');
@@ -239,6 +260,27 @@ try {
   assert.equal(await page.locator('[aria-label="Resolve recorded history identities"]').count(), 0);
   assert.equal(await page.getByTestId('allergy-summary').textContent(), 'Penicillin (Rash)');
   assert.equal(await page.getByTestId('medicine-summary').textContent(), 'Paracetamol 500mg SOS');
+  const historyForm = page.getByRole('region', { name: 'Patient allergies and current medicines', exact: true });
+  await historyForm.getByRole('button', { name: 'Clarify medicine and allergy names', exact: true }).click();
+  const clarify = historyForm.getByRole('region', { name: 'Confirm medicine and allergy names', exact: true });
+  const allergen = clarify.getByLabel('Allergen for “Penicillin (Rash)”', { exact: true });
+  const exactProduct = clarify.getByLabel('Exact product for “Paracetamol 500mg SOS”', { exact: true });
+  await visible(allergen);
+  assert.equal(await allergen.inputValue(), 'penicillin', 'A supported exact allergen is proposed for explicit doctor confirmation');
+  assert.equal(await clarify.getByLabel('Reported reaction for “Penicillin (Rash)”', { exact: true }).inputValue(), 'Rash');
+  assert.equal(await exactProduct.inputValue(), '', 'Strength/schedule prose does not automatically establish an exact product');
+  await exactProduct.selectOption(product.id);
+  await historyForm.getByRole('button', { name: 'Cancel name clarification', exact: true }).click();
+  await historyForm.getByRole('button', { name: 'Clarify medicine and allergy names', exact: true }).click();
+  await visible(exactProduct);
+  assert.equal(await exactProduct.inputValue(), '', 'Cancelling discards only unsaved name choices and reopens with unresolved source text');
+  await exactProduct.selectOption(product.id);
+  await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
+  assert.equal(await page.getByRole('button', { name: 'Save patient information', exact: true }).isDisabled(), true, 'A non-exact product needs a clarification note');
+  await clarify.getByLabel('Reported schedule for “Paracetamol 500mg SOS”', { exact: true }).fill('SOS');
+  await clarify.getByLabel('How was “Paracetamol 500mg SOS” clarified?', { exact: true }).fill(identityDetails.medicines[0].clarification_note);
+  await clarify.screenshot({ path: join(artifacts, 'history-clarification.png') });
+  assert.equal(await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).isChecked(), false, 'Changing a proposed identity requires renewed doctor confirmation');
   await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
   await page.getByRole('button', { name: 'Save patient information', exact: true }).click();
   await visible(page.getByText(/^Patient information reviewed and saved for this visit\./));
@@ -247,13 +289,48 @@ try {
   const savedHistories = await ask({ method: 'GET', path: '/api/prescription/patient-contexts/' });
   const savedHistory = savedHistories.data.find((row) => row.patient === cases[0].patient);
   assert.deepEqual(savedHistory.provenance.history_identity.details, identityDetails, 'An unchanged basic-form review retains saved identity, reaction and schedule');
-  assert.equal(requests.some((row) => /history-identities/.test(row.path)), false, 'Browser no longer fetches removed identity controls');
+  assert.equal(requests.some((row) => /history-identities/.test(row.path)), true, 'The compact clarification panel reuses authorized backend name options');
   await assess(cases[0]); await preview().click(); await visible(result());
   assert.equal(await result().getByText(/An allergy identity is unresolved|Unresolved current medicines prevent interaction clearance/).count(), 0);
   await visible(result().getByText('The candidate duplicates an ingredient in reported current medicines. Continuation/replacement needs a separate clinician decision.', { exact: true }));
   await visible(section().getByRole('link', { name: 'Review allergies and current medicines', exact: true }));
   assert.equal((await ask({ action: 'count' })).count, 6, 'Resolving history and previewing do not publish or write another draft');
-  console.log('PASS: identity form removed; basic review/save/reload preserves existing identities, reaction and schedule; duplicate/interaction controls remain.');
+  console.log('PASS: compact clarification saves explicit doctor identities, retains original history/reaction/schedule after reload, and preserves duplicate/interaction blocks.');
+  // Expire a review only inside this in-memory fixture, then use the doctor's
+  // real review form. The application must never fabricate a live review.
+  await ask({ action: 'pending_safety_review', medicine: 'oseltamivir-75mg-capsule' });
+  await preview().click(); await visible(result());
+  const reviewLink = section().getByRole('region', { name: 'Screening next actions', exact: true }).getByRole('link', { name: /^Review Oseltamivir/ });
+  assert.equal(await reviewLink.getAttribute('href'), '/doctor/medicine-knowledge?medicine=oseltamivir-75mg-capsule');
+  const popup = context.waitForEvent('page');
+  await reviewLink.click();
+  const knowledge = await popup;
+  knowledge.on('pageerror', (error) => errors.push(error.message));
+  const medicine = knowledge.getByRole('article', { name: 'Oseltamivir medicine knowledge', exact: true });
+  await visible(medicine);
+  const rules = medicine.getByRole('region', { name: 'Safety rule review', exact: true });
+  await visible(rules.getByText('Safety rule review · Pending review', { exact: true }));
+  await rules.getByLabel('Safety rule review notes', { exact: true }).fill('Isolated fixture doctor inspected this current rule version and evidence.');
+  await rules.getByLabel('I reviewed the executable rules, dose policies and exclusions against the linked evidence.', { exact: true }).check();
+  await rules.getByRole('button', { name: 'Save safety rule review', exact: true }).click();
+  await visible(rules.getByText('Safety rule review saved for this version.', { exact: true }));
+  await knowledge.close(); await page.bringToFront();
+  const beforeReviewRefresh = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
+  await section().getByRole('button', { name: 'Refresh medicine reviews', exact: true }).click();
+  await visible(section().getByText(/^Medicine review status refreshed\./));
+  await preview().click(); await visible(result());
+  const refreshed = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1);
+  assert.deepEqual(refreshed.body.clinical, beforeReviewRefresh);
+  assert.equal(await result().getByRole('article', { name: 'Oseltamivir', exact: true }).getByText(/Current catalogue and executable-rule reviews are required/).count(), 0);
+  console.log('PASS: pending safety review opens the exact medicine in a separate tab, saves through the real doctor form, and refreshes without losing clinical entries.');
+  // Deliberately contradictory fixture facts verify that a mild dropdown cannot
+  // bypass a severe finding retained in the source analysis.
+  await ask({ action: 'reported_severe', visit: cases[1].visit });
+  await page.reload(); await choose(cases[1]); await assess(cases[1]);
+  await preview().click(); await visible(result());
+  await visible(result().getByText(/^No medicine candidate is available\./));
+  await visible(section().getByText('The analysis reports severe disease. Changing the assessment dropdown cannot remove this reported-source block; the finding needs clinical clarification.', { exact: true }));
+  assert.equal((await ask({ action: 'count' })).count, 6, 'Correction actions do not create or approve prescriptions');
   await page.goto(origin + '/doctor/prescription-records');
   await visible(page.getByLabel('Saved prescription draft', { exact: true }));
   await ask({ action: 'revoke' });

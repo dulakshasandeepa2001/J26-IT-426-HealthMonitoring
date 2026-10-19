@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useImperativeHandle, useRef, useState, type Ref } from "react";
 import { controlStyle, buttonStyle } from "./PageFrame";
 import { assessmentSelects, conditionConcerns, conditionSymptoms, symptomNames } from "./clinicalAssessmentFields";
 import { missingValue, selectLabel, sourcePresence, writeGuideline, type QuickRequirements } from "./quickReviewData";
@@ -8,13 +8,24 @@ import type { ClinicalAssessment, ScreeningInputs } from "./clinicalScreeningApi
 import type { HandoffCondition } from "./analysisData";
 import type { PatientContext, RegisteredPatient } from "./prescriptionApi";
 
-export function QuickClinicalReview({ metadata, condition, clinical, initial, requirements, patient, history, doctor, disabled, onEdit, onConfirm, onReviewHistory }: {
+export interface ClinicalReviewHandle { open: () => void }
+
+export function QuickClinicalReview({ metadata, condition, clinical, initial, requirements, patient, history, doctor, disabled, onEdit, onConfirm, onReviewHistory, editorRef }: {
   metadata: ScreeningInputs; condition: HandoffCondition; clinical: ClinicalAssessment; initial: ClinicalAssessment;
   requirements: QuickRequirements; patient: RegisteredPatient | null; history: PatientContext | null; doctor: number; disabled: boolean;
   onEdit: (value: ClinicalAssessment) => void; onConfirm: (checked: boolean) => void;
   onReviewHistory?: () => void;
+  editorRef?: Ref<ClinicalReviewHandle>;
 }) {
   const [editingAll, setEditingAll] = useState(false);
+  const questionPanel = useRef<HTMLDivElement>(null);
+  useImperativeHandle(editorRef, () => ({ open() {
+    setEditingAll(true);
+    requestAnimationFrame(() => {
+      questionPanel.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+      questionPanel.current?.querySelector<HTMLSelectElement>("[data-clinical-field]")?.focus({ preventScroll: true });
+    });
+  } }), []);
   const [presence, setPresence] = useState(() => sourcePresence(metadata, condition));
   const [rememberGuideline, setRememberGuideline] = useState(initial.influenza_guideline !== "unselected");
   const fields = assessmentSelects.filter((field) => !field.conditions || field.conditions.includes(condition));
@@ -60,7 +71,7 @@ export function QuickClinicalReview({ metadata, condition, clinical, initial, re
       <p role="status" aria-live="polite" className={clinical.reviewed ? "font-semibold text-emerald-800" : "font-semibold text-amber-900"}>{clinical.reviewed ? "Summary reviewed for this visit. Unknown facts remain unknown." : "Not yet confirmed by you for this visit."}</p>
       <button type="button" className={buttonStyle} disabled={disabled || clinical.reviewed} onClick={() => onConfirm(true)}>Confirm clinical summary</button>
     </div>
-    <div className="space-y-4 rounded-2xl border border-slate-200 p-4" role="region" aria-label="Questions to clarify">
+    <div ref={questionPanel} className="scroll-mt-24 space-y-4 rounded-2xl border border-slate-200 p-4" role="region" aria-label="Questions to clarify">
       <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-sm font-bold">{editingAll ? "Correct clinical details" : `Questions to clarify (${unknownCount})`}</h3><button type="button" className={buttonStyle} onClick={() => setEditingAll((old) => !old)}>{editingAll ? "Show missing questions only" : "Edit all clinical details"}</button></div>
       {!requirements.coverageKnown && <p className="text-xs text-amber-900">Medicine coverage could not be loaded. Use Edit all clinical details if needed; preview will check the current rules on the server.</p>}
       {requirements.coverageKnown && !requirements.activeCandidates && <p className="text-xs text-amber-900">No candidate currently has executable coverage and current reviews for this condition. Preview can explain the exclusions; extra answers cannot resolve missing product/rule coverage.</p>}

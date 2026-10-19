@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
-import type { ContextStatus } from "./prescriptionApi";
+import type { ContextStatus, HistoryIdentityRecord } from "./prescriptionApi";
+import { HistoryClarification, type ClarificationDraft } from "./HistoryClarification";
 import { buttonStyle, controlStyle } from "./PageFrame";
 import { patientHistoryPrefill, historyEntries as entries, type HistoryFields } from "./historyPrefill";
 
 function statusOrUnknown(status: string | undefined): ContextStatus {
   return status === "confirmed" || status === "none" ? status : "unknown";
+}
+
+function distinctEntries(text: string) {
+  const seen = new Set<string>();
+  return entries(text).filter((name) => { const key = name.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; });
 }
 
 export interface PatientHistoryEditorHandle { open: () => void }
@@ -21,20 +27,33 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
   const fields = draft ?? prefill.fields;
   const { allergyStatus, medicineStatus, allergyText, medicineText } = fields;
   const [editingOverride, setEditingOverride] = useState<boolean | null>(null);
+  const [clarifying, setClarifying] = useState(false);
+  const [clarification, setClarification] = useState<ClarificationDraft | null>(null);
+  const [clarificationRevision, setClarificationRevision] = useState(0);
+  const acceptClarification = useCallback((value: ClarificationDraft) => setClarification(value), []);
+  const identityHistory = useMemo(() => ({ allergies: allergyStatus === "confirmed" ? distinctEntries(allergyText) : [],
+    medicines: medicineStatus === "confirmed" ? distinctEntries(medicineText) : [] }), [allergyStatus, allergyText, medicineStatus, medicineText]);
+  const historyKey = JSON.stringify([visit.id, allergyStatus, medicineStatus, identityHistory]);
+  const activeClarification = clarification?.key === historyKey ? clarification : null;
+  const savedIdentity = context?.provenance.history_identity as HistoryIdentityRecord | undefined;
+  const identityChanged = !!activeClarification && (!activeClarification.valid
+    || !!activeClarification.details && JSON.stringify(activeClarification.details) !== JSON.stringify(savedIdentity?.details));
+  const hasRecordedNames = identityHistory.allergies.length + identityHistory.medicines.length > 0;
   const allergyStatusRef = useRef<HTMLSelectElement>(null);
   useImperativeHandle(editorRef, () => ({ open() {
     setEditingOverride(true);
+    setClarifying(true);
     document.getElementById("patient-medicine-history")?.scrollIntoView({ block: "start", behavior: "smooth" });
     window.requestAnimationFrame(() => allergyStatusRef.current?.focus({ preventScroll: true }));
   } }), []);
   const editing = editingOverride ?? (draft !== null || allergyStatus === "unknown" && medicineStatus === "unknown");
   const [reviewedKey, setReviewedKey] = useState<string | null>(null);
   const inputKey = JSON.stringify([rx.activeConsultation?.id, context?.updated_at, rx.activeAnalysis?.id,
-    rx.activeAnalysis?.payload, fields]);
+    rx.activeAnalysis?.payload, fields, activeClarification?.details]);
   const reviewed = reviewedKey === inputKey;
   const submitting = useRef(false);
   const reviewedForVisit = prefill.reviewedForVisit;
-  const dirty = allergyStatus !== statusOrUnknown(context?.allergy_status)
+  const dirty = identityChanged || allergyStatus !== statusOrUnknown(context?.allergy_status)
     || medicineStatus !== statusOrUnknown(context?.medicine_status)
     || allergyText !== (context?.allergies ?? []).join("\n")
     || medicineText !== (context?.current_medicines ?? []).join("\n");
@@ -51,15 +70,16 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!reviewed || missingKnownEntry || submitting.current || rx.loading) return;
+    if (!reviewed || missingKnownEntry || activeClarification && !activeClarification.valid || submitting.current || rx.loading) return;
     submitting.current = true;
     try {
       await rx.reviewPatientContext({
         allergy_status: allergyStatus,
-        allergies: allergyStatus === "confirmed" ? entries(allergyText) : [],
+        allergies: identityHistory.allergies,
         medicine_status: medicineStatus,
-        current_medicines: medicineStatus === "confirmed" ? entries(medicineText) : [],
+        current_medicines: identityHistory.medicines,
         reviewed: true, expected_updated_at: context?.updated_at ?? null,
+        ...(activeClarification?.details ? { history_details: activeClarification.details } : {}),
       });
     } finally {
       submitting.current = false;
@@ -130,12 +150,19 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
         </div>
       </div>
       </div>
+        {hasRecordedNames && <>
+          <button type="button" className={buttonStyle} aria-expanded={clarifying} aria-controls="history-name-clarification" onClick={() => setClarifying((value) => !value)}>{clarifying ? "Hide name clarification" : "Clarify medicine and allergy names"}</button>
+          <HistoryClarification key={`${historyKey}:${clarificationRevision}`} visit={visit.id} historyKey={historyKey} allergies={identityHistory.allergies} medicines={identityHistory.medicines}
+            saved={savedIdentity} expanded={clarifying} disabled={rx.loading} onChange={acceptClarification} onDenied={rx.loadAll} />
+          {clarifying && <button type="button" className="text-xs font-semibold text-purple-700 underline" onClick={() => { setClarification(null); setClarifying(false); setClarificationRevision((v) => v + 1); setReviewedKey(null); }}>Cancel name clarification</button>}
+          {activeClarification && !activeClarification.valid && <p className="text-xs text-amber-900">Finish loading name options and add the requested clarification notes before saving. An unknown product can stay unresolved.</p>}
+        </>}
         <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-700 sm:col-span-2">
           <input type="checkbox" checked={reviewed} className="mt-0.5 h-4 w-4 shrink-0 accent-purple-600" onChange={(event) => setReviewedKey(event.target.checked ? inputKey : null)} />
           I reviewed allergies and current medicines with the patient for this visit.
         </label>
       </fieldset>
-      <button type="submit" className={buttonStyle} disabled={rx.loading || !reviewed || missingKnownEntry}>
+      <button type="submit" className={buttonStyle} disabled={rx.loading || !reviewed || missingKnownEntry || !!activeClarification && !activeClarification.valid}>
         {rx.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ClipboardCheck className="h-4 w-4" aria-hidden="true" />}
         Save patient information
       </button>

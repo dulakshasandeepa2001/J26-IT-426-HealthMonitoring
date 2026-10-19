@@ -68,6 +68,11 @@ def build_database_config(config, base_dir):
         'NAME': values['SUPABASE_DB_NAME'].strip(),
         'USER': user,
         'PASSWORD': values['SUPABASE_DB_PASSWORD'],
+        # Reuse a healthy connection in WSGI workers instead of repeating the
+        # remote TLS/session-pooler handshake for every request. No query or
+        # authorization result is cached.
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
         'OPTIONS': {'sslmode': 'require', 'connect_timeout': 10},
     }
 

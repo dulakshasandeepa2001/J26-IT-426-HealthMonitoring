@@ -82,7 +82,7 @@ export async function fetchScreeningInputs(visit: string): Promise<ScreeningInpu
   return row;
 }
 export async function previewScreening(visit: string, body: ScreeningRequest, signal?: AbortSignal): Promise<ScreeningPreview> {
-  const row: ScreeningPreview = await apiRequest(`/api/prescription/consultations/${encodeURIComponent(visit)}/clinical-screening/preview/`, { method: "POST", body: JSON.stringify(body), signal });
+  const row: ScreeningPreview = await apiRequest(`/api/prescription/consultations/${encodeURIComponent(visit)}/clinical-screening/preview/`, { method: "POST", body: JSON.stringify(body), signal }, "reuse");
   checkResult(row.result);
   if (row.consultation_id !== visit || row.diagnosis_id !== body.diagnosis_id) throw new Error("Screening preview belongs to different inputs.");
   return row;

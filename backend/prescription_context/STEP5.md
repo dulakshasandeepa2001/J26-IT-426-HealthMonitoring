@@ -1,5 +1,8 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+[Step 15](STEP15.md) fixes the Preview timeout budget, avoids a redundant session
+lookup, and documents local database connection reuse and availability handling.
+
 [Step 13](STEP13.md) organizes the connected prescription workflow as patient
 safety screening → Experimental ML suggestions → doctor-review draft. The
 separate fictional experiment is retained on its own research page.
@@ -208,3 +211,6 @@ reaction/schedule details, provenance and current-version safety review bindings
 [Step 10](STEP10.md) connects saved screening drafts to synthetic Experimental ML
 proposals, recorded doctor edit/approve/reject decisions and an approved-only A6
 research-demo print view.
+[Step 14](STEP14.md) adds compact doctor-confirmed history names and actionable
+screening corrections, preserving clinical facts and deterministic blocks.
+

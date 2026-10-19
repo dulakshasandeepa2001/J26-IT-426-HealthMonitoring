@@ -7,7 +7,8 @@ import { buttonStyle, controlStyle, Section } from "./PageFrame";
 import type { usePrescription } from "./usePrescription";
 import { conditionNames } from "./AdditionalMedicineScopes";
 import { emptyAssessment } from "./clinicalAssessmentFields";
-import { QuickClinicalReview } from "./QuickClinicalReview";
+import { QuickClinicalReview, type ClinicalReviewHandle } from "./QuickClinicalReview";
+import { ScreeningNextActions } from "./ScreeningNextActions";
 import { prefillReported, quickRequirements, readGuideline } from "./quickReviewData";
 import { fetchSafetyProfiles, type SafetyProfile } from "./draftApi";
 import { fetchConditionKnowledge, type ConditionScope } from "./medicineApi";
@@ -31,15 +32,18 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
   const [plan, setPlan] = useState<{ response: ScreeningPreview; request: ScreeningRequest } | null>(null);
   const [records, setRecords] = useState<ScreeningDraft[]>([]), [selected, setSelected] = useState("");
   const [loading, setLoading] = useState(false), [previewing, setPreviewing] = useState(false), [saving, setSaving] = useState(false);
+  const [slowPreview, setSlowPreview] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false), [dirty, setDirty] = useState(true);
   const [error, setError] = useState<string | null>(null), [message, setMessage] = useState<string | null>(null);
   const alive = useRef(true), sequence = useRef(0), locked = useRef(false);
   const previewRequest = useRef<AbortController | null>(null);
   const previewFeedback = useRef<HTMLDivElement>(null);
+  const clinicalEditor = useRef<ClinicalReviewHandle>(null);
   const retry = useRef<{ key: string; hash: string } | null>(null);
   const reloadWorkspace = rx.loadAll;
   const invalidate = useCallback(() => { ++sequence.current; previewRequest.current?.abort(); previewRequest.current = null; }, []);
-  const clearPlan = useCallback(() => { invalidate(); setPlan(null); setAcknowledged(false); setPreviewing(false); retry.current = null; }, [invalidate, setPlan, setAcknowledged, setPreviewing]);
+  const clearPlan = useCallback(() => { invalidate(); setPlan(null); setAcknowledged(false); setPreviewing(false); setSlowPreview(false); retry.current = null; }, [invalidate, setPlan, setAcknowledged, setPreviewing]);
   const failure = useCallback((reason: unknown) => {
     setError(reason instanceof Error ? reason.message : "Screening could not be completed.");
     if (reason instanceof ApiError && [401, 403].includes(reason.status)) {
@@ -49,7 +53,7 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
   const load = useCallback(async () => {
     if (!ready || !visitId || !condition || doctorId == null) return;
     clearPlan(); const current = sequence.current;
-    setLoading(true); setError(null); setMessage(null); setMetadata(null); setRecords([]); setCoverage(null);
+    setLoading(true); setError(null); setPreviewFailed(false); setMessage(null); setMetadata(null); setRecords([]); setCoverage(null);
     try {
       const knowledge = Promise.all([fetchSafetyProfiles(), fetchConditionKnowledge()]).then(([profiles, scopes]) => ({ profiles, scopes })).catch((reason: unknown) => {
         if (reason instanceof ApiError && [401, 403].includes(reason.status)) throw reason;
@@ -83,6 +87,18 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
     && metadata.confirmed_diagnoses.some((row) => row.id === diagnosis?.id);
   const canPreview = ready && bindingCurrent && clinical.reviewed && (!(clinical.verified_symptoms?.length) || clinical.symptoms_reviewed) && !loading && !saving && !previewing;
   const canSave = ready && bindingCurrent && !!plan && acknowledged && !loading && !saving && !previewing;
+  async function refreshReviews() {
+    if (!ready || loading || saving || previewing) return;
+    clearPlan(); const current = sequence.current;
+    setLoading(true); setError(null); setPreviewFailed(false); setMessage(null);
+    try {
+      const [profiles, scopes] = await Promise.all([fetchSafetyProfiles(), fetchConditionKnowledge()]);
+      if (!alive.current || current !== sequence.current) return;
+      setCoverage({ profiles, scopes });
+      setMessage("Medicine review status refreshed. Your clinical entries are retained. Preview again to screen the current rules.");
+    } catch (reason) { if (alive.current && current === sequence.current) failure(reason); }
+    finally { if (alive.current && current === sequence.current) setLoading(false); }
+  }
   const previewRequirement = !visit ? "Select a patient and saved visit first."
     : !diagnosis ? "Confirm this visit diagnosis first."
     : !condition ? "This diagnosis has no supported screening pathway."
@@ -102,28 +118,33 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
   }, [error, plan]);
   async function preview() {
     if (!canPreview || !metadata || !diagnosis || !context || !visit) return;
-    clearPlan(); const current = sequence.current; setPreviewing(true); setError(null); setMessage(null);
+    clearPlan(); const current = sequence.current; setPreviewing(true); setError(null); setPreviewFailed(false); setMessage(null);
     const request: ScreeningRequest = { diagnosis_id: diagnosis.id, expected_context_updated_at: context.updated_at,
       expected_analysis_hash: metadata.expected_analysis_hash, clinical: structuredClone(clinical) };
     const controller = new AbortController(); previewRequest.current = controller;
     let timedOut = false;
-    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 30_000);
+    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 75_000);
+    const slow = setTimeout(() => { if (alive.current && current === sequence.current) setSlowPreview(true); }, 15_000);
     try {
       const response = await previewScreening(visit.id, request, controller.signal);
       if (!alive.current || current !== sequence.current) return;
       if (response.result.condition !== condition) throw new Error("Preview diagnosis changed. Refresh the consultation.");
       setPlan({ response, request });
     } catch (reason) {
-      if (alive.current && current === sequence.current) failure(timedOut ? new Error("Screening took too long to respond. Your clinical entries are still here. Try Preview medicine candidates again; no screening result was confirmed.") : reason);
+      if (alive.current && current === sequence.current) {
+        setPreviewFailed(true);
+        failure(timedOut ? new Error("Screening took too long to respond. Your clinical entries are still here. Try Preview medicine candidates again; no screening result was confirmed.") : reason);
+      }
     } finally {
       clearTimeout(timeout);
+      clearTimeout(slow);
       if (previewRequest.current === controller) previewRequest.current = null;
       if (alive.current && current === sequence.current) setPreviewing(false);
     }
   }
   async function save() {
     if (!canSave || !plan || !visit || locked.current) return;
-    locked.current = true; setSaving(true); setError(null); setMessage(null);
+    locked.current = true; setSaving(true); setError(null); setPreviewFailed(false); setMessage(null);
     const current = sequence.current;
     if (!retry.current || retry.current.hash !== plan.response.plan_hash) retry.current = { key: crypto.randomUUID(), hash: plan.response.plan_hash };
     try {
@@ -146,7 +167,8 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
     <Section title="Patient safety screening" icon={ShieldCheck}>
       <div className="space-y-5">
         <p className="text-sm text-slate-600">Verify this visit and screen medicine candidates first. Save the reviewed assessment to continue to Experimental ML suggestions, then prepare a doctor-review prescription draft.</p>
-        <div className="flex flex-wrap gap-3"><button type="button" className={buttonStyle} disabled={!ready || loading || saving} onClick={load}>Refresh screening inputs and drafts</button></div>
+        <div className="flex flex-wrap gap-3"><button type="button" className={buttonStyle} disabled={!ready || loading || saving} onClick={load}>Refresh screening inputs and drafts</button>
+          <button type="button" className={buttonStyle} disabled={!ready || loading || saving || previewing} onClick={refreshReviews}>Refresh medicine reviews</button></div>
         <ul className="space-y-1 text-xs text-amber-900">
           {!visit && <li>Select a patient and saved visit first.</li>}
           {visit && !diagnosis && <li>Confirm this visit diagnosis first.</li>}
@@ -167,17 +189,21 @@ export function SixConditionDraftFlow({ rx, onReviewHistory }: { rx: ReturnType<
           <QuickClinicalReview key={metadata.expected_analysis_hash + ":" + metadata.expected_context_updated_at} metadata={metadata} condition={condition} clinical={clinical} initial={initial}
             requirements={quickRequirements(condition, coverage?.profiles ?? [], coverage?.scopes ?? [], metadata.patient_age_years, coverage != null)}
             patient={rx.activePatient} history={context} doctor={visit!.doctor} disabled={loading || saving || !bindingCurrent}
-            onEdit={editClinical} onConfirm={confirmReview} onReviewHistory={onReviewHistory} />
+            onEdit={editClinical} onConfirm={confirmReview} onReviewHistory={onReviewHistory} editorRef={clinicalEditor} />
         </>}
         <div className="space-y-2">
           <button type="button" className={buttonStyle} disabled={!canPreview} onClick={preview} aria-controls="medicine-preview-feedback" aria-describedby={previewRequirement ? "medicine-preview-requirement" : undefined}>{previewing ? "Screening candidates…" : "Preview medicine candidates"}</button>
           {previewRequirement && !previewing && <p id="medicine-preview-requirement" className="text-xs text-amber-900">{previewRequirement}</p>}
         </div>
         <div id="medicine-preview-feedback" ref={previewFeedback} role="group" aria-label="Medicine preview feedback" tabIndex={-1} className="scroll-mt-24 space-y-4" aria-busy={previewing}>
-        {previewing && <p role="status" className="text-xs text-slate-600">Screening the current patient inputs. Waiting for the database response…</p>}
-        {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs text-rose-900">{error} <button type="button" className="font-bold underline" onClick={load} disabled={!ready || loading || saving}>Refresh screening</button></p>}
+        {previewing && <p role="status" className="text-xs text-slate-600">{slowPreview ? "Screening is still running against the cloud database. Your clinical entries are retained; wait for the result." : "Screening the current patient inputs. Waiting for the database response…"}</p>}
+        {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs text-rose-900">{error} {previewFailed && canPreview
+          ? <button type="button" className="font-bold underline" onClick={preview}>Try preview again</button>
+          : <button type="button" className="font-bold underline" onClick={load} disabled={!ready || loading || saving}>Refresh screening</button>}</p>}
         {usablePlan && <>
           <p role="status" className="rounded-xl bg-purple-50 p-3 text-sm font-semibold text-purple-900">Screening complete: {availableCount} medicine {availableCount === 1 ? "candidate" : "candidates"} available for doctor review; {usablePlan.response.result.candidates.length - availableCount} unavailable. Review the details below.</p>
+          <ScreeningNextActions result={usablePlan.response.result} clinical={usablePlan.request.clinical} observations={metadata!.source_observations}
+            onHistory={onReviewHistory} onClinical={() => clinicalEditor.current?.open()} />
           <ClinicalScreeningResult result={usablePlan.response.result} />
           {usablePlan.response.result.candidates.some((row) => row.checks.some((check) => ["allergy", "duplicate_ingredient", "interaction"].includes(check.category) && ["cannot_validate", "blocked", "warning"].includes(check.status))) &&
             <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
