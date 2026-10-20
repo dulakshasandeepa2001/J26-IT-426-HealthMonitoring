@@ -6,9 +6,12 @@
 		}
 	],
 	"settings": {
+		"python.defaultInterpreterPath": "${workspaceFolder}/backend/Venv/Scripts/python.exe",
 		"python.analysis.extraPaths": [
+			"./backend",
+			"./backend/labreports",
 			"./backend/taskcreate",
-			"./backend/user_create"
+			"./backend/accounts"
 		]
 	}
 }
