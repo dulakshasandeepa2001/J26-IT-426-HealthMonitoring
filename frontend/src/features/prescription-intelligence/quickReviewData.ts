@@ -60,7 +60,9 @@ export function quickRequirements(condition: HandoffCondition, profiles: SafetyP
     policy.targets.forEach((name) => targets.add(name));
     if (!["influenza", "chickenpox"].includes(condition)) conditionConcerns[condition].forEach((name) => concerns.add(name));
     policy.concerns.forEach((name) => concerns.add(name));
-    if (policy.handler === "paracetamol") fields.add("hepatic_assessment");
+    // The actual oral reference_regimen requires both, including when no
+    // antiviral/NSAID is reviewed and able to introduce the renal question.
+    if (policy.handler === "paracetamol") { fields.add("hepatic_assessment"); fields.add("renal_assessment"); }
     if (["oseltamivir", "acyclovir"].includes(policy.handler)) { fields.add("renal_assessment"); fields.add("onset_hours"); }
     if (policy.handler === "oseltamivir") { fields.add("laiv_timing"); fields.add("influenza_guideline"); }
     if (policy.handler === "acyclovir") fields.add("varicella_risk");

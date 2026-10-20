@@ -7,7 +7,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError, APIException
 from medicine_knowledge.models import PatientScreeningDraft
-from medicine_knowledge.patient_screening import authorized_visit, freshness, digest_json, prepare
+from medicine_knowledge.patient_screening import authorized_visit, digest_json
+from medicine_knowledge.selected_screening import freshness, prepare
 from prescription_context.experimental_ml import ExperimentUnavailable
 from .models import MedicineProposal, DoctorDecision
 from .inference import infer
@@ -22,7 +23,7 @@ class ReviewConflict(APIException):
 
 def implementation_hash():
     root = Path(__file__).resolve().parent
-    return hashlib.sha256(b''.join((root / name).read_bytes() for name in ('services.py', 'inference.py', 'models.py', 'contracts.py'))).hexdigest()
+    return hashlib.sha256(b''.join((root / name).read_bytes() for name in ('services.py', 'inference.py', 'rf_inference.py', 'models.py', 'contracts.py'))).hexdigest()
 
 
 def demo_scope(actor, visit_id, lock=False):
@@ -65,12 +66,11 @@ def current_state(proposal, actor):
     if not state['is_current']:
         return state
     try:
-        from prescription_research.expansion import comparison
-        from prescription_research import dataset as io
-        comparison.verify_run()
-        if proposal.result['ml']['model_hash'] != io.file_hash(comparison.DEFAULT_OUTPUT / 'selected_model.json'):
-            return {'is_current': False, 'reason': 'The frozen model changed.'}
-    except (OSError, ValueError, KeyError, TypeError):
+        from .rf_inference import model_identity
+        identity = model_identity()
+        if proposal.result['ml']['model_hash'] != identity['model_hash'] or proposal.result['ml']['model_version'] != identity['model_version']:
+            return {'is_current': False, 'reason': 'The saved RF model bundle changed.'}
+    except (OSError, ValueError, KeyError, TypeError, ImportError):
         return {'is_current': False, 'reason': 'Frozen Experimental ML artifacts cannot be verified.'}
     return {'is_current': True, 'reason': None}
 
@@ -90,7 +90,7 @@ def create_proposal(actor, visit_id, data):
     revalidate(draft, actor, visit)
     try:
         ml = infer(draft)
-    except (OSError, ValueError, KeyError, TypeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, ImportError) as error:
         raise ExperimentUnavailable() from error
     candidates = deepcopy(draft.result['candidates'])
     eligible = [row for row in candidates if row['status'] == 'candidate_for_clinician_review' and row['regimen']]

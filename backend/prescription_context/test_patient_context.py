@@ -151,6 +151,45 @@ class PatientContextReviewTests(TestCase):
         self.assertEqual(revision.snapshot['before']['history_identity']['details'], details)
         self.assertIn('history_identity', revision.changed_fields)
 
+    def test_management_proposals_are_audited_without_changing_active_history(self):
+        from copy import deepcopy
+        body = {**self.payload(), 'medicine_plans': [
+            {'recorded_text': 'Test existing medicine', 'action': 'stop', 'note': 'Synthetic proposal pending separate clinical review.'}]}
+        response = self.save(body)
+        self.assertEqual(response.status_code, 200, response.data)
+        saved = response.json()
+        self.assertEqual(saved['current_medicines'], ['Test existing medicine'])
+        self.assertEqual(saved['medicine_status'], 'confirmed')
+        proposal = saved['provenance']['medicine_plan']
+        self.assertEqual(proposal['status'], 'proposed_only')
+        self.assertFalse(proposal['changes_active_history'])
+        self.assertEqual(proposal['reviewed_by'], self.doctor.pk)
+        self.assertEqual(proposal['consultation_id'], str(self.consultation.pk))
+        self.assertEqual(Revision.objects.get().snapshot['after']['medicine_plan'], proposal)
+        for change in ({'note': 'short'}, {'action': 'approved'}, {'recorded_text': 'Another medicine'}, {'reviewed_by': self.other_doctor.pk}):
+            bad = deepcopy(body)
+            bad['expected_updated_at'] = saved['updated_at']
+            bad['medicine_plans'][0].update(change)
+            self.assertEqual(self.save(bad).status_code, 400)
+        self.assertEqual(Revision.objects.count(), 1, 'Invalid proposals must not save partial history')
+
+    def test_proposal_is_not_carried_to_another_visit_or_changed_history(self):
+        body = {**self.payload(), 'medicine_plans': [
+            {'recorded_text': 'Test existing medicine', 'action': 'continue', 'note': 'Fictional proposed action with review still required.'}]}
+        saved = self.save(body).json()
+        unchanged = {**self.payload(saved['updated_at']), 'allergies': saved['allergies']}
+        same_visit = self.save(unchanged).json()
+        self.assertEqual(same_visit['provenance']['medicine_plan']['details'], body['medicine_plans'])
+        next_visit = Consultation.objects.create(doctor=self.doctor, patient=self.patient, reason='Return visit')
+        unchanged['expected_updated_at'] = same_visit['updated_at']
+        next_record = self.save(unchanged, consultation=next_visit).json()
+        self.assertNotIn('medicine_plan', next_record['provenance'])
+        self.assertEqual(Revision.objects.order_by('id').first().snapshot['after']['medicine_plan']['details'], body['medicine_plans'])
+        body['expected_updated_at'] = next_record['updated_at']
+        saved = self.save(body).json()
+        changed = {**unchanged, 'expected_updated_at': saved['updated_at'], 'current_medicines': ['New unresolved medicine']}
+        self.assertNotIn('medicine_plan', self.save(changed).json()['provenance'])
+
     def test_next_visit_loads_same_patient_data_and_can_record_a_new_review(self):
         first = self.save().json()
         next_visit = self.client.post('/api/prescription/consultations/', {'patient': self.patient.pk, 'reason': 'Return visit'}, format='json').json()

@@ -38,10 +38,14 @@ export default function PrescriptionSlipView({ id }: { id: string }) {
       <dl><div><dt className="inline font-bold">Name: </dt><dd className="inline">{slip.patient.name}</dd></div><div><dt className="inline font-bold">Age: </dt><dd className="inline">{slip.patient.age_years ?? "Unknown"} years</dd></div><div><dt className="inline font-bold">Date: </dt><dd className="inline">{new Date(slip.approved_at).toLocaleDateString(undefined, { timeZone: "Asia/Colombo" })}</dd></div></dl>
       <ol className="list-inside list-decimal space-y-3">{slip.medicines.map((row) => <li key={row.medicine_id} className="break-inside-avoid"><span className="font-bold">{row.generic_name} · {row.product?.strength} · {row.product?.form}</span><p>{regimenText(row)}</p>{row.regimen?.review_after_days != null && <p>Reassessment limit: {row.regimen.review_after_days} days; this is not a prescribed course.</p>}{row.regimen?.reassessment_limit_hours != null && <p>Reassessment limit: {row.regimen.reassessment_limit_hours} hours.</p>}</li>)}</ol>
       <footer className="space-y-2 border-t border-slate-300 pt-3 break-inside-avoid">
-        <p className="font-bold">Doctor decision recorded: {slip.doctor.name}</p>
-        {slip.doctor.qualifications && <p>Profile qualification: {slip.doctor.qualifications}</p>}
-        {slip.doctor.university && <p>{slip.doctor.university}</p>}
-        {slip.doctor.hospital && <p>{slip.doctor.hospital}</p>}
+        <div aria-label="Doctor profile stamp" className="max-w-full space-y-1 rounded-xl border-2 border-double border-slate-500 px-3 py-2 text-center text-slate-700">
+          <p className="text-[9px] font-bold uppercase tracking-widest">Doctor approval record</p>
+          <p className="break-words font-bold">{slip.doctor.name}</p>
+          {slip.doctor.qualifications && <p className="break-words">{slip.doctor.qualifications}</p>}
+          {slip.doctor.university ? <p className="break-words">{slip.doctor.university}</p> : <p>University not recorded</p>}
+          {slip.doctor.hospital && <p className="break-words">{slip.doctor.hospital}</p>}
+          <p className="text-[9px]">Unsigned profile stamp · Research use only</p>
+        </div>
         <p>Signature / authorized seal: __________________</p>
         <p className="text-[10px]">Doctor identity details are profile data. Credentials/signature are not verified. Research use only; not valid for dispensing.</p>
         <p className="break-all text-[9px]">Decision reference: {slip.decision_id}</p>

@@ -25,6 +25,11 @@ class SafetyProfileSerializer(serializers.ModelSerializer):
     conditions = serializers.SerializerMethodField()
     engine_version = serializers.SerializerMethodField()
     history_identity_policy = serializers.SerializerMethodField()
+    review_binding = serializers.SerializerMethodField()
+
+    def get_review_binding(self, obj):
+        from medicine_knowledge.screening_trace import review_trace
+        return review_trace(obj, safety=True)
 
     def get_history_identity_policy(self, obj):
         from prescription_context.history_identity import review_policy
@@ -48,7 +53,7 @@ class SafetyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = SafetyProfile
         fields = ('medicine', 'generic_name', 'content', 'content_hash', 'medicine_content_hash', 'review_status',
-                  'review_is_current', 'catalogue_review_current', 'reviewer_name', 'reviewed_at', 'review_notes', 'updated_at', 'sources', 'product', 'conditions', 'engine_version', 'history_identity_policy')
+                  'review_is_current', 'catalogue_review_current', 'reviewer_name', 'reviewed_at', 'review_notes', 'updated_at', 'sources', 'product', 'conditions', 'engine_version', 'history_identity_policy', 'review_binding')
 
 
 class SafetyProfileViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):
@@ -70,6 +75,8 @@ class SafetyProfileViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):
             if data['expected_content_hash'] != profile.content_hash or data['expected_updated_at'] != profile.updated_at or profile.content_hash != content_digest(profile.content) or profile.medicine_content_hash != medicine.content_hash:
                 return Response({'detail': 'Rules or bound medicine content changed. Refresh and review the current profile.'}, status=409)
             validate_profile(profile.content, medicine)
+            if data['decision'] == 'reviewed' and profile.review_is_current and data['notes'] == profile.review_notes:
+                return Response(self.get_serializer(profile).data)
             profile.review_status = data['decision']
             profile.reviewed_content_hash = profile.content_hash
             profile.reviewed_engine_hash = engine_digest()

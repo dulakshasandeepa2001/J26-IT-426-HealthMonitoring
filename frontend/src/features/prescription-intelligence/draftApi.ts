@@ -8,6 +8,7 @@ export interface SafetyProfile {
   catalogue_review_current: boolean; reviewer_name: string | null; reviewed_at: string | null; review_notes: string; updated_at: string;
   sources: EvidenceSource[]; product: { strength: string; form: string; route: "oral" | "topical"; standard_concept: StandardMedicineConcept }; conditions: string[];
   engine_version?: string;
+  review_binding?: { reasons: string[]; reviewed_engine_hash?: string; current_engine_hash?: string };
   history_identity_policy?: IdentityPolicy;
 }
 export interface ClinicalDetails {

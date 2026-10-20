@@ -1,0 +1,17 @@
+{
+  "candidate_rows": 636,
+  "cases": 200,
+  "clinical_facts_promoted": 0,
+  "invented_proposed_regimens": 0,
+  "source_hashes": {
+    "MediTrack_Synthetic_200.xlsx": {
+      "bytes": 58873,
+      "sha256": "08e587f88b737f40ad311f139b8e15df169c21567964f0a5050b69444e6ad25b"
+    },
+    "patient_scenarios_200.csv": {
+      "bytes": 117093,
+      "sha256": "3dbaba97ec14768365167a1e92929acf4d7dfa937acac91ca422c3b39c6f85ef"
+    }
+  },
+  "used_for_training": false
+}

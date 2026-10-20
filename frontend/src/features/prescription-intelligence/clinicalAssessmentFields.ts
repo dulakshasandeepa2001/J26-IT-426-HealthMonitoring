@@ -24,7 +24,7 @@ export const conditionConcerns: Record<HandoffCondition, string[]> = {
   viral_conjunctivitis: [...commonConcerns, "eye_pain", "photophobia", "vision_change", "marked_or_worsening_redness", "contact_lens_use", "suspected_herpetic_eye_disease"],
   viral_gastroenteritis: [...commonConcerns, "blood_in_stool", "severe_abdominal_pain", "fluid_restriction"],
 };
-type SelectKey = Exclude<keyof ClinicalAssessment, "reviewed" | "symptoms_reviewed" | "verified_symptoms" | "symptom_durations" | "condition_assessments" | "onset_hours" | "weight_kg">;
+type SelectKey = Exclude<keyof ClinicalAssessment, "reviewed" | "symptoms_reviewed" | "verified_symptoms" | "symptom_durations" | "condition_assessments" | "onset_hours" | "weight_kg" | "selected_pair_review">;
 export interface AssessmentSelect { key: SelectKey; label: string; options: [string, string][]; conditions?: HandoffCondition[] }
 const unknown: [string, string] = ["unknown", "Unknown / not assessed"];
 export const assessmentSelects: AssessmentSelect[] = [

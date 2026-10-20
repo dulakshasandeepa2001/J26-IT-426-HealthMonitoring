@@ -11,7 +11,13 @@ export interface MedicineProposal {
   snapshot: { synthetic_only: true; patient: { id: number; name: string; age_years: number | null; birthday: string | null }; condition: string };
   result: { approved: false; published: false; candidates: ScreeningCandidate[]; default_ids: string[];
     ml: { presentation_label: "Experimental ML"; algorithm: string; model_version: string; label_method: string; clinical_review_status: "not_reviewed";
-      limits: string[]; predictions: { medicine_id: string; label: string | null; status: string; reason: string; suggested: boolean }[] } };
+      adapter_version?: string; supporting_models?: { version: string; role: string; hash: string }[];
+      limits: string[]; predictions: { medicine_id: string; label: string | null; status: string; reason: string; suggested: boolean;
+        rule_predictions?: Record<string, { predicted: string | null; status: string; reason: string; deterministic_reference: string | null; agrees_with_selected_check: boolean | null; unseen_features: string[] }>;
+        rule_disagreements_or_abstentions?: string[];
+        symptom_match_rf?: { label: number | null; status: string; reason: string };
+        ml_can_override_rules?: false;
+      }[] } };
   decisions: DoctorDecision[];
 }
 export interface PrescriptionSlip {
@@ -23,6 +29,8 @@ export interface PrescriptionSlip {
 function checked(row: MedicineProposal, visit: string, draft?: string) {
   if (row.consultation_id !== visit || draft && row.draft_id !== draft || row.snapshot.synthetic_only !== true
     || row.result.approved !== false || row.result.published !== false || row.result.ml.clinical_review_status !== "not_reviewed") throw new Error("Unsupported proposal binding. Refresh the saved draft.");
+  if (row.result.ml.algorithm === "random_forest" && (!row.result.ml.supporting_models?.length
+    || row.result.ml.predictions.some((prediction) => prediction.ml_can_override_rules !== false))) throw new Error("Invalid RF safety boundary. Refresh the saved draft.");
   return row;
 }
 export async function loadProposals(visit: string) {

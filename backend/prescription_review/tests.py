@@ -42,10 +42,11 @@ class DoctorReviewTests(TestCase):
         return self.client.post(path, data, format='json'), (path, data)
 
     def test_saved_model_inference_has_no_teacher_leakage_training_or_research_writes(self):
-        with patch('prescription_research.expansion.learners.fit', side_effect=AssertionError('No fitting in API')):
+        with patch('sklearn.ensemble.RandomForestClassifier.fit', side_effect=AssertionError('No fitting in API')):
             visit, proposal, request = self.proposal()
         ml = proposal['result']['ml']
-        self.assertEqual(ml['algorithm'], 'categorical_tree')
+        self.assertEqual(ml['algorithm'], 'random_forest')
+        self.assertEqual(len(ml['supporting_models']), 2)
         self.assertEqual(ml['clinical_review_status'], 'not_reviewed')
         self.assertFalse(ml['medical_confidence_calibrated'])
         predictions = {row['medicine_id']: row for row in ml['predictions']}
@@ -62,7 +63,9 @@ class DoctorReviewTests(TestCase):
         self.assertEqual(changed['reason'], 'outside_frozen_model_product_coverage')
         self.assertNotIn('allergies', predictions['oseltamivir-75mg-capsule']['features'])
         self.assertNotIn('relevance_target', str(predictions))
-        self.assertIn('paracetamol-500mg-tablet', proposal['result']['default_ids'])
+        for identity in proposal['result']['default_ids']:
+            self.assertTrue(predictions[identity]['suggested'])
+            self.assertFalse(predictions[identity]['rule_disagreements_or_abstentions'])
         self.assertEqual(predictions['baloxavir-reference']['status'], 'withheld')
         self.assertFalse(DoctorDecision.objects.exists())
         retry = self.client.post(*request, format='json')
@@ -141,7 +144,7 @@ class DoctorReviewTests(TestCase):
         visit.is_demo = False; visit.save()
         self.assertEqual(self.client.get(request[0]).status_code, 403)
         visit.is_demo = True; visit.save()
-        with patch('prescription_research.expansion.comparison.verify_run', side_effect=ValueError('Changed artifact')):
+        with patch('prescription_review.rf_inference.model_identity', side_effect=ValueError('Changed artifact')):
             response, _ = self.decision(proposal)
             self.assertEqual(response.status_code, 409)
 
@@ -175,3 +178,55 @@ class DoctorReviewTests(TestCase):
         type(self.patient).objects.filter(pk=self.patient.pk).update(first_name='Corrected fictional name')
         response = self.client.get(f"/api/prescription/prescription-slips/{approved.data['decision']['id']}/")
         self.assertEqual(response.status_code, 409)
+
+    def test_rf_inputs_keep_unlisted_symptoms_unknown_and_do_not_mutate_snapshot(self):
+        from .rf_inference import adapt_features, infer
+        _, proposal, _ = self.proposal()
+        draft = PatientScreeningDraft.objects.get(pk=proposal['draft_id'])
+        draft.snapshot['clinical']['verified_symptoms'] = ['fever', 'body_aches']
+        before = deepcopy(draft.snapshot)
+        candidate = next(row for row in draft.result['candidates'] if row['medicine_id'] == 'paracetamol-500mg-tablet')
+        values = adapt_features(draft.snapshot, candidate, 'dose')
+        self.assertEqual(values['symptom_fever'], 'True')
+        self.assertEqual(values['symptom_jaw_pain'], '__unknown__')
+        self.assertEqual(values['symptom_itching'], '__unknown__')
+        for forbidden in ('targets', 'teacher_score', 'teacher_checks', 'allergy_match', 'clinical_review_status', 'scenario_id'):
+            self.assertNotIn(forbidden, values)
+        infer(draft)
+        self.assertEqual(draft.snapshot, before)
+        draft.snapshot['is_demo'] = False
+        with self.assertRaisesRegex(ValueError, 'synthetic'):
+            infer(draft)
+
+    def test_blocking_screening_is_never_overridden_by_permissive_rf_predictions(self):
+        from .rf_inference import infer
+        _, proposal, _ = self.proposal()
+        draft = PatientScreeningDraft.objects.get(pk=proposal['draft_id'])
+        for candidate in draft.result['candidates']:
+            candidate['status'] = 'unavailable'
+        with patch('prescription_review.rf_inference.predict_features', return_value={
+            'predicted': 'provisional_relevance', 'status': 'experimental_prediction', 'reason': 'test_permissive', 'unseen_features': []}):
+            result = infer(draft)
+        self.assertTrue(all(not r['suggested'] and r['status'] == 'withheld' and not r['ml_can_override_rules'] for r in result['predictions']))
+
+    def test_rf_disagreement_withholds_automatic_selection_but_keeps_deterministic_candidates(self):
+        from .rf_inference import infer
+        _, proposal, _ = self.proposal()
+        draft = PatientScreeningDraft.objects.get(pk=proposal['draft_id'])
+        original = deepcopy(draft.result)
+        with patch('prescription_review.rf_inference.predict_features', return_value={
+            'predicted': 'provisional_relevance', 'status': 'experimental_prediction', 'reason': 'test_disagreement', 'unseen_features': []}):
+            result = infer(draft)
+        self.assertTrue(all(not r['suggested'] for r in result['predictions']))
+        self.assertEqual(draft.result, original)
+
+    def test_frozen_rf_tampering_is_checked_even_when_model_is_cached(self):
+        from pathlib import Path
+        from .rf_inference import model_identity, toy_data
+        model_identity()
+        original = toy_data.digest
+        def altered(path):
+            return 'changed' if Path(path).name == 'models.joblib' else original(path)
+        with patch('prescription_review.rf_inference.toy_data.digest', side_effect=altered):
+            with self.assertRaisesRegex(ValueError, 'integrity'):
+                model_identity()

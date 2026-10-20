@@ -63,6 +63,14 @@ try:
             if message.get('action') == 'count':
                 emit({'count': PatientScreeningDraft.objects.count()})
                 continue
+            if message.get('action') == 'fictional_doctor_profile':
+                fixture.doctor.first_name = 'Fictional'
+                fixture.doctor.last_name = 'Reviewer'
+                fixture.doctor.degrees = 'Fictional research qualification'
+                fixture.doctor.university = 'Fictional Research University'
+                fixture.doctor.save(update_fields=['first_name', 'last_name', 'degrees', 'university'])
+                emit({'configured': True})
+                continue
             if message.get('action') == 'change_context':
                 row = Context.objects.get(patient_id=message['patient'])
                 row.save()  # Real updated_at change, same verified visit history.
@@ -72,6 +80,14 @@ try:
                 from prescription_drafts.models import SafetyProfile
                 SafetyProfile.objects.filter(pk=message['medicine']).update(review_status='pending')
                 emit({'pending': True})
+                continue
+            if message.get('action') == 'outdated_scope':
+                from medicine_knowledge.models import ConditionKnowledge, content_digest
+                row = ConditionKnowledge.objects.get(pk=message['scope'])
+                row.rules['clinical_implementation_bindings'] = {'fixture': 'previous implementation'}
+                row.rules_hash = content_digest(row.rules)
+                row.save()  # Disposable in-memory fixture only; preserve review history.
+                emit({'outdated': True})
                 continue
             if message.get('action') == 'reported_severe':
                 from prescription_context.models import PrescriptionContextConsultationanalysis as Analysis

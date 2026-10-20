@@ -1,0 +1,3517 @@
+{
+  "api_enabled": false,
+  "application_model_replaced": false,
+  "audit": {
+    "class_balance": {
+      "allergy": {
+        "test": {
+          "blocked": 42,
+          "cannot_validate": 21,
+          "no_selected_issue": 189
+        },
+        "train": {
+          "blocked": 21,
+          "cannot_validate": 42,
+          "no_selected_issue": 651
+        },
+        "validation": {
+          "blocked": 28,
+          "cannot_validate": 14,
+          "no_selected_issue": 70
+        }
+      },
+      "dose": {
+        "test": {
+          "cannot_validate": 78,
+          "matches_selected_rule": 113,
+          "mismatch": 61
+        },
+        "train": {
+          "cannot_validate": 219,
+          "matches_selected_rule": 368,
+          "mismatch": 127
+        },
+        "validation": {
+          "cannot_validate": 52,
+          "matches_selected_rule": 32,
+          "mismatch": 28
+        }
+      },
+      "duplicate_ingredient": {
+        "test": {
+          "blocked": 21,
+          "cannot_validate": 63,
+          "no_selected_issue": 168
+        },
+        "train": {
+          "blocked": 21,
+          "cannot_validate": 63,
+          "no_selected_issue": 630
+        },
+        "validation": {
+          "blocked": 14,
+          "cannot_validate": 14,
+          "no_selected_issue": 84
+        }
+      },
+      "interaction": {
+        "test": {
+          "cannot_validate": 66,
+          "no_selected_issue": 165,
+          "review_required": 21
+        },
+        "train": {
+          "cannot_validate": 66,
+          "no_selected_issue": 603,
+          "review_required": 45
+        },
+        "validation": {
+          "cannot_validate": 14,
+          "no_selected_issue": 68,
+          "review_required": 30
+        }
+      },
+      "purpose_applicability": {
+        "test": {
+          "cannot_validate": 69,
+          "guideline_against": 3,
+          "provisional_relevance": 180
+        },
+        "train": {
+          "cannot_validate": 66,
+          "guideline_against": 3,
+          "not_relevant": 15,
+          "provisional_relevance": 630
+        },
+        "validation": {
+          "cannot_validate": 4,
+          "guideline_against": 2,
+          "not_relevant": 10,
+          "provisional_relevance": 96
+        }
+      }
+    },
+    "families": 54,
+    "family_leakage": false,
+    "rows": 1078,
+    "splits": {
+      "test": {
+        "families": 12,
+        "rows": 252
+      },
+      "train": {
+        "families": 34,
+        "rows": 714
+      },
+      "validation": {
+        "families": 8,
+        "rows": 112
+      }
+    }
+  },
+  "best_medicine_model_trained": false,
+  "clinical_accuracy_claimed": false,
+  "clinical_review_status": "not_reviewed",
+  "clinical_reviews_created": 0,
+  "clinical_validation": false,
+  "environment": {
+    "cloudpickle": "3.1.2",
+    "joblib": "1.6.0",
+    "narwhals": "2.27.1",
+    "numpy": "2.5.4",
+    "python": "3.13.3",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.7.0"
+  },
+  "label_method": "rule_derived",
+  "limitations": [
+    "Synthetic rule imitation only; no independent clinician labels or outcomes.",
+    "Four exact reference products with existing executable profiles; other catalogue products are unsupported by this experiment.",
+    "Interaction labels cover selected cautions and missingness only; there are no validated safe/unsafe drug-pair labels.",
+    "Dose classifier compares a fictional proposed regimen to an existing rule; it never generates a dose.",
+    "Single-candidate purpose groups have no meaningful ranking ground truth. No best-medicine labels are invented.",
+    "Held-out family compositions can repeat task-specific feature vectors; novel counts and overlap are reported per task.",
+    "Unseen categorical inputs abstain; RF errors, including falsely permissive predictions, cannot overrule deterministic controls.",
+    "The supplied 200 cases remain unverified and are audited separately, never promoted or used to train these classifiers."
+  ],
+  "live_patient_data_used": false,
+  "numeric_dose_model_trained": false,
+  "purpose_groups": [
+    {
+      "candidates": [
+        "acyclovir-800mg-tablet"
+      ],
+      "clinical_role": "varicella_antiviral",
+      "condition": "chickenpox",
+      "purpose": "antiviral",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "paracetamol-500mg-tablet"
+      ],
+      "clinical_role": "fever_relief",
+      "condition": "chickenpox",
+      "purpose": "symptom_relief",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "calamine-zinc-oxide-lotion"
+      ],
+      "clinical_role": "itching_relief",
+      "condition": "chickenpox",
+      "purpose": "symptom_relief",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "oseltamivir-75mg-capsule"
+      ],
+      "clinical_role": "influenza_antiviral",
+      "condition": "influenza",
+      "purpose": "antiviral",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "paracetamol-500mg-tablet"
+      ],
+      "clinical_role": "fever_or_aches_relief",
+      "condition": "influenza",
+      "purpose": "symptom_relief",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "paracetamol-500mg-tablet"
+      ],
+      "clinical_role": "fever_relief",
+      "condition": "measles",
+      "purpose": "symptom_relief",
+      "within_group_ranking_supported": false
+    },
+    {
+      "candidates": [
+        "paracetamol-500mg-tablet"
+      ],
+      "clinical_role": "fever_or_pain_relief",
+      "condition": "mumps",
+      "purpose": "symptom_relief",
+      "within_group_ranking_supported": false
+    }
+  ],
+  "tasks": {
+    "allergy": {
+      "algorithm": "sklearn.ensemble.RandomForestClassifier",
+      "feature_names": [
+        "allergy_mentions",
+        "allergy_status",
+        "candidate_id"
+      ],
+      "majority_baseline_test_unique": {
+        "abstentions": 0,
+        "agreement_with_rule_labels": 0.25,
+        "class_balance": {
+          "blocked": 8,
+          "cannot_validate": 4,
+          "no_selected_issue": 4
+        },
+        "confusion_matrix": {
+          "blocked": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 0,
+            "no_selected_issue": 8
+          },
+          "cannot_validate": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 0,
+            "no_selected_issue": 4
+          },
+          "no_selected_issue": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 0,
+            "no_selected_issue": 4
+          }
+        },
+        "correct": 4,
+        "errors_including_abstentions": 12,
+        "false_permissive_predictions": 12,
+        "inputs": 16,
+        "interpretation": "agreement with synthetic rules, not clinical accuracy",
+        "macro_f1": 0.13333333333333333,
+        "per_class": {
+          "blocked": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 8
+          },
+          "cannot_validate": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 4
+          },
+          "no_selected_issue": {
+            "f1": 0.4,
+            "precision": 0.25,
+            "recall": 1.0,
+            "support": 4
+          }
+        },
+        "supported_class_count": 3
+      },
+      "novel_validation_inputs": 0,
+      "selected_configuration": "depth4_leaf2",
+      "selection_subset": "unique_inputs",
+      "selection_used_test": false,
+      "selection_variation": "insufficient_novel_validation_variation",
+      "status": "trained",
+      "test": {
+        "all_rows": {
+          "abstentions": 42,
+          "agreement_with_rule_labels": 0.8333333333333334,
+          "class_balance": {
+            "blocked": 42,
+            "cannot_validate": 21,
+            "no_selected_issue": 189
+          },
+          "confusion_matrix": {
+            "blocked": {
+              "abstained": 42,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 0
+            },
+            "cannot_validate": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 21,
+              "no_selected_issue": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 189
+            }
+          },
+          "correct": 210,
+          "errors_including_abstentions": 42,
+          "false_permissive_predictions": 0,
+          "inputs": 252,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.6666666666666666,
+          "per_class": {
+            "blocked": {
+              "f1": 0.0,
+              "precision": null,
+              "recall": 0.0,
+              "support": 42
+            },
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 21
+            },
+            "no_selected_issue": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 189
+            }
+          },
+          "supported_class_count": 3
+        },
+        "novel_unique_inputs": {
+          "abstentions": 8,
+          "agreement_with_rule_labels": 0.0,
+          "class_balance": {
+            "blocked": 8
+          },
+          "confusion_matrix": {
+            "blocked": {
+              "abstained": 8,
+              "blocked": 0
+            }
+          },
+          "correct": 0,
+          "errors_including_abstentions": 8,
+          "false_permissive_predictions": 0,
+          "inputs": 8,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.0,
+          "per_class": {
+            "blocked": {
+              "f1": 0.0,
+              "precision": null,
+              "recall": 0.0,
+              "support": 8
+            }
+          },
+          "supported_class_count": 1
+        },
+        "unique_inputs": {
+          "abstentions": 8,
+          "agreement_with_rule_labels": 0.5,
+          "class_balance": {
+            "blocked": 8,
+            "cannot_validate": 4,
+            "no_selected_issue": 4
+          },
+          "confusion_matrix": {
+            "blocked": {
+              "abstained": 8,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 0
+            },
+            "cannot_validate": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 4,
+              "no_selected_issue": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 4
+            }
+          },
+          "correct": 8,
+          "errors_including_abstentions": 8,
+          "false_permissive_predictions": 0,
+          "inputs": 16,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.6666666666666666,
+          "per_class": {
+            "blocked": {
+              "f1": 0.0,
+              "precision": null,
+              "recall": 0.0,
+              "support": 8
+            },
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 4
+            },
+            "no_selected_issue": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 4
+            }
+          },
+          "supported_class_count": 3
+        }
+      },
+      "train_test_exact_input_overlap": 8,
+      "training_class_balance": {
+        "blocked": 4,
+        "cannot_validate": 8,
+        "no_selected_issue": 8
+      },
+      "training_unique_inputs": 20,
+      "validation": {
+        "depth12_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 28,
+              "cannot_validate": 14,
+              "no_selected_issue": 70
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 28,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 70
+              }
+            },
+            "correct": 112,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 28
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 70
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 4
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 4
+              }
+            },
+            "correct": 12,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 12,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth4_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 28,
+              "cannot_validate": 14,
+              "no_selected_issue": 70
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 28,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 70
+              }
+            },
+            "correct": 112,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 28
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 70
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 4
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 4
+              }
+            },
+            "correct": 12,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 12,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth8_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 28,
+              "cannot_validate": 14,
+              "no_selected_issue": 70
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 28,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 70
+              }
+            },
+            "correct": 112,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 28
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 70
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 1.0,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 4
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 4
+              }
+            },
+            "correct": 12,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 12,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 1.0,
+            "per_class": {
+              "blocked": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              }
+            },
+            "supported_class_count": 3
+          }
+        }
+      },
+      "validation_refit": false
+    },
+    "dose": {
+      "algorithm": "sklearn.ensemble.RandomForestClassifier",
+      "feature_names": [
+        "age_years",
+        "candidate_id",
+        "condition",
+        "duration_body_aches",
+        "duration_fever",
+        "duration_itching",
+        "duration_jaw_pain",
+        "hepatic_assessment",
+        "proposal_amount",
+        "proposal_doses_per_day",
+        "proposal_duration_days",
+        "proposal_instructions",
+        "proposal_interval_hours",
+        "proposal_max_daily_amount_mg",
+        "proposal_max_doses_per_day",
+        "proposal_present",
+        "proposal_review_after_days",
+        "proposal_route",
+        "proposal_schedule_type",
+        "proposal_unit",
+        "renal_assessment",
+        "symptom_body_aches",
+        "symptom_fever",
+        "symptom_itching",
+        "symptom_jaw_pain",
+        "symptoms_reviewed",
+        "topical_assessment",
+        "weight_kg"
+      ],
+      "majority_baseline_test_unique": {
+        "abstentions": 0,
+        "agreement_with_rule_labels": 0.3870967741935484,
+        "class_balance": {
+          "cannot_validate": 60,
+          "matches_selected_rule": 34,
+          "mismatch": 61
+        },
+        "confusion_matrix": {
+          "cannot_validate": {
+            "abstained": 0,
+            "cannot_validate": 60,
+            "matches_selected_rule": 0,
+            "mismatch": 0
+          },
+          "matches_selected_rule": {
+            "abstained": 0,
+            "cannot_validate": 34,
+            "matches_selected_rule": 0,
+            "mismatch": 0
+          },
+          "mismatch": {
+            "abstained": 0,
+            "cannot_validate": 61,
+            "matches_selected_rule": 0,
+            "mismatch": 0
+          }
+        },
+        "correct": 60,
+        "errors_including_abstentions": 95,
+        "false_permissive_predictions": 0,
+        "inputs": 155,
+        "interpretation": "agreement with synthetic rules, not clinical accuracy",
+        "macro_f1": 0.18604651162790697,
+        "per_class": {
+          "cannot_validate": {
+            "f1": 0.5581395348837209,
+            "precision": 0.3870967741935484,
+            "recall": 1.0,
+            "support": 60
+          },
+          "matches_selected_rule": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 34
+          },
+          "mismatch": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 61
+          }
+        },
+        "supported_class_count": 3
+      },
+      "novel_validation_inputs": 98,
+      "selected_configuration": "depth12_leaf2",
+      "selection_subset": "novel_unique_inputs",
+      "selection_used_test": false,
+      "selection_variation": "multiple_novel_classes",
+      "status": "trained",
+      "test": {
+        "all_rows": {
+          "abstentions": 16,
+          "agreement_with_rule_labels": 0.8968253968253969,
+          "class_balance": {
+            "cannot_validate": 78,
+            "matches_selected_rule": 113,
+            "mismatch": 61
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 0,
+              "cannot_validate": 78,
+              "matches_selected_rule": 0,
+              "mismatch": 0
+            },
+            "matches_selected_rule": {
+              "abstained": 6,
+              "cannot_validate": 0,
+              "matches_selected_rule": 97,
+              "mismatch": 10
+            },
+            "mismatch": {
+              "abstained": 10,
+              "cannot_validate": 0,
+              "matches_selected_rule": 0,
+              "mismatch": 51
+            }
+          },
+          "correct": 226,
+          "errors_including_abstentions": 26,
+          "false_permissive_predictions": 0,
+          "inputs": 252,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.9199583658600052,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 78
+            },
+            "matches_selected_rule": {
+              "f1": 0.9238095238095239,
+              "precision": 1.0,
+              "recall": 0.8584070796460177,
+              "support": 113
+            },
+            "mismatch": {
+              "f1": 0.8360655737704918,
+              "precision": 0.8360655737704918,
+              "recall": 0.8360655737704918,
+              "support": 61
+            }
+          },
+          "supported_class_count": 3
+        },
+        "novel_unique_inputs": {
+          "abstentions": 16,
+          "agreement_with_rule_labels": 0.8838709677419355,
+          "class_balance": {
+            "cannot_validate": 60,
+            "matches_selected_rule": 34,
+            "mismatch": 61
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 0,
+              "cannot_validate": 60,
+              "matches_selected_rule": 0,
+              "mismatch": 0
+            },
+            "matches_selected_rule": {
+              "abstained": 6,
+              "cannot_validate": 0,
+              "matches_selected_rule": 26,
+              "mismatch": 2
+            },
+            "mismatch": {
+              "abstained": 10,
+              "cannot_validate": 0,
+              "matches_selected_rule": 0,
+              "mismatch": 51
+            }
+          },
+          "correct": 137,
+          "errors_including_abstentions": 18,
+          "false_permissive_predictions": 0,
+          "inputs": 155,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.92046783625731,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 60
+            },
+            "matches_selected_rule": {
+              "f1": 0.8666666666666667,
+              "precision": 1.0,
+              "recall": 0.7647058823529411,
+              "support": 34
+            },
+            "mismatch": {
+              "f1": 0.8947368421052632,
+              "precision": 0.9622641509433962,
+              "recall": 0.8360655737704918,
+              "support": 61
+            }
+          },
+          "supported_class_count": 3
+        },
+        "unique_inputs": {
+          "abstentions": 16,
+          "agreement_with_rule_labels": 0.8838709677419355,
+          "class_balance": {
+            "cannot_validate": 60,
+            "matches_selected_rule": 34,
+            "mismatch": 61
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 0,
+              "cannot_validate": 60,
+              "matches_selected_rule": 0,
+              "mismatch": 0
+            },
+            "matches_selected_rule": {
+              "abstained": 6,
+              "cannot_validate": 0,
+              "matches_selected_rule": 26,
+              "mismatch": 2
+            },
+            "mismatch": {
+              "abstained": 10,
+              "cannot_validate": 0,
+              "matches_selected_rule": 0,
+              "mismatch": 51
+            }
+          },
+          "correct": 137,
+          "errors_including_abstentions": 18,
+          "false_permissive_predictions": 0,
+          "inputs": 155,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.92046783625731,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 60
+            },
+            "matches_selected_rule": {
+              "f1": 0.8666666666666667,
+              "precision": 1.0,
+              "recall": 0.7647058823529411,
+              "support": 34
+            },
+            "mismatch": {
+              "f1": 0.8947368421052632,
+              "precision": 0.9622641509433962,
+              "recall": 0.8360655737704918,
+              "support": 61
+            }
+          },
+          "supported_class_count": 3
+        }
+      },
+      "train_test_exact_input_overlap": 0,
+      "training_class_balance": {
+        "cannot_validate": 157,
+        "matches_selected_rule": 64,
+        "mismatch": 124
+      },
+      "training_unique_inputs": 345,
+      "validation": {
+        "depth12_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9821428571428571,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 30,
+                "mismatch": 2
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 110,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9777530589543938,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.967741935483871,
+                "precision": 1.0,
+                "recall": 0.9375,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.9655172413793104,
+                "precision": 0.9333333333333333,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9795918367346939,
+            "class_balance": {
+              "cannot_validate": 44,
+              "matches_selected_rule": 26,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 44,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 24,
+                "mismatch": 2
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 96,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 0,
+            "inputs": 98,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9751724137931035,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 44
+              },
+              "matches_selected_rule": {
+                "f1": 0.96,
+                "precision": 1.0,
+                "recall": 0.9230769230769231,
+                "support": 26
+              },
+              "mismatch": {
+                "f1": 0.9655172413793104,
+                "precision": 0.9333333333333333,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9821428571428571,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 30,
+                "mismatch": 2
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 110,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9777530589543938,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.967741935483871,
+                "precision": 1.0,
+                "recall": 0.9375,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.9655172413793104,
+                "precision": 0.9333333333333333,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth4_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8571428571428571,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 20,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 4,
+                "mismatch": 24
+              }
+            },
+            "correct": 96,
+            "errors_including_abstentions": 16,
+            "false_permissive_predictions": 4,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8214285714285715,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.7142857142857143,
+                "precision": 0.8333333333333334,
+                "recall": 0.625,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.75,
+                "precision": 0.6666666666666666,
+                "recall": 0.8571428571428571,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8367346938775511,
+            "class_balance": {
+              "cannot_validate": 44,
+              "matches_selected_rule": 26,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 44,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 14,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 4,
+                "mismatch": 24
+              }
+            },
+            "correct": 82,
+            "errors_including_abstentions": 16,
+            "false_permissive_predictions": 4,
+            "inputs": 98,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.7954545454545454,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 44
+              },
+              "matches_selected_rule": {
+                "f1": 0.6363636363636364,
+                "precision": 0.7777777777777778,
+                "recall": 0.5384615384615384,
+                "support": 26
+              },
+              "mismatch": {
+                "f1": 0.75,
+                "precision": 0.6666666666666666,
+                "recall": 0.8571428571428571,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8571428571428571,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 20,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 4,
+                "mismatch": 24
+              }
+            },
+            "correct": 96,
+            "errors_including_abstentions": 16,
+            "false_permissive_predictions": 4,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8214285714285715,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.7142857142857143,
+                "precision": 0.8333333333333334,
+                "recall": 0.625,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.75,
+                "precision": 0.6666666666666666,
+                "recall": 0.8571428571428571,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth8_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8928571428571429,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 20,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 100,
+            "errors_including_abstentions": 12,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8642533936651584,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.7692307692307693,
+                "precision": 1.0,
+                "recall": 0.625,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.8235294117647058,
+                "precision": 0.7,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8775510204081632,
+            "class_balance": {
+              "cannot_validate": 44,
+              "matches_selected_rule": 26,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 44,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 14,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 86,
+            "errors_including_abstentions": 12,
+            "false_permissive_predictions": 0,
+            "inputs": 98,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8411764705882353,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 44
+              },
+              "matches_selected_rule": {
+                "f1": 0.7,
+                "precision": 1.0,
+                "recall": 0.5384615384615384,
+                "support": 26
+              },
+              "mismatch": {
+                "f1": 0.8235294117647058,
+                "precision": 0.7,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8928571428571429,
+            "class_balance": {
+              "cannot_validate": 52,
+              "matches_selected_rule": 32,
+              "mismatch": 28
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 52,
+                "matches_selected_rule": 0,
+                "mismatch": 0
+              },
+              "matches_selected_rule": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 20,
+                "mismatch": 12
+              },
+              "mismatch": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "matches_selected_rule": 0,
+                "mismatch": 28
+              }
+            },
+            "correct": 100,
+            "errors_including_abstentions": 12,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8642533936651584,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 52
+              },
+              "matches_selected_rule": {
+                "f1": 0.7692307692307693,
+                "precision": 1.0,
+                "recall": 0.625,
+                "support": 32
+              },
+              "mismatch": {
+                "f1": 0.8235294117647058,
+                "precision": 0.7,
+                "recall": 1.0,
+                "support": 28
+              }
+            },
+            "supported_class_count": 3
+          }
+        }
+      },
+      "validation_refit": false
+    },
+    "duplicate_ingredient": {
+      "algorithm": "sklearn.ensemble.RandomForestClassifier",
+      "feature_names": [
+        "candidate_id",
+        "current_medicine_mentions",
+        "medicine_status"
+      ],
+      "majority_baseline_test_unique": {
+        "abstentions": 0,
+        "agreement_with_rule_labels": 0.6,
+        "class_balance": {
+          "blocked": 4,
+          "cannot_validate": 12,
+          "no_selected_issue": 4
+        },
+        "confusion_matrix": {
+          "blocked": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 4,
+            "no_selected_issue": 0
+          },
+          "cannot_validate": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 12,
+            "no_selected_issue": 0
+          },
+          "no_selected_issue": {
+            "abstained": 0,
+            "blocked": 0,
+            "cannot_validate": 4,
+            "no_selected_issue": 0
+          }
+        },
+        "correct": 12,
+        "errors_including_abstentions": 8,
+        "false_permissive_predictions": 0,
+        "inputs": 20,
+        "interpretation": "agreement with synthetic rules, not clinical accuracy",
+        "macro_f1": 0.25,
+        "per_class": {
+          "blocked": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 4
+          },
+          "cannot_validate": {
+            "f1": 0.75,
+            "precision": 0.6,
+            "recall": 1.0,
+            "support": 12
+          },
+          "no_selected_issue": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 4
+          }
+        },
+        "supported_class_count": 3
+      },
+      "novel_validation_inputs": 0,
+      "selected_configuration": "depth4_leaf2",
+      "selection_subset": "unique_inputs",
+      "selection_used_test": false,
+      "selection_variation": "insufficient_novel_validation_variation",
+      "status": "trained",
+      "test": {
+        "all_rows": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": 1.0,
+          "class_balance": {
+            "blocked": 21,
+            "cannot_validate": 63,
+            "no_selected_issue": 168
+          },
+          "confusion_matrix": {
+            "blocked": {
+              "abstained": 0,
+              "blocked": 21,
+              "cannot_validate": 0,
+              "no_selected_issue": 0
+            },
+            "cannot_validate": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 63,
+              "no_selected_issue": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 168
+            }
+          },
+          "correct": 252,
+          "errors_including_abstentions": 0,
+          "false_permissive_predictions": 0,
+          "inputs": 252,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 1.0,
+          "per_class": {
+            "blocked": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 21
+            },
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 63
+            },
+            "no_selected_issue": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 168
+            }
+          },
+          "supported_class_count": 3
+        },
+        "novel_unique_inputs": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": null,
+          "class_balance": {},
+          "confusion_matrix": {},
+          "correct": 0,
+          "errors_including_abstentions": 0,
+          "false_permissive_predictions": 0,
+          "inputs": 0,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": null,
+          "per_class": {},
+          "supported_class_count": 0
+        },
+        "unique_inputs": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": 1.0,
+          "class_balance": {
+            "blocked": 4,
+            "cannot_validate": 12,
+            "no_selected_issue": 4
+          },
+          "confusion_matrix": {
+            "blocked": {
+              "abstained": 0,
+              "blocked": 4,
+              "cannot_validate": 0,
+              "no_selected_issue": 0
+            },
+            "cannot_validate": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 12,
+              "no_selected_issue": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "blocked": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 4
+            }
+          },
+          "correct": 20,
+          "errors_including_abstentions": 0,
+          "false_permissive_predictions": 0,
+          "inputs": 20,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 1.0,
+          "per_class": {
+            "blocked": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 4
+            },
+            "cannot_validate": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 12
+            },
+            "no_selected_issue": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 4
+            }
+          },
+          "supported_class_count": 3
+        }
+      },
+      "train_test_exact_input_overlap": 20,
+      "training_class_balance": {
+        "blocked": 4,
+        "cannot_validate": 12,
+        "no_selected_issue": 8
+      },
+      "training_unique_inputs": 24,
+      "validation": {
+        "depth12_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9285714285714286,
+            "class_balance": {
+              "blocked": 14,
+              "cannot_validate": 14,
+              "no_selected_issue": 84
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 14,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 8,
+                "cannot_validate": 0,
+                "no_selected_issue": 76
+              }
+            },
+            "correct": 104,
+            "errors_including_abstentions": 8,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9092592592592593,
+            "per_class": {
+              "blocked": {
+                "f1": 0.7777777777777778,
+                "precision": 0.6363636363636364,
+                "recall": 1.0,
+                "support": 14
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.95,
+                "precision": 1.0,
+                "recall": 0.9047619047619048,
+                "support": 84
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9375,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 8
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 1,
+                "cannot_validate": 0,
+                "no_selected_issue": 7
+              }
+            },
+            "correct": 15,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 0,
+            "inputs": 16,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9407407407407407,
+            "per_class": {
+              "blocked": {
+                "f1": 0.8888888888888888,
+                "precision": 0.8,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 1.0,
+                "recall": 0.875,
+                "support": 8
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth4_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9285714285714286,
+            "class_balance": {
+              "blocked": 14,
+              "cannot_validate": 14,
+              "no_selected_issue": 84
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 14,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 8,
+                "cannot_validate": 0,
+                "no_selected_issue": 76
+              }
+            },
+            "correct": 104,
+            "errors_including_abstentions": 8,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9092592592592593,
+            "per_class": {
+              "blocked": {
+                "f1": 0.7777777777777778,
+                "precision": 0.6363636363636364,
+                "recall": 1.0,
+                "support": 14
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.95,
+                "precision": 1.0,
+                "recall": 0.9047619047619048,
+                "support": 84
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9375,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 8
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 1,
+                "cannot_validate": 0,
+                "no_selected_issue": 7
+              }
+            },
+            "correct": 15,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 0,
+            "inputs": 16,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9407407407407407,
+            "per_class": {
+              "blocked": {
+                "f1": 0.8888888888888888,
+                "precision": 0.8,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 1.0,
+                "recall": 0.875,
+                "support": 8
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth8_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9285714285714286,
+            "class_balance": {
+              "blocked": 14,
+              "cannot_validate": 14,
+              "no_selected_issue": 84
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 14,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 8,
+                "cannot_validate": 0,
+                "no_selected_issue": 76
+              }
+            },
+            "correct": 104,
+            "errors_including_abstentions": 8,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9092592592592593,
+            "per_class": {
+              "blocked": {
+                "f1": 0.7777777777777778,
+                "precision": 0.6363636363636364,
+                "recall": 1.0,
+                "support": 14
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.95,
+                "precision": 1.0,
+                "recall": 0.9047619047619048,
+                "support": 84
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9375,
+            "class_balance": {
+              "blocked": 4,
+              "cannot_validate": 4,
+              "no_selected_issue": 8
+            },
+            "confusion_matrix": {
+              "blocked": {
+                "abstained": 0,
+                "blocked": 4,
+                "cannot_validate": 0,
+                "no_selected_issue": 0
+              },
+              "cannot_validate": {
+                "abstained": 0,
+                "blocked": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "blocked": 1,
+                "cannot_validate": 0,
+                "no_selected_issue": 7
+              }
+            },
+            "correct": 15,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 0,
+            "inputs": 16,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9407407407407407,
+            "per_class": {
+              "blocked": {
+                "f1": 0.8888888888888888,
+                "precision": 0.8,
+                "recall": 1.0,
+                "support": 4
+              },
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 1.0,
+                "recall": 0.875,
+                "support": 8
+              }
+            },
+            "supported_class_count": 3
+          }
+        }
+      },
+      "validation_refit": false
+    },
+    "interaction": {
+      "algorithm": "sklearn.ensemble.RandomForestClassifier",
+      "feature_names": [
+        "candidate_id",
+        "current_medicine_mentions",
+        "laiv_timing",
+        "medicine_status"
+      ],
+      "majority_baseline_test_unique": {
+        "abstentions": 0,
+        "agreement_with_rule_labels": 0.5416666666666666,
+        "class_balance": {
+          "cannot_validate": 13,
+          "no_selected_issue": 7,
+          "review_required": 4
+        },
+        "confusion_matrix": {
+          "cannot_validate": {
+            "abstained": 0,
+            "cannot_validate": 13,
+            "no_selected_issue": 0,
+            "review_required": 0
+          },
+          "no_selected_issue": {
+            "abstained": 0,
+            "cannot_validate": 7,
+            "no_selected_issue": 0,
+            "review_required": 0
+          },
+          "review_required": {
+            "abstained": 0,
+            "cannot_validate": 4,
+            "no_selected_issue": 0,
+            "review_required": 0
+          }
+        },
+        "correct": 13,
+        "errors_including_abstentions": 11,
+        "false_permissive_predictions": 0,
+        "inputs": 24,
+        "interpretation": "agreement with synthetic rules, not clinical accuracy",
+        "macro_f1": 0.23423423423423426,
+        "per_class": {
+          "cannot_validate": {
+            "f1": 0.7027027027027027,
+            "precision": 0.5416666666666666,
+            "recall": 1.0,
+            "support": 13
+          },
+          "no_selected_issue": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 7
+          },
+          "review_required": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 4
+          }
+        },
+        "supported_class_count": 3
+      },
+      "novel_validation_inputs": 0,
+      "selected_configuration": "depth4_leaf2",
+      "selection_subset": "unique_inputs",
+      "selection_used_test": false,
+      "selection_variation": "insufficient_novel_validation_variation",
+      "status": "trained",
+      "test": {
+        "all_rows": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": 0.9880952380952381,
+          "class_balance": {
+            "cannot_validate": 66,
+            "no_selected_issue": 165,
+            "review_required": 21
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 0,
+              "cannot_validate": 63,
+              "no_selected_issue": 3,
+              "review_required": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 165,
+              "review_required": 0
+            },
+            "review_required": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 0,
+              "review_required": 21
+            }
+          },
+          "correct": 249,
+          "errors_including_abstentions": 3,
+          "false_permissive_predictions": 3,
+          "inputs": 252,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.9892450590125009,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 0.9767441860465116,
+              "precision": 1.0,
+              "recall": 0.9545454545454546,
+              "support": 66
+            },
+            "no_selected_issue": {
+              "f1": 0.990990990990991,
+              "precision": 0.9821428571428571,
+              "recall": 1.0,
+              "support": 165
+            },
+            "review_required": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 21
+            }
+          },
+          "supported_class_count": 3
+        },
+        "novel_unique_inputs": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": null,
+          "class_balance": {},
+          "confusion_matrix": {},
+          "correct": 0,
+          "errors_including_abstentions": 0,
+          "false_permissive_predictions": 0,
+          "inputs": 0,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": null,
+          "per_class": {},
+          "supported_class_count": 0
+        },
+        "unique_inputs": {
+          "abstentions": 0,
+          "agreement_with_rule_labels": 0.9583333333333334,
+          "class_balance": {
+            "cannot_validate": 13,
+            "no_selected_issue": 7,
+            "review_required": 4
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 0,
+              "cannot_validate": 12,
+              "no_selected_issue": 1,
+              "review_required": 0
+            },
+            "no_selected_issue": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 7,
+              "review_required": 0
+            },
+            "review_required": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "no_selected_issue": 0,
+              "review_required": 4
+            }
+          },
+          "correct": 23,
+          "errors_including_abstentions": 1,
+          "false_permissive_predictions": 1,
+          "inputs": 24,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.9644444444444445,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 0.96,
+              "precision": 1.0,
+              "recall": 0.9230769230769231,
+              "support": 13
+            },
+            "no_selected_issue": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "review_required": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 4
+            }
+          },
+          "supported_class_count": 3
+        }
+      },
+      "train_test_exact_input_overlap": 24,
+      "training_class_balance": {
+        "cannot_validate": 13,
+        "no_selected_issue": 10,
+        "review_required": 9
+      },
+      "training_unique_inputs": 32,
+      "validation": {
+        "depth12_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9821428571428571,
+            "class_balance": {
+              "cannot_validate": 14,
+              "no_selected_issue": 68,
+              "review_required": 30
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 68,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 2,
+                "review_required": 28
+              }
+            },
+            "correct": 110,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 2,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9836748292520406,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.9855072463768116,
+                "precision": 0.9714285714285714,
+                "recall": 1.0,
+                "support": 68
+              },
+              "review_required": {
+                "f1": 0.9655172413793104,
+                "precision": 1.0,
+                "recall": 0.9333333333333333,
+                "support": 30
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.95,
+            "class_balance": {
+              "cannot_validate": 4,
+              "no_selected_issue": 7,
+              "review_required": 9
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 7,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 1,
+                "review_required": 8
+              }
+            },
+            "correct": 19,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 1,
+            "inputs": 20,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9581699346405229,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 0.875,
+                "recall": 1.0,
+                "support": 7
+              },
+              "review_required": {
+                "f1": 0.9411764705882353,
+                "precision": 1.0,
+                "recall": 0.8888888888888888,
+                "support": 9
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth4_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9821428571428571,
+            "class_balance": {
+              "cannot_validate": 14,
+              "no_selected_issue": 68,
+              "review_required": 30
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 68,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 2,
+                "review_required": 28
+              }
+            },
+            "correct": 110,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 2,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9836748292520406,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.9855072463768116,
+                "precision": 0.9714285714285714,
+                "recall": 1.0,
+                "support": 68
+              },
+              "review_required": {
+                "f1": 0.9655172413793104,
+                "precision": 1.0,
+                "recall": 0.9333333333333333,
+                "support": 30
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.95,
+            "class_balance": {
+              "cannot_validate": 4,
+              "no_selected_issue": 7,
+              "review_required": 9
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 7,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 1,
+                "review_required": 8
+              }
+            },
+            "correct": 19,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 1,
+            "inputs": 20,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9581699346405229,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 0.875,
+                "recall": 1.0,
+                "support": 7
+              },
+              "review_required": {
+                "f1": 0.9411764705882353,
+                "precision": 1.0,
+                "recall": 0.8888888888888888,
+                "support": 9
+              }
+            },
+            "supported_class_count": 3
+          }
+        },
+        "depth8_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.9821428571428571,
+            "class_balance": {
+              "cannot_validate": 14,
+              "no_selected_issue": 68,
+              "review_required": 30
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 14,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 68,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 2,
+                "review_required": 28
+              }
+            },
+            "correct": 110,
+            "errors_including_abstentions": 2,
+            "false_permissive_predictions": 2,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9836748292520406,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 14
+              },
+              "no_selected_issue": {
+                "f1": 0.9855072463768116,
+                "precision": 0.9714285714285714,
+                "recall": 1.0,
+                "support": 68
+              },
+              "review_required": {
+                "f1": 0.9655172413793104,
+                "precision": 1.0,
+                "recall": 0.9333333333333333,
+                "support": 30
+              }
+            },
+            "supported_class_count": 3
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.95,
+            "class_balance": {
+              "cannot_validate": 4,
+              "no_selected_issue": 7,
+              "review_required": 9
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "no_selected_issue": 0,
+                "review_required": 0
+              },
+              "no_selected_issue": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 7,
+                "review_required": 0
+              },
+              "review_required": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "no_selected_issue": 1,
+                "review_required": 8
+              }
+            },
+            "correct": 19,
+            "errors_including_abstentions": 1,
+            "false_permissive_predictions": 1,
+            "inputs": 20,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.9581699346405229,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 4
+              },
+              "no_selected_issue": {
+                "f1": 0.9333333333333333,
+                "precision": 0.875,
+                "recall": 1.0,
+                "support": 7
+              },
+              "review_required": {
+                "f1": 0.9411764705882353,
+                "precision": 1.0,
+                "recall": 0.8888888888888888,
+                "support": 9
+              }
+            },
+            "supported_class_count": 3
+          }
+        }
+      },
+      "validation_refit": false
+    },
+    "purpose_applicability": {
+      "algorithm": "sklearn.ensemble.RandomForestClassifier",
+      "feature_names": [
+        "candidate_id",
+        "care_setting",
+        "condition",
+        "condition_severity",
+        "influenza_guideline",
+        "onset_hours",
+        "red_flags",
+        "special_population",
+        "symptom_body_aches",
+        "symptom_fever",
+        "symptom_itching",
+        "symptom_jaw_pain",
+        "symptoms_reviewed",
+        "varicella_risk"
+      ],
+      "majority_baseline_test_unique": {
+        "abstentions": 0,
+        "agreement_with_rule_labels": 0.5555555555555556,
+        "class_balance": {
+          "cannot_validate": 27,
+          "guideline_against": 1,
+          "provisional_relevance": 35
+        },
+        "confusion_matrix": {
+          "cannot_validate": {
+            "abstained": 0,
+            "cannot_validate": 0,
+            "guideline_against": 0,
+            "provisional_relevance": 27
+          },
+          "guideline_against": {
+            "abstained": 0,
+            "cannot_validate": 0,
+            "guideline_against": 0,
+            "provisional_relevance": 1
+          },
+          "provisional_relevance": {
+            "abstained": 0,
+            "cannot_validate": 0,
+            "guideline_against": 0,
+            "provisional_relevance": 35
+          }
+        },
+        "correct": 35,
+        "errors_including_abstentions": 28,
+        "false_permissive_predictions": 28,
+        "inputs": 63,
+        "interpretation": "agreement with synthetic rules, not clinical accuracy",
+        "macro_f1": 0.2380952380952381,
+        "per_class": {
+          "cannot_validate": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 27
+          },
+          "guideline_against": {
+            "f1": 0.0,
+            "precision": null,
+            "recall": 0.0,
+            "support": 1
+          },
+          "provisional_relevance": {
+            "f1": 0.7142857142857143,
+            "precision": 0.5555555555555556,
+            "recall": 1.0,
+            "support": 35
+          }
+        },
+        "supported_class_count": 3
+      },
+      "novel_validation_inputs": 0,
+      "selected_configuration": "depth8_leaf2",
+      "selection_subset": "unique_inputs",
+      "selection_used_test": false,
+      "selection_variation": "insufficient_novel_validation_variation",
+      "status": "trained",
+      "test": {
+        "all_rows": {
+          "abstentions": 21,
+          "agreement_with_rule_labels": 0.75,
+          "class_balance": {
+            "cannot_validate": 69,
+            "guideline_against": 3,
+            "provisional_relevance": 180
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 6,
+              "cannot_validate": 63,
+              "guideline_against": 0,
+              "provisional_relevance": 0
+            },
+            "guideline_against": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "guideline_against": 3,
+              "provisional_relevance": 0
+            },
+            "provisional_relevance": {
+              "abstained": 15,
+              "cannot_validate": 42,
+              "guideline_against": 0,
+              "provisional_relevance": 123
+            }
+          },
+          "correct": 189,
+          "errors_including_abstentions": 63,
+          "false_permissive_predictions": 0,
+          "inputs": 252,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.8453397063844316,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 0.7241379310344828,
+              "precision": 0.6,
+              "recall": 0.9130434782608695,
+              "support": 69
+            },
+            "guideline_against": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 3
+            },
+            "provisional_relevance": {
+              "f1": 0.8118811881188119,
+              "precision": 1.0,
+              "recall": 0.6833333333333333,
+              "support": 180
+            }
+          },
+          "supported_class_count": 3
+        },
+        "novel_unique_inputs": {
+          "abstentions": 7,
+          "agreement_with_rule_labels": 0.5,
+          "class_balance": {
+            "cannot_validate": 9,
+            "provisional_relevance": 5
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 2,
+              "cannot_validate": 7,
+              "provisional_relevance": 0
+            },
+            "provisional_relevance": {
+              "abstained": 5,
+              "cannot_validate": 0,
+              "provisional_relevance": 0
+            }
+          },
+          "correct": 7,
+          "errors_including_abstentions": 7,
+          "false_permissive_predictions": 0,
+          "inputs": 14,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.4375,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 0.875,
+              "precision": 1.0,
+              "recall": 0.7777777777777778,
+              "support": 9
+            },
+            "provisional_relevance": {
+              "f1": 0.0,
+              "precision": null,
+              "recall": 0.0,
+              "support": 5
+            }
+          },
+          "supported_class_count": 2
+        },
+        "unique_inputs": {
+          "abstentions": 7,
+          "agreement_with_rule_labels": 0.8253968253968254,
+          "class_balance": {
+            "cannot_validate": 27,
+            "guideline_against": 1,
+            "provisional_relevance": 35
+          },
+          "confusion_matrix": {
+            "cannot_validate": {
+              "abstained": 2,
+              "cannot_validate": 25,
+              "guideline_against": 0,
+              "provisional_relevance": 0
+            },
+            "guideline_against": {
+              "abstained": 0,
+              "cannot_validate": 0,
+              "guideline_against": 1,
+              "provisional_relevance": 0
+            },
+            "provisional_relevance": {
+              "abstained": 5,
+              "cannot_validate": 4,
+              "guideline_against": 0,
+              "provisional_relevance": 26
+            }
+          },
+          "correct": 52,
+          "errors_including_abstentions": 11,
+          "false_permissive_predictions": 0,
+          "inputs": 63,
+          "interpretation": "agreement with synthetic rules, not clinical accuracy",
+          "macro_f1": 0.9151053864168618,
+          "per_class": {
+            "cannot_validate": {
+              "f1": 0.8928571428571429,
+              "precision": 0.8620689655172413,
+              "recall": 0.9259259259259259,
+              "support": 27
+            },
+            "guideline_against": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "provisional_relevance": {
+              "f1": 0.8524590163934426,
+              "precision": 1.0,
+              "recall": 0.7428571428571429,
+              "support": 35
+            }
+          },
+          "supported_class_count": 3
+        }
+      },
+      "train_test_exact_input_overlap": 49,
+      "training_class_balance": {
+        "cannot_validate": 26,
+        "guideline_against": 1,
+        "not_relevant": 5,
+        "provisional_relevance": 38
+      },
+      "training_unique_inputs": 70,
+      "validation": {
+        "depth12_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.7857142857142857,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 2,
+              "not_relevant": 10,
+              "provisional_relevance": 96
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 2,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 10,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 20,
+                "guideline_against": 0,
+                "not_relevant": 4,
+                "provisional_relevance": 72
+              }
+            },
+            "correct": 88,
+            "errors_including_abstentions": 24,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.7440476190476191,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.2857142857142857,
+                "precision": 0.16666666666666666,
+                "recall": 1.0,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 2
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 10
+              },
+              "provisional_relevance": {
+                "f1": 0.8571428571428571,
+                "precision": 1.0,
+                "recall": 0.75,
+                "support": 96
+              }
+            },
+            "supported_class_count": 4
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8857142857142857,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 1,
+              "not_relevant": 5,
+              "provisional_relevance": 25
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 1,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 5,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 2,
+                "guideline_against": 0,
+                "not_relevant": 2,
+                "provisional_relevance": 21
+              }
+            },
+            "correct": 31,
+            "errors_including_abstentions": 4,
+            "false_permissive_predictions": 0,
+            "inputs": 35,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8865942028985507,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.8,
+                "precision": 0.6666666666666666,
+                "recall": 1.0,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 1
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 5
+              },
+              "provisional_relevance": {
+                "f1": 0.9130434782608695,
+                "precision": 1.0,
+                "recall": 0.84,
+                "support": 25
+              }
+            },
+            "supported_class_count": 4
+          }
+        },
+        "depth4_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8571428571428571,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 2,
+              "not_relevant": 10,
+              "provisional_relevance": 96
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 2,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 2
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 2,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 10,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 10,
+                "guideline_against": 0,
+                "not_relevant": 4,
+                "provisional_relevance": 82
+              }
+            },
+            "correct": 96,
+            "errors_including_abstentions": 16,
+            "false_permissive_predictions": 2,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.7486111111111111,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.25,
+                "precision": 0.16666666666666666,
+                "recall": 0.5,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 2
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 10
+              },
+              "provisional_relevance": {
+                "f1": 0.9111111111111111,
+                "precision": 0.9761904761904762,
+                "recall": 0.8541666666666666,
+                "support": 96
+              }
+            },
+            "supported_class_count": 4
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8571428571428571,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 1,
+              "not_relevant": 5,
+              "provisional_relevance": 25
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 2,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 2
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 1,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 5,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 1,
+                "guideline_against": 0,
+                "not_relevant": 2,
+                "provisional_relevance": 22
+              }
+            },
+            "correct": 30,
+            "errors_including_abstentions": 5,
+            "false_permissive_predictions": 2,
+            "inputs": 35,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8256802721088435,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.5714285714285714,
+                "precision": 0.6666666666666666,
+                "recall": 0.5,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 1
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 5
+              },
+              "provisional_relevance": {
+                "f1": 0.8979591836734694,
+                "precision": 0.9166666666666666,
+                "recall": 0.88,
+                "support": 25
+              }
+            },
+            "supported_class_count": 4
+          }
+        },
+        "depth8_leaf2": {
+          "all_rows": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.7857142857142857,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 2,
+              "not_relevant": 10,
+              "provisional_relevance": 96
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 2,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 10,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 20,
+                "guideline_against": 0,
+                "not_relevant": 4,
+                "provisional_relevance": 72
+              }
+            },
+            "correct": 88,
+            "errors_including_abstentions": 24,
+            "false_permissive_predictions": 0,
+            "inputs": 112,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.7440476190476191,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.2857142857142857,
+                "precision": 0.16666666666666666,
+                "recall": 1.0,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 2
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 10
+              },
+              "provisional_relevance": {
+                "f1": 0.8571428571428571,
+                "precision": 1.0,
+                "recall": 0.75,
+                "support": 96
+              }
+            },
+            "supported_class_count": 4
+          },
+          "novel_unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": null,
+            "class_balance": {},
+            "confusion_matrix": {},
+            "correct": 0,
+            "errors_including_abstentions": 0,
+            "false_permissive_predictions": 0,
+            "inputs": 0,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": null,
+            "per_class": {},
+            "supported_class_count": 0
+          },
+          "unique_inputs": {
+            "abstentions": 0,
+            "agreement_with_rule_labels": 0.8857142857142857,
+            "class_balance": {
+              "cannot_validate": 4,
+              "guideline_against": 1,
+              "not_relevant": 5,
+              "provisional_relevance": 25
+            },
+            "confusion_matrix": {
+              "cannot_validate": {
+                "abstained": 0,
+                "cannot_validate": 4,
+                "guideline_against": 0,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "guideline_against": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 1,
+                "not_relevant": 0,
+                "provisional_relevance": 0
+              },
+              "not_relevant": {
+                "abstained": 0,
+                "cannot_validate": 0,
+                "guideline_against": 0,
+                "not_relevant": 5,
+                "provisional_relevance": 0
+              },
+              "provisional_relevance": {
+                "abstained": 0,
+                "cannot_validate": 2,
+                "guideline_against": 0,
+                "not_relevant": 2,
+                "provisional_relevance": 21
+              }
+            },
+            "correct": 31,
+            "errors_including_abstentions": 4,
+            "false_permissive_predictions": 0,
+            "inputs": 35,
+            "interpretation": "agreement with synthetic rules, not clinical accuracy",
+            "macro_f1": 0.8865942028985507,
+            "per_class": {
+              "cannot_validate": {
+                "f1": 0.8,
+                "precision": 0.6666666666666666,
+                "recall": 1.0,
+                "support": 4
+              },
+              "guideline_against": {
+                "f1": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "support": 1
+              },
+              "not_relevant": {
+                "f1": 0.8333333333333334,
+                "precision": 0.7142857142857143,
+                "recall": 1.0,
+                "support": 5
+              },
+              "provisional_relevance": {
+                "f1": 0.9130434782608695,
+                "precision": 1.0,
+                "recall": 0.84,
+                "support": 25
+              }
+            },
+            "supported_class_count": 4
+          }
+        }
+      },
+      "validation_refit": false
+    }
+  },
+  "version": "selected-rule-imitation-rf-2026-10-20-v1"
+}

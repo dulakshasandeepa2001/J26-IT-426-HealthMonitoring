@@ -6,8 +6,9 @@ from prescription_context.models import PrescriptionContextConsultationanalysis 
 from prescription_context.member1_v21 import HANDOFF_CONDITIONS, BOOLEAN_OBSERVATIONS
 from prescription_context.patient_data import patient_age
 from .models import PatientScreeningDraft, content_digest
-from .screening_contract import SixConditionPreviewSerializer, SixConditionSaveSerializer, SixConditionClinicalSerializer
-from .patient_screening import authorized_visit, draft_queryset, source_observations, preview, save, freshness
+from .selected_interactions import SelectedPreviewSerializer as SixConditionPreviewSerializer, SelectedSaveSerializer as SixConditionSaveSerializer, SelectedClinicalSerializer as SixConditionClinicalSerializer, pair_scope, policy
+from .patient_screening import authorized_visit, draft_queryset, source_observations
+from .selected_screening import preview, save, freshness
 from .screening_engine import ENGINE_VERSION
 from .screening_availability import screening_database_operation
 
@@ -26,6 +27,17 @@ class ScreeningInputsView(DoctorAccess, APIView):
         clinical.update(reviewed=False, condition_assessments={key: None for key in BOOLEAN_OBSERVATIONS})
         age, status = patient_age(visit.patient.birthday)
         member = (analysis.payload if analysis else {}).get('member1', {})
+        from prescription_context.patient_data import context_snapshot
+        from .models import MedicineEntry
+        diagnosis = Diagnosis.objects.filter(consultation=visit, doctor=request.user).order_by('pk').first()
+        condition = (diagnosis.condition_label.casefold().replace(' ', '_') if diagnosis and diagnosis.condition_code.casefold() == 'manual'
+            else diagnosis.condition_code.casefold() if diagnosis else None)
+        selected_policy = pair_scope({'is_demo': visit.is_demo,
+            'patient': {'id': visit.patient_id, 'birthday': visit.patient.birthday.isoformat() if visit.patient.birthday else None, 'age_years': age, 'dob_status': status},
+            'context': {**context_snapshot(context), 'updated_at': context.updated_at.isoformat(), 'provenance': context.provenance} if context else None,
+            'diagnosis': {'id': diagnosis.pk, 'condition': condition} if diagnosis else None,
+            'analysis_hash': content_digest(analysis.payload if analysis else None)},
+            {row.pk: row.content for row in MedicineEntry.objects.filter(pk__in=policy()['product_hashes'])})
         return Response({'consultation_id': str(visit.pk), 'supported_conditions': HANDOFF_CONDITIONS,
             'engine_version': ENGINE_VERSION,
             'source_red_flag_assessment': member.get('red_flag_assessment', 'not_assessed'),
@@ -34,6 +46,7 @@ class ScreeningInputsView(DoctorAccess, APIView):
             'expected_analysis_hash': content_digest(analysis.payload if analysis else None),
             'confirmed_diagnoses': list(Diagnosis.objects.filter(consultation=visit, doctor=request.user).values('id', 'condition_code', 'condition_label')),
             'clinical_template': clinical, 'source_observations': source_observations(analysis.payload if analysis else None),
+            'selected_pair_policy': selected_policy,
             'source_observations_verified': False,
             'instructions': 'Use the registered patient and saved per-visit history. Independently verify required clinical inputs; source observations are not clearance. Preview candidates before saving an unapproved draft.',
             'approved': False, 'published': False})

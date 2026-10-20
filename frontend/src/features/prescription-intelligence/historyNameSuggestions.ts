@@ -2,6 +2,20 @@ import type { HistoryDetails, HistoryIdentityOptions, HistoryIdentityRecord } fr
 
 export const historyNameKey = (name: string) => name.toLowerCase().trim().replace(/\s+/g, " ");
 
+// Display-only suggestions. A name/strength match cannot establish formulation,
+// route, brand or excipients and must never populate catalogue_id automatically.
+export function possibleRecordedProducts(text: string, options: HistoryIdentityOptions) {
+  const raw = historyNameKey(text);
+  const tokens = new Set(raw.match(/[a-z]+/g) ?? []);
+  const masses = (value: string) => [...value.matchAll(/(\d+(?:\.\d+)?)\s*(mcg|mg|g)\b/g)].map((match) => `${Number(match[1])}${match[2]}`);
+  const reportedMasses = masses(raw);
+  return options.products.filter((product) => {
+    const names = product.name.toLowerCase().split(/[^a-z]+/).filter((name) => name.length > 3);
+    return names.some((name) => tokens.has(name)) && reportedMasses.length > 0
+      && masses(product.strength.toLowerCase()).some((mass) => reportedMasses.includes(mass));
+  });
+}
+
 export function recordedAllergen(text: string, options: HistoryIdentityOptions) {
   const parts = text.trim().match(/^([^()]+)\s*\(([^()]+)\)$/);
   const name = historyNameKey(parts ? parts[1] : text);

@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type FormEvent, type Ref } from "react";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import type { usePrescription } from "./usePrescription";
-import type { ContextStatus, HistoryIdentityRecord } from "./prescriptionApi";
+import type { ContextStatus, CurrentMedicinePlan, CurrentMedicinePlanRecord, HistoryIdentityRecord } from "./prescriptionApi";
 import { HistoryClarification, type ClarificationDraft } from "./HistoryClarification";
+import { CurrentMedicinePlans } from "./CurrentMedicinePlans";
+import { medicinePlansValid, prepareMedicinePlans } from "./medicinePlanDrafts";
 import { buttonStyle, controlStyle } from "./PageFrame";
 import { patientHistoryPrefill, historyEntries as entries, type HistoryFields } from "./historyPrefill";
 
@@ -27,18 +29,29 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
   const fields = draft ?? prefill.fields;
   const { allergyStatus, medicineStatus, allergyText, medicineText } = fields;
   const [editingOverride, setEditingOverride] = useState<boolean | null>(null);
-  const [clarifying, setClarifying] = useState(false);
+  const [clarifyingOverride, setClarifying] = useState<boolean | null>(null);
   const [clarification, setClarification] = useState<ClarificationDraft | null>(null);
   const [clarificationRevision, setClarificationRevision] = useState(0);
   const acceptClarification = useCallback((value: ClarificationDraft) => setClarification(value), []);
   const identityHistory = useMemo(() => ({ allergies: allergyStatus === "confirmed" ? distinctEntries(allergyText) : [],
     medicines: medicineStatus === "confirmed" ? distinctEntries(medicineText) : [] }), [allergyStatus, allergyText, medicineStatus, medicineText]);
-  const historyKey = JSON.stringify([visit.id, allergyStatus, medicineStatus, identityHistory]);
+  const historyKey = JSON.stringify([visit.id, context?.updated_at, allergyStatus, medicineStatus, identityHistory]);
   const activeClarification = clarification?.key === historyKey ? clarification : null;
   const savedIdentity = context?.provenance.history_identity as HistoryIdentityRecord | undefined;
   const identityChanged = !!activeClarification && (!activeClarification.valid
     || !!activeClarification.details && JSON.stringify(activeClarification.details) !== JSON.stringify(savedIdentity?.details));
   const hasRecordedNames = identityHistory.allergies.length + identityHistory.medicines.length > 0;
+  const savedNamesMatch = !!savedIdentity && JSON.stringify(savedIdentity.details.allergies.map((row) => row.recorded_text)) === JSON.stringify(identityHistory.allergies)
+    && JSON.stringify(savedIdentity.details.medicines.map((row) => row.recorded_text)) === JSON.stringify(identityHistory.medicines);
+  const clarifying = clarifyingOverride ?? (hasRecordedNames && !savedNamesMatch);
+  const identityReady = !hasRecordedNames || !!activeClarification?.details;
+  const planKey = JSON.stringify([visit.id, context?.updated_at, identityHistory.medicines]);
+  const [planDraft, setPlanDraft] = useState<{ key: string; rows: CurrentMedicinePlan[] } | null>(null);
+  const savedPlan = context?.provenance.medicine_plan as CurrentMedicinePlanRecord | undefined;
+  const initialPlans = useMemo(() => prepareMedicinePlans(identityHistory.medicines, visit.id, savedPlan), [identityHistory.medicines, visit.id, savedPlan]);
+  const plans = planDraft?.key === planKey ? planDraft.rows : initialPlans;
+  const plansValid = medicinePlansValid(plans);
+  const plansChanged = JSON.stringify(plans) !== JSON.stringify(initialPlans);
   const allergyStatusRef = useRef<HTMLSelectElement>(null);
   useImperativeHandle(editorRef, () => ({ open() {
     setEditingOverride(true);
@@ -49,18 +62,18 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
   const editing = editingOverride ?? (draft !== null || allergyStatus === "unknown" && medicineStatus === "unknown");
   const [reviewedKey, setReviewedKey] = useState<string | null>(null);
   const inputKey = JSON.stringify([rx.activeConsultation?.id, context?.updated_at, rx.activeAnalysis?.id,
-    rx.activeAnalysis?.payload, fields, activeClarification?.details]);
+    rx.activeAnalysis?.payload, fields, activeClarification?.details, plans]);
   const reviewed = reviewedKey === inputKey;
   const submitting = useRef(false);
   const reviewedForVisit = prefill.reviewedForVisit;
-  const dirty = identityChanged || allergyStatus !== statusOrUnknown(context?.allergy_status)
+  const dirty = identityChanged || plansChanged || allergyStatus !== statusOrUnknown(context?.allergy_status)
     || medicineStatus !== statusOrUnknown(context?.medicine_status)
     || allergyText !== (context?.allergies ?? []).join("\n")
     || medicineText !== (context?.current_medicines ?? []).join("\n");
   const missingKnownEntry = (allergyStatus === "confirmed" && entries(allergyText).length === 0)
     || (medicineStatus === "confirmed" && entries(medicineText).length === 0);
   const setField = rx.setField;
-  const pending = dirty || !reviewedForVisit, reportedPending = rx.patientHistoryPending;
+  const pending = dirty || !identityReady || !reviewedForVisit, reportedPending = rx.patientHistoryPending;
   useEffect(() => {
     if (reportedPending !== pending) setField("patientHistoryPending", pending);
   }, [pending, reportedPending, setField]);
@@ -70,7 +83,7 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!reviewed || missingKnownEntry || activeClarification && !activeClarification.valid || submitting.current || rx.loading) return;
+    if (!reviewed || !identityReady || !plansValid || missingKnownEntry || activeClarification && !activeClarification.valid || submitting.current || rx.loading) return;
     submitting.current = true;
     try {
       await rx.reviewPatientContext({
@@ -80,6 +93,7 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
         current_medicines: identityHistory.medicines,
         reviewed: true, expected_updated_at: context?.updated_at ?? null,
         ...(activeClarification?.details ? { history_details: activeClarification.details } : {}),
+        medicine_plans: plans,
       });
     } finally {
       submitting.current = false;
@@ -151,18 +165,21 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
       </div>
       </div>
         {hasRecordedNames && <>
-          <button type="button" className={buttonStyle} aria-expanded={clarifying} aria-controls="history-name-clarification" onClick={() => setClarifying((value) => !value)}>{clarifying ? "Hide name clarification" : "Clarify medicine and allergy names"}</button>
+          <p className="text-xs text-slate-600">Name proposals load automatically and are saved with your explicit history review. Confirm exact products; unsupported or ambiguous names remain unresolved.</p>
+          <button type="button" className={buttonStyle} aria-expanded={clarifying} aria-controls="history-name-clarification" onClick={() => setClarifying(!clarifying)}>{clarifying ? "Hide name clarification" : "Clarify medicine and allergy names"}</button>
           <HistoryClarification key={`${historyKey}:${clarificationRevision}`} visit={visit.id} historyKey={historyKey} allergies={identityHistory.allergies} medicines={identityHistory.medicines}
             saved={savedIdentity} expanded={clarifying} disabled={rx.loading} onChange={acceptClarification} onDenied={rx.loadAll} />
           {clarifying && <button type="button" className="text-xs font-semibold text-purple-700 underline" onClick={() => { setClarification(null); setClarifying(false); setClarificationRevision((v) => v + 1); setReviewedKey(null); }}>Cancel name clarification</button>}
           {activeClarification && !activeClarification.valid && <p className="text-xs text-amber-900">Finish loading name options and add the requested clarification notes before saving. An unknown product can stay unresolved.</p>}
+          {!identityReady && <p role="status" className="text-xs text-amber-900">Name confirmations are not ready. Open name clarification to retry if loading fails.</p>}
         </>}
+        <CurrentMedicinePlans rows={plans} disabled={rx.loading} onChange={(rows) => { setPlanDraft({ key: planKey, rows }); setReviewedKey(null); }} />
         <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-700 sm:col-span-2">
           <input type="checkbox" checked={reviewed} className="mt-0.5 h-4 w-4 shrink-0 accent-purple-600" onChange={(event) => setReviewedKey(event.target.checked ? inputKey : null)} />
           I reviewed allergies and current medicines with the patient for this visit.
         </label>
       </fieldset>
-      <button type="submit" className={buttonStyle} disabled={rx.loading || !reviewed || missingKnownEntry || !!activeClarification && !activeClarification.valid}>
+      <button type="submit" className={buttonStyle} disabled={rx.loading || !reviewed || !identityReady || !plansValid || missingKnownEntry || !!activeClarification && !activeClarification.valid}>
         {rx.loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ClipboardCheck className="h-4 w-4" aria-hidden="true" />}
         Save patient information
       </button>

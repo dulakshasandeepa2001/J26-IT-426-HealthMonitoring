@@ -387,6 +387,24 @@ class SafetyProfileReviewTests(TestCase):
         self.assertEqual(seed_profiles(), {'created': 0, 'updated': 0, 'unchanged': 4})
         self.assertEqual(SafetyReview.objects.count(), 4)
 
+    def test_saved_safety_review_survives_logout_login_and_same_version_reuse(self):
+        saved = self.client.post(self.path, self.body(), format='json')
+        self.assertEqual(saved.status_code, 200, saved.data)
+        self.assertTrue(saved.data['review_is_current'])
+        count = SafetyReview.objects.count()
+        reviewed_at = saved.data['reviewed_at']
+        self.client.logout()
+        fresh = APIClient(); fresh.force_login(self.doctor)
+        row = fresh.get('/api/prescription/safety-profiles/' + self.profile.pk + '/').json()
+        self.assertTrue(row['review_is_current'])
+        self.assertEqual(row['reviewed_at'], reviewed_at)
+        self.assertEqual(row['review_binding']['reasons'], [])
+        self.profile.refresh_from_db()
+        repeated = fresh.post(self.path, self.body(), format='json')
+        self.assertEqual(repeated.status_code, 200)
+        self.assertEqual(SafetyReview.objects.count(), count)
+        self.assertEqual(repeated.data['reviewed_at'], reviewed_at)
+
     def test_rule_review_is_separate_atomic_actor_derived_and_stale_safe(self):
         self.assertEqual(self.client.post(self.path, self.body(evidence_checked=False), format='json').status_code, 400)
         response = self.client.post(self.path, self.body(), format='json')

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { buttonStyle, controlStyle } from "./PageFrame";
 import { fetchHistoryIdentityOptions, type HistoryDetails, type HistoryIdentityOptions, type HistoryIdentityRecord } from "./prescriptionApi";
-import { clarificationNeedsNote, clarificationValid, prepareHistoryClarification, recordedAllergen } from "./historyNameSuggestions";
+import { clarificationNeedsNote, clarificationValid, possibleRecordedProducts, prepareHistoryClarification, recordedAllergen } from "./historyNameSuggestions";
 
 export interface ClarificationDraft { key: string; details: HistoryDetails | null; valid: boolean }
 
@@ -16,7 +16,7 @@ export function HistoryClarification({ visit, historyKey, allergies, medicines, 
   const [details, setDetails] = useState<HistoryDetails | null>(null);
   const [error, setError] = useState(""), [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!expanded || options) return;
+    if (options) return;
     let alive = true;
     onChange({ key: historyKey, details: null, valid: false });
     fetchHistoryIdentityOptions(visit).then((value) => {
@@ -30,16 +30,19 @@ export function HistoryClarification({ visit, historyKey, allergies, medicines, 
       if (reason instanceof ApiError && [401, 403].includes(reason.status)) onDenied();
     });
     return () => { alive = false; };
-  }, [expanded, options, visit, historyKey, allergies, medicines, saved, onChange, onDenied, retry]);
+  }, [options, visit, historyKey, allergies, medicines, saved, onChange, onDenied, retry]);
   function update(next: HistoryDetails) {
     setDetails(next);
     onChange({ key: historyKey, details: next, valid: !!options && clarificationValid(next, options) });
   }
-  return <div id="history-name-clarification" hidden={!expanded} role="region" aria-label="Confirm medicine and allergy names" className="space-y-3 rounded-2xl border border-purple-200 bg-purple-50/40 p-4 text-xs">
+  const unresolved = details ? details.allergies.filter((row) => !row.identity).length + details.medicines.filter((row) => !row.catalogue_id).length : null;
+  return <>
+    {error && <p role="alert" className="text-xs text-rose-900">{error} <button type="button" className={buttonStyle} disabled={disabled} onClick={() => setRetry((v) => v + 1)}>Retry name options</button></p>}
+    {unresolved !== null && <p role="status" className={`text-xs ${unresolved ? "text-amber-900" : "text-slate-600"}`}>Prepared name confirmations: {details!.allergies.filter((row) => !!row.identity).length} allergen identities, {details!.medicines.filter((row) => !!row.catalogue_id).length} exact products; {unresolved} unresolved. Review and save patient information to record changes. Name matching does not clear safety checks.</p>}
+    <div id="history-name-clarification" hidden={!expanded} role="region" aria-label="Confirm medicine and allergy names" className="space-y-3 rounded-2xl border border-purple-200 bg-purple-50/40 p-4 text-xs">
     <h3 className="font-bold">Confirm medicine and allergy names</h3>
     <p>Keep the original history. Confirm proposed names with the patient, then use Save patient information below. Unresolved names remain unknown; name confirmation does not clear safety checks.</p>
-    {error ? <p role="alert" className="text-rose-900">{error} <button type="button" className={buttonStyle} disabled={disabled} onClick={() => setRetry((v) => v + 1)}>Retry name options</button></p>
-      : !options || !details ? <p role="status">Loading supported names…</p> : <fieldset disabled={disabled} className="space-y-3">
+    {!options || !details ? <p role="status">{error ? "Name options could not be loaded. Use Retry name options above." : "Loading supported names…"}</p> : <fieldset disabled={disabled} className="space-y-3">
       {details.allergies.map((row, i) => {
         const known = recordedAllergen(row.recorded_text, options).identity;
         return <div key={i} className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
@@ -53,6 +56,7 @@ export function HistoryClarification({ visit, historyKey, allergies, medicines, 
       })}
       {details.medicines.map((row, i) => <div key={i} className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
         <p className="font-semibold">Recorded current medicine: {row.recorded_text}</p>
+        {!row.catalogue_id && <p className="text-slate-600">Possible name/strength matches (not selected or confirmed): {possibleRecordedProducts(row.recorded_text, options).map((product) => `${product.name} · ${product.strength} · ${product.form} · ${product.route}`).join("; ") || "No supported match; confirm separately or leave unresolved."}</p>}
         <label className="block space-y-1">Exact product for “{row.recorded_text}”<select aria-label={`Exact product for “${row.recorded_text}”`} className={controlStyle} value={row.catalogue_id} onChange={(e) => {
           const product = options.products.find((p) => p.id === e.target.value);
           update({ ...details, medicines: details.medicines.map((a, n) => n === i ? { ...a, catalogue_id: product?.id ?? "", expected_identity_hash: product?.identity_hash ?? "" } : a) });
@@ -62,5 +66,5 @@ export function HistoryClarification({ visit, historyKey, allergies, medicines, 
         {clarificationNeedsNote(row, options) && <label className="block space-y-1">How was “{row.recorded_text}” clarified?<textarea aria-label={`How was “${row.recorded_text}” clarified?`} className={controlStyle} rows={2} minLength={10} maxLength={500} value={row.clarification_note} onChange={(e) => update({ ...details, medicines: details.medicines.map((a, n) => n === i ? { ...a, clarification_note: e.target.value } : a) })} /><span>At least 10 characters describing how you confirmed the exact product.</span></label>}
       </div>)}
     </fieldset>}
-  </div>;
+  </div></>;
 }

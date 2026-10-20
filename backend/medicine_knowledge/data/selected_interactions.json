@@ -1,0 +1,22 @@
+{
+  "version": "selected-oseltamivir-acetaminophen-2026-10-20-v1",
+  "scope": "Explicitly reviewed synthetic adult influenza outpatient assessments only; exact reference products, one current medicine, no general interaction clearance.",
+  "candidate_id": "oseltamivir-75mg-capsule",
+  "current_product_id": "paracetamol-500mg-tablet",
+  "product_hashes": {
+    "oseltamivir-75mg-capsule": "1dd08add5a3300db9ab4ac41436267ddcf5e300e5260311d81c5b3f858b45192",
+    "paracetamol-500mg-tablet": "125ea4c02e891e7eaf16b079ac3075e11cb09da5ce911743fe7c3616cea53b23"
+  },
+  "source": {
+    "id": "tamiflu-selected-acetaminophen-pair",
+    "title": "TAMIFLU prescribing information — selected acetaminophen interaction evidence",
+    "publisher": "DailyMed / NLM; Genentech label",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ee3c9555-60f2-4f82-a760-11983c86e97b",
+    "published_date": "2025-12-15",
+    "accessed_date": "2026-10-20",
+    "sections": ["7.2 Drugs Without Clinically Significant Drug Interaction with TAMIFLU", "12.3 Drug Interaction Studies"]
+  },
+  "evidence_summary": "The label reports no clinically relevant pharmacokinetic interaction with acetaminophen and no coadministration dose adjustment for this pair. This does not establish individual suitability, change either product's limits, or cover any other medicine.",
+  "clinical_review_status": "not_reviewed",
+  "review_requirement": "The authenticated assigned doctor must explicitly inspect the linked evidence and confirm its limited applicability for this visit, with a reason. No review is created by loading this file."
+}

@@ -112,6 +112,42 @@ class PatientScreeningTests(TestCase):
         self.assertEqual(PatientScreeningDraft.objects.count(), 6)
         self.assertEqual(PrescriptionDraft.objects.count(), 0)
 
+    def test_current_medicine_proposals_never_clear_duplicate_or_interaction_findings(self):
+        visit, body = self.case('influenza')
+        from prescription_context.history_identity import options
+        product = next(row for row in options()['products'] if row['id'] == 'paracetamol-500mg-tablet')
+        context = Context.objects.get(patient=self.patient)
+        history = {'allergy_status': 'confirmed', 'allergies': ['Penicillin (Rash)'],
+            'medicine_status': 'confirmed', 'current_medicines': ['Paracetamol 500mg SOS'],
+            'reviewed': True, 'expected_updated_at': context.updated_at.isoformat(),
+            'history_details': {'allergies': [{'recorded_text': 'Penicillin (Rash)', 'identity': 'penicillin',
+                'reaction': 'Rash', 'reaction_date': None, 'clarification_note': ''}],
+                'medicines': [{'recorded_text': 'Paracetamol 500mg SOS', 'catalogue_id': product['id'],
+                    'expected_identity_hash': product['identity_hash'], 'schedule': 'SOS',
+                    'clarification_note': 'Isolated fictional fixture specifies this exact tablet.'}]}}
+        previous = None
+        for action in ('undecided', 'continue', 'change', 'stop'):
+            history['medicine_plans'] = [{'recorded_text': 'Paracetamol 500mg SOS', 'action': action,
+                'note': 'Fictional management proposal; no treatment change applied.'}]
+            response = self.client.post(f'/api/prescription/consultations/{visit.pk}/patient-context/', history, format='json')
+            self.assertEqual(response.status_code, 200, response.data)
+            history['expected_updated_at'] = response.data['updated_at']
+            body['expected_context_updated_at'] = response.data['updated_at']
+            preview = self.preview(visit, body)
+            self.assertEqual(preview.status_code, 200, preview.data)
+            outcomes = {row['medicine_id']: [(check['category'], check['status'], check['blocks_availability'], check['message'])
+                for check in row['checks']] for row in preview.data['result']['candidates']}
+            if previous is not None:
+                self.assertEqual(outcomes, previous, 'A management note cannot alter deterministic findings')
+            previous = outcomes
+            paracetamol = next(row for row in preview.data['result']['candidates'] if row['medicine_id'] == product['id'])
+            self.assertEqual(paracetamol['status'], 'unavailable')
+            self.assertTrue(any(check['category'] == 'duplicate_ingredient' and check['status'] == 'blocked' for check in paracetamol['checks']))
+            self.assertFalse(preview.data['result']['model_used'])
+        context.refresh_from_db()
+        self.assertEqual(context.current_medicines, ['Paracetamol 500mg SOS'])
+        self.assertEqual(PatientScreeningDraft.objects.count(), 0)
+
     def test_preview_database_lock_timeout_is_retryable_without_partial_candidates(self):
         visit, body = self.case('influenza')
         cause = Exception('Private database details must not reach the browser')
@@ -138,7 +174,7 @@ class PatientScreeningTests(TestCase):
         self.assertEqual(PatientScreeningDraft.objects.count(), 0)
 
     def test_database_failure_after_save_rolls_back_and_same_request_can_retry(self):
-        from .patient_screening import save as actual_save
+        from .selected_screening import save as actual_save
         visit, body = self.case()
         plan = self.preview(visit, body).data
         cause = Exception('Statement timeout')
@@ -304,6 +340,116 @@ class PatientScreeningTests(TestCase):
             row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'].startswith('oseltamivir'))
             self.assertIsNone(row['regimen'])
             self.assertTrue(any(c['category'] == 'guideline' for c in row['checks']))
+
+    def test_hours_round_trip_separately_and_missing_onset_is_never_inferred(self):
+        visit, body = self.case('influenza')
+        body['clinical'].update(verified_symptoms=['fever', 'body_aches'],
+            symptom_durations={'fever': '48', 'body_aches': '72'}, onset_hours='18.5')
+        plan = self.preview(visit, body)
+        self.assertEqual(plan.status_code, 200, plan.data)
+        used = plan.data['result']['input_trace']['clinical']
+        self.assertEqual(used['onset_hours'], '18.5')
+        self.assertEqual(used['symptom_durations'], {'fever': '48.0', 'body_aches': '72.0'})
+        saved, _ = self.save(visit, body, plan.data)
+        self.assertEqual(saved.status_code, 201, saved.data)
+        self.assertEqual(saved.data['snapshot']['clinical'], used)
+        body['clinical']['onset_hours'] = None
+        row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'].startswith('oseltamivir'))
+        onset = next(c for c in row['checks'] if c['category'] == 'onset')
+        self.assertEqual(onset['status'], 'cannot_validate')
+        self.assertIsNone(onset['trace']['inputs']['clinical.onset_hours'])
+        self.assertIsNone(row['regimen'])
+
+    def test_who_choice_never_runs_cdc_regimen_onset_or_vaccine_checks(self):
+        from .screening_engine import reference_regimen as real_reference
+        visit, body = self.case('influenza')
+        body['clinical'].update(influenza_guideline='WHO_2024', onset_hours=None, laiv_timing='unknown')
+
+        def guarded_reference(profile, *args):
+            self.assertNotEqual(profile['kind'], 'oseltamivir', 'WHO must not run the CDC/label regimen pathway')
+            return real_reference(profile, *args)
+
+        with patch('medicine_knowledge.screening_engine.reference_regimen', side_effect=guarded_reference):
+            result = self.preview(visit, body).json()['result']
+        row = next(r for r in result['candidates'] if r['medicine_id'].startswith('oseltamivir'))
+        self.assertEqual(next(c for c in row['checks'] if c['category'] == 'guideline')['status'], 'blocked')
+        self.assertFalse({'onset', 'vaccine_interaction', 'dose'} & {c['category'] for c in row['checks']})
+        self.assertTrue(any(s['id'] == 'who-flu-2024' for s in row['sources']))
+        saved, _ = self.save(visit, body)
+        self.assertEqual(saved.status_code, 201, saved.data)
+        self.assertEqual(saved.data['snapshot']['clinical']['influenza_guideline'], 'WHO_2024')
+        self.assertIsNone(saved.data['snapshot']['clinical']['onset_hours'])
+        self.assertFalse(saved.data['result']['model_used'])
+
+    def test_unknown_or_severe_who_scope_is_coverage_gap_not_non_severe_recommendation(self):
+        visit, body = self.case('influenza')
+        body['clinical']['influenza_guideline'] = 'WHO_2024'
+        for severity in ('unknown', 'severe'):
+            body['clinical']['condition_severity'] = severity
+            row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'].startswith('oseltamivir'))
+            self.assertIsNone(row['regimen'])
+            self.assertTrue(any(c['category'] == 'guideline_coverage' and c['status'] == 'cannot_validate' for c in row['checks']))
+            self.assertFalse(any(c['category'] == 'guideline' and c['status'] == 'blocked' for c in row['checks']))
+
+    def test_duplicate_trace_identifies_acetaminophen_and_retains_current_product(self):
+        visit, body = self.case('influenza')
+        self.resolve_history(visit, body, medicine=True)
+        row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'].startswith('paracetamol'))
+        duplicate = next(c for c in row['checks'] if c['category'] == 'duplicate_ingredient')
+        self.assertEqual(duplicate['status'], 'blocked')
+        self.assertIn('acetaminophen', duplicate['message'])
+        self.assertIn('Paracetamol 500mg SOS', duplicate['message'])
+        matches = duplicate['trace']['inputs']['normalized_current_medicines']
+        self.assertEqual(matches[0]['matches'][0]['ingredients'], ['acetaminophen'])
+        self.assertEqual(matches[0]['resolution_method'], 'doctor_confirmed')
+        self.assertTrue(duplicate['blocks_availability'])
+        interaction = next(c for c in row['checks'] if c['category'] == 'interaction')
+        self.assertEqual(interaction['status'], 'warning')
+        self.assertTrue(interaction['blocks_availability'], 'Existing interaction-review warnings remain blocking')
+        self.assertEqual(Context.objects.get(patient=self.patient).current_medicines, ['Paracetamol 500mg SOS'])
+
+    def test_stale_engine_review_is_not_resolved_as_current_content_review(self):
+        visit, body = self.case('influenza')
+        SafetyProfile.objects.update(reviewed_engine_hash='0' * 64)  # In-memory fixture only.
+        rows = self.preview(visit, body).json()['result']['candidates']
+        self.assertTrue(all(r['status'] == 'unavailable' for r in rows))
+        for row in rows[:2]:
+            reviews = row['review_trace']
+            self.assertTrue(reviews['content']['is_current'])
+            self.assertEqual(reviews['safety']['stored_status'], 'reviewed')
+            self.assertFalse(reviews['safety']['is_current'])
+            self.assertNotEqual(reviews['safety']['reviewed_engine_hash'], reviews['safety']['current_engine_hash'])
+            self.assertTrue(any('stale' in reason for reason in reviews['safety']['reasons']))
+        self.assertTrue(MedicineEntry.objects.get(pk='paracetamol-500mg-tablet').review_is_current)
+
+    def test_reference_safety_review_never_enables_an_incomplete_candidate(self):
+        visit, body = self.case('influenza')
+        scope = ConditionKnowledge.objects.get(pk='flu-baloxavir')
+        review = self.client.post(f'/api/prescription/condition-knowledge/{scope.pk}/review/safety/', {
+            'decision': 'reviewed', 'review_scope': 'reference_only', 'notes': 'Reviewed the reference evidence and missing product and executable rules.',
+            'evidence_checked': True, 'expected_content_hash': scope.rules_hash, 'expected_updated_at': scope.updated_at.isoformat()}, format='json')
+        self.assertEqual(review.status_code, 200, review.data)
+        self.assertTrue(review.data['safety_review']['reference_review_is_current'])
+        self.assertFalse(review.data['safety_review']['is_current'])
+        row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'] == 'baloxavir-reference')
+        self.assertEqual(row['status'], 'unavailable')
+        self.assertIsNone(row['regimen'])
+        self.assertTrue(any(c['category'] == 'product_rule_coverage' and c['blocks_availability'] for c in row['checks']))
+
+    def test_server_reference_precedes_dose_validation_no_manual_proposal_cycle(self):
+        visit, body = self.case('influenza')
+        rows = self.preview(visit, body).json()['result']['candidates']
+        for row in rows[:2]:
+            self.assertEqual(row['status'], 'candidate_for_clinician_review')
+            self.assertIsNotNone(row['regimen'])
+            self.assertEqual(next(c for c in row['checks'] if c['category'] == 'dose')['status'], 'passed')
+        body['clinical']['renal_assessment'] = 'unknown'
+        row = next(r for r in self.preview(visit, body).json()['result']['candidates'] if r['medicine_id'].startswith('paracetamol'))
+        doses = [c for c in row['checks'] if c['category'] == 'dose']
+        self.assertEqual(len(doses), 1)
+        self.assertIn('renal', doses[0]['message'])
+        self.assertNotIn('enter a clinician proposal', doses[0]['message'])
+        self.assertIsNone(row['regimen'])
 
     def test_bad_or_missing_inputs_cannot_be_made_safe_by_casting_or_extra_fields(self):
         visit, body = self.case()

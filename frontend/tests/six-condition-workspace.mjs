@@ -60,34 +60,34 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   return route.fulfill({ status: result.status, json: result.data, headers });
 });
 const section = () => page.getByRole('region', { name: 'Patient safety screening', exact: true });
+const clinical = () => page.getByRole('group', { name: 'Clinical inputs for this visit', exact: true });
 const saved = () => page.getByRole('region', { name: 'Saved safety screening assessment', exact: true });
-const preview = () => section().getByRole('button', { name: 'Preview medicine candidates', exact: true });
+const preview = () => section().getByRole('button', { name: 'Confirm inputs and screen medicines', exact: true });
 const save = () => section().getByRole('button', { name: /^(Continue to ML suggestions|Save screening assessment)$/ });
 const result = () => section().getByRole('region', { name: 'Six-condition screening result', exact: true });
 const visible = (locator) => locator.waitFor({ state: 'visible' });
-async function choose(row) {
+async function choose(row, clinicalReady = true) {
   await page.getByLabel('Assigned registered patient', { exact: true }).selectOption(String(row.patient));
   await page.getByLabel('Active encounter / consultation', { exact: true }).selectOption(row.visit);
-  await visible(section().getByRole('group', { name: 'Quick clinical review', exact: true }));
+  if (clinicalReady) await visible(clinical());
 }
 async function assess(row) {
-  const edit = section().getByRole('button', { name: 'Edit all clinical details', exact: true });
+  const edit = clinical().getByRole('button', { name: 'Edit all clinical details', exact: true });
   if (await edit.count()) await edit.click();
-  for (const field of await section().locator('[data-clinical-field]').all()) {
+  for (const field of await clinical().locator('[data-clinical-field]').all()) {
     const name = await field.getAttribute('data-clinical-field'), value = row.clinical[name];
     if (await field.evaluate((node) => node.tagName === 'SELECT')) await field.selectOption(value ?? 'unknown');
     else await field.fill(value ?? '');
   }
-  for (const field of await section().locator('[data-concern]').all()) await field.selectOption('false');
-  for (const field of await section().locator('[data-symptom]').all()) {
+  for (const field of await clinical().locator('[data-concern]').all()) await field.selectOption('false');
+  for (const field of await clinical().locator('[data-symptom]').all()) {
     await field.selectOption('true');
     const name = await field.getAttribute('data-symptom');
-    await section().locator(`[data-duration="${name}"]`).fill('12');
+    await clinical().locator(`[data-duration="${name}"]`).fill('12');
   }
-  await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).check();
 }
 async function quickAssess(row) {
-  const questions = section().getByRole('region', { name: 'Questions to clarify', exact: true });
+  const questions = clinical().getByRole('region', { name: 'Questions to clarify', exact: true });
   const fields = await questions.locator('[data-clinical-field]').evaluateAll((nodes) => nodes.map((node) => ({ name: node.getAttribute('data-clinical-field'), select: node.tagName === 'SELECT' })));
   for (const { name, select } of fields) {
     const input = questions.locator(`[data-clinical-field="${name}"]`);
@@ -98,11 +98,10 @@ async function quickAssess(row) {
     await questions.locator(`[data-symptom="${name}"]`).selectOption('true');
     await questions.locator(`[data-duration="${name}"]`).fill('12');
   }
-  const remember = section().getByLabel('Remember my explicit influenza guideline choice for future reviews on this browser. Each visit still requires confirmation.', { exact: true });
+  const remember = clinical().getByLabel('Remember my explicit influenza guideline choice for future reviews on this browser. Each visit still requires confirmation.', { exact: true });
   if (!await remember.isDisabled()) await remember.check();
-  assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), false, 'Changing clinical facts requires renewed summary confirmation');
-  await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).check();
-  assert.equal(await section().getByRole('button', { name: 'Edit all clinical details', exact: true }).count(), 1, 'Quick path did not open the full form');
+  assert.equal(await clinical().getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }).count(), 0, 'Editing invalidates explicit confirmation');
+  assert.equal(await clinical().getByRole('button', { name: 'Edit all clinical details', exact: true }).count(), 1, 'Quick path did not open the full form');
 }
 async function acknowledge() { await section().getByLabel('I reviewed this screening, exclusions and unresolved alternatives. Save this assessment to continue.', { exact: true }).check(); }
 const artifacts = join(tmpdir(), 'meditrack-six-condition-workspace');
@@ -111,20 +110,14 @@ try {
   await visible(page.getByLabel('Assigned registered patient', { exact: true }));
   for (const row of cases) {
     await choose(row);
-    await visible(section().getByText('Not yet confirmed by you for this visit.', { exact: true }));
-    assert.equal(await section().getByRole('button', { name: 'Edit all clinical details', exact: true }).count(), 1);
-    assert.equal(await preview().isDisabled(), true);
-    await visible(section().getByText('Confirm the clinical summary above, or check the visit-review checkbox after your corrections.', { exact: true }));
+    assert.equal(await page.getByRole('group', { name: 'Quick clinical review', exact: true }).count(), 0);
+    assert.equal(await preview().isEnabled(), true, 'Explicit confirm-and-screen action is available');
+    assert.equal(await clinical().getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }).count(), 0);
     if (row.condition === 'influenza') {
-      const summary = section().getByRole('region', { name: 'Patient review summary', exact: true });
-      await summary.getByRole('link', { name: 'Review or correct saved patient history above', exact: true }).click();
+      const summary = clinical().getByRole('region', { name: 'Patient review summary', exact: true });
+      await page.getByRole('region', { name: 'Patient information', exact: true }).getByRole('button', { name: 'Edit allergies and current medicines', exact: true }).click();
       await visible(page.getByLabel('Allergy status', { exact: true }));
-      await page.waitForFunction(() => document.activeElement?.id === 'allergy-status');
-      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), false, 'Opening patient history does not confirm the clinical summary');
-      await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).click();
-      await visible(summary.getByText('Summary reviewed for this visit. Unknown facts remain unknown.', { exact: true }));
-      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), true, 'Summary button and lower checkbox share the same confirmation');
-      assert.equal(await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).isDisabled(), true);
+      assert.equal(requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).length, 0, 'Loading and opening fields never confirms or starts screening');
       failNextPreview = true;
       await preview().click();
       const feedback = section().getByRole('group', { name: 'Medicine preview feedback', exact: true });
@@ -132,7 +125,7 @@ try {
       await page.waitForFunction(() => document.activeElement?.id === 'medicine-preview-feedback');
       assert.equal(await result().count(), 0, 'Database failure never supplies partial candidates');
       assert.equal(await preview().isEnabled(), true, 'Busy response allows retry without re-entering facts');
-      assert.equal(await summary.getByRole('button', { name: 'Confirm clinical summary', exact: true }).isDisabled(), true, 'A transient preview failure retains confirmation');
+      await visible(summary.getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }));
       await page.clock.install();
       holdNextPreview = true;
       const timedRequest = new Promise((resolve) => { notifyHeld = resolve; });
@@ -160,16 +153,48 @@ try {
       await visible(result().getByText(/^No medicine candidate is available\./));
       const nextActions = section().getByRole('region', { name: 'Screening next actions', exact: true });
       await nextActions.getByRole('button', { name: 'Review clinical details', exact: true }).click();
-      await visible(section().getByRole('button', { name: 'Show missing questions only', exact: true }));
+      await visible(clinical().getByRole('button', { name: 'Show missing questions only', exact: true }));
       await page.waitForFunction(() => document.activeElement?.getAttribute('data-clinical-field') === 'care_setting');
-      assert.equal(await section().getByLabel('I checked the summary, symptom targets, corrections and remaining unknowns for this visit.', { exact: true }).isChecked(), true, 'Opening clinical correction does not invent or alter facts');
-      await section().getByRole('button', { name: 'Show missing questions only', exact: true }).click();
+      await visible(summary.getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }));
+      await clinical().getByRole('button', { name: 'Show missing questions only', exact: true }).click();
       assert.equal(await ask({ action: 'count' }).then((value) => value.count), 0, 'Preview has no draft writes');
     }
     if (row.condition === 'influenza') await quickAssess(row); else await assess(row);
     if (row.condition === 'influenza') {
+      // Real key-by-key entry, rather than fill(), catches missing-question
+      // inputs disappearing after the first digit on a controlled rerender.
+      await clinical().getByRole('button', { name: 'Edit all clinical details', exact: true }).click();
+      await clinical().locator('[data-clinical-field="onset_hours"]').fill('');
+      await clinical().locator('[data-duration="fever"]').fill('');
+      await clinical().getByRole('button', { name: 'Show missing questions only', exact: true }).click();
+      const onset = clinical().locator('[data-clinical-field="onset_hours"]');
+      await onset.pressSequentially('18.5');
+      assert.equal(await onset.inputValue(), '18.5', 'Onset stays mounted for all typed digits');
+      const fever = clinical().locator('[data-duration="fever"]');
+      await fever.pressSequentially('48');
+      assert.equal(await fever.inputValue(), '48', 'Duration stays mounted after the first digit');
+      await clinical().getByRole('button', { name: 'Edit all clinical details', exact: true }).click();
+      const guideline = clinical().locator('[data-clinical-field="influenza_guideline"]');
+      await guideline.selectOption('WHO_2024');
+      await preview().click(); await visible(result());
+      const who = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
+      assert.equal(who.influenza_guideline, 'WHO_2024');
+      assert.equal(who.onset_hours, '18.5');
+      assert.equal(who.symptom_durations.fever, '48');
+      await visible(result().getByRole('article', { name: 'Oseltamivir', exact: true }).getByText(/^WHO 2024 recommends against oseltamivir/).first());
+      assert.equal(await guideline.inputValue(), 'WHO_2024', 'Preview never switches the explicit guideline');
+      await section().getByRole('button', { name: 'Refresh screening inputs and drafts', exact: true }).click();
+      await visible(clinical().getByRole('region', { name: 'Patient review summary', exact: true }).getByText(/^WHO 2024/));
+      await quickAssess(row);
+      await clinical().getByRole('button', { name: 'Edit all clinical details', exact: true }).click();
+      // The fictional test doctor explicitly chooses CDC for the independent
+      // existing available-candidate save/ML test; no live answers are changed.
+      await guideline.selectOption('CDC_2026');
+      await clinical().getByRole('button', { name: 'Show missing questions only', exact: true }).click();
+    }
+    if (row.condition === 'influenza') {
       mkdirSync(artifacts, { recursive: true });
-      await section().getByRole('group', { name: 'Quick clinical review', exact: true }).screenshot({ path: join(artifacts, 'quick-review.png') });
+      await clinical().screenshot({ path: join(artifacts, 'quick-review.png') });
     }
     await preview().click(); await visible(result());
     if (row.condition === 'influenza') {
@@ -204,10 +229,11 @@ try {
       assert.equal(await page.getByRole('region', { name: 'Doctor-review prescription draft', exact: true }).getByRole('button', { name: 'Approve selected medicines', exact: true }).count(), 0);
     }
     await page.reload(); await visible(saved());
-    assert.equal(await preview().isDisabled(), true, 'Refresh requires a new summary confirmation');
+    assert.equal(await preview().isEnabled(), true, 'Refresh offers explicit confirmation again; no screening runs automatically');
+    assert.equal(await clinical().getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }).count(), 0);
     if (row.condition === 'influenza') {
-      assert.equal(await section().locator('[data-clinical-field="influenza_guideline"]').count(), 0, 'Explicitly remembered guideline is proposed again without another dropdown');
-      await visible(section().getByRole('region', { name: 'Patient review summary', exact: true }).getByText(/^CDC 2026 outpatient pathway/));
+      assert.equal(await clinical().locator('[data-clinical-field="influenza_guideline"]').count(), 0, 'Explicitly remembered guideline is proposed again without another dropdown');
+      await visible(clinical().getByRole('region', { name: 'Patient review summary', exact: true }).getByText(/^CDC 2026 outpatient pathway/));
     }
     console.log('PASS: ' + row.condition + ' real preview/save, independent inputs, unapproved history and refresh persistence.');
   }
@@ -215,7 +241,7 @@ try {
   holdNextPreview = true;
   const waiting = new Promise((resolve) => { notifyHeld = resolve; });
   await preview().click(); await waiting;
-  await section().locator('[data-clinical-field="condition_severity"]').selectOption('severe');
+  await clinical().locator('[data-clinical-field="condition_severity"]').selectOption('severe');
   held(); await page.waitForTimeout(250);
   assert.equal(await result().count(), 0, 'Late preview cannot restore an obsolete plan');
   assert.equal(await save().isDisabled(), true);
@@ -255,13 +281,12 @@ try {
   } });
   assert.equal(seeded.status, 200);
   await page.goto(origin + '/doctor/prescription-workspace');
-  await choose(cases[0]);
+  await choose(cases[0], false);
   assert.equal(await page.getByText('Confirm recorded identities', { exact: true }).count(), 0);
   assert.equal(await page.locator('[aria-label="Resolve recorded history identities"]').count(), 0);
   assert.equal(await page.getByTestId('allergy-summary').textContent(), 'Penicillin (Rash)');
   assert.equal(await page.getByTestId('medicine-summary').textContent(), 'Paracetamol 500mg SOS');
-  const historyForm = page.getByRole('region', { name: 'Patient allergies and current medicines', exact: true });
-  await historyForm.getByRole('button', { name: 'Clarify medicine and allergy names', exact: true }).click();
+  const historyForm = page.getByRole('region', { name: 'Patient information', exact: true });
   const clarify = historyForm.getByRole('region', { name: 'Confirm medicine and allergy names', exact: true });
   const allergen = clarify.getByLabel('Allergen for “Penicillin (Rash)”', { exact: true });
   const exactProduct = clarify.getByLabel('Exact product for “Paracetamol 500mg SOS”', { exact: true });
@@ -269,6 +294,19 @@ try {
   assert.equal(await allergen.inputValue(), 'penicillin', 'A supported exact allergen is proposed for explicit doctor confirmation');
   assert.equal(await clarify.getByLabel('Reported reaction for “Penicillin (Rash)”', { exact: true }).inputValue(), 'Rash');
   assert.equal(await exactProduct.inputValue(), '', 'Strength/schedule prose does not automatically establish an exact product');
+  await visible(clarify.getByText(/^Possible name\/strength matches \(not selected or confirmed\): Paracetamol/));
+  // Collapsing the identity panel no longer silently omits prepared details.
+  const historySavesBefore = requests.filter((request) => request.path.endsWith('/patient-context/') && request.method === 'POST').length;
+  await historyForm.getByRole('button', { name: 'Hide name clarification', exact: true }).click();
+  await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
+  await page.getByRole('button', { name: 'Save patient information', exact: true }).click();
+  await visible(page.getByText(/^Patient information reviewed and saved for this visit\./));
+  const collapsedSave = requests.filter((request) => request.path.endsWith('/patient-context/') && request.method === 'POST');
+  assert.equal(collapsedSave.length, historySavesBefore + 1, 'Only an explicit save writes identities');
+  assert.equal(collapsedSave.at(-1).body.history_details.allergies[0].identity, 'penicillin');
+  assert.equal(collapsedSave.at(-1).body.history_details.medicines[0].catalogue_id, '', 'The unresolved product stays unresolved');
+  await historyForm.getByRole('button', { name: 'Clarify medicine and allergy names', exact: true }).click();
+  await visible(exactProduct);
   await exactProduct.selectOption(product.id);
   await historyForm.getByRole('button', { name: 'Cancel name clarification', exact: true }).click();
   await historyForm.getByRole('button', { name: 'Clarify medicine and allergy names', exact: true }).click();
@@ -279,6 +317,8 @@ try {
   assert.equal(await page.getByRole('button', { name: 'Save patient information', exact: true }).isDisabled(), true, 'A non-exact product needs a clarification note');
   await clarify.getByLabel('Reported schedule for “Paracetamol 500mg SOS”', { exact: true }).fill('SOS');
   await clarify.getByLabel('How was “Paracetamol 500mg SOS” clarified?', { exact: true }).fill(identityDetails.medicines[0].clarification_note);
+  await historyForm.getByLabel('Proposed action for “Paracetamol 500mg SOS”', { exact: true }).selectOption('stop');
+  await historyForm.getByLabel('Reason / review needs for “Paracetamol 500mg SOS”', { exact: true }).fill('Fictional proposed stop pending review, not an active status change.');
   await clarify.screenshot({ path: join(artifacts, 'history-clarification.png') });
   assert.equal(await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).isChecked(), false, 'Changing a proposed identity requires renewed doctor confirmation');
   await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
@@ -289,11 +329,30 @@ try {
   const savedHistories = await ask({ method: 'GET', path: '/api/prescription/patient-contexts/' });
   const savedHistory = savedHistories.data.find((row) => row.patient === cases[0].patient);
   assert.deepEqual(savedHistory.provenance.history_identity.details, identityDetails, 'An unchanged basic-form review retains saved identity, reaction and schedule');
+  assert.equal(savedHistory.provenance.medicine_plan.details[0].action, 'stop');
+  assert.equal(savedHistory.provenance.medicine_plan.changes_active_history, false);
+  assert.deepEqual(savedHistory.current_medicines, ['Paracetamol 500mg SOS']);
+  assert.equal(await historyForm.getByLabel('Proposed action for “Paracetamol 500mg SOS”', { exact: true }).inputValue(), 'stop');
   assert.equal(requests.some((row) => /history-identities/.test(row.path)), true, 'The compact clarification panel reuses authorized backend name options');
   await assess(cases[0]); await preview().click(); await visible(result());
+  await choose(cases[0]);
+  assert.equal(await result().count(), 1, 'Selecting the already active patient/visit does not reset review flags or discard the preview');
   assert.equal(await result().getByText(/An allergy identity is unresolved|Unresolved current medicines prevent interaction clearance/).count(), 0);
-  await visible(result().getByText('The candidate duplicates an ingredient in reported current medicines. Continuation/replacement needs a separate clinician decision.', { exact: true }));
+  await visible(result().getByText(/^Duplicate normalized ingredient\(s\): acetaminophen\. Recorded current medicine\(s\): Paracetamol 500mg SOS\./).first());
+  await visible(section().getByText(/^Current-medicine interaction assessment still prevents availability:/));
+  assert.equal(await section().getByText(/^Names or history status need confirmation:/).count(), 0, 'Resolved products do not get misleading repeat name instructions');
   await visible(section().getByRole('link', { name: 'Review allergies and current medicines', exact: true }));
+  const beforeHistorySave = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical;
+  const previewCount = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).length;
+  await historyForm.getByLabel('Proposed action for “Paracetamol 500mg SOS”', { exact: true }).selectOption('continue');
+  await page.getByLabel('I reviewed allergies and current medicines with the patient for this visit.', { exact: true }).check();
+  await page.getByRole('button', { name: 'Save patient information', exact: true }).click();
+  await visible(clinical());
+  assert.equal(await result().count(), 0, 'History save invalidates the earlier preview');
+  assert.equal(await clinical().getByText('Visit inputs confirmed for the requested preview. Unknown facts remain unknown.', { exact: true }).count(), 0);
+  assert.equal(requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).length, previewCount, 'History save does not confirm or screen automatically');
+  await preview().click(); await visible(result());
+  assert.deepEqual(requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1).body.clinical, beforeHistorySave, 'Same-visit history saves retain clinical answers while requiring a new explicit preview');
   assert.equal((await ask({ action: 'count' })).count, 6, 'Resolving history and previewing do not publish or write another draft');
   console.log('PASS: compact clarification saves explicit doctor identities, retains original history/reaction/schedule after reload, and preserves duplicate/interaction blocks.');
   // Expire a review only inside this in-memory fixture, then use the doctor's
@@ -321,16 +380,50 @@ try {
   await preview().click(); await visible(result());
   const refreshed = requests.filter((request) => request.path.endsWith('/clinical-screening/preview/')).at(-1);
   assert.deepEqual(refreshed.body.clinical, beforeReviewRefresh);
-  assert.equal(await result().getByRole('article', { name: 'Oseltamivir', exact: true }).getByText(/Current catalogue and executable-rule reviews are required/).count(), 0);
+  assert.equal(await result().getByRole('article', { name: 'Oseltamivir', exact: true }).getByText(/Current reviews are required/).count(), 0);
   console.log('PASS: pending safety review opens the exact medicine in a separate tab, saves through the real doctor form, and refreshes without losing clinical entries.');
+  // Prospective selected-pair evidence, never a generic interaction override.
+  const pairReview = clinical().getByRole('region', { name: 'Selected interaction evidence review', exact: true });
+  await visible(pairReview);
+  const pairConfirmed = pairReview.getByLabel('I reviewed the linked evidence and its limited applicability to this exact medicine pair for this visit.', { exact: true });
+  assert.equal(await pairConfirmed.isChecked(), false, 'Loading evidence never fabricates review');
+  assert.equal(await pairConfirmed.isDisabled(), true, 'A real review reason is required');
+  const originalDuplicate = await result().getByRole('article', { name: 'Paracetamol (acetaminophen)', exact: true }).getByText(/^Duplicate normalized ingredient/).first().innerText();
+  await pairReview.getByLabel('Pair-review reason and remaining limitations', { exact: true }).fill('Isolated fictional doctor inspected TAMIFLU sections 7.2 and 12.3; other checks remain required.');
+  await pairConfirmed.check();
+  assert.equal(await result().count(), 0, 'Review edits invalidate the old preview');
+  await preview().click(); await visible(result());
+  await visible(section().getByText(/^Screening complete: 1 medicine candidate available for doctor review; 4 unavailable\./));
+  await visible(result().getByRole('article', { name: 'Oseltamivir', exact: true }).getByText('Candidate for clinician review', { exact: true }));
+  assert.equal(await result().getByRole('article', { name: 'Paracetamol (acetaminophen)', exact: true }).getByText(/^Duplicate normalized ingredient/).first().innerText(), originalDuplicate);
+  await acknowledge(); await save().click(); await visible(saved());
+  assert.equal((await ask({ action: 'count' })).count, 7);
+  const pairedMl = page.getByRole('region', { name: 'Experimental ML suggestions', exact: true });
+  await pairedMl.getByLabel('Enable Experimental ML medicine suggestions', { exact: true }).check();
+  await pairedMl.getByRole('button', { name: 'Generate ML suggestions', exact: true }).click();
+  await visible(pairedMl.getByText(/^Experimental ML · random_forest/));
+  const oseltamivirSuggestion = pairedMl.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Oseltamivir', exact: true }) });
+  await oseltamivirSuggestion.getByText('RF predictions and deterministic checks', { exact: true }).click();
+  await visible(oseltamivirSuggestion.getByText('selected pair extension not in frozen training scope', { exact: true }));
+  await pairedMl.getByRole('button', { name: 'Prepare doctor-review draft', exact: true }).click();
+  const pairedDoctor = page.getByRole('region', { name: 'Doctor-review prescription draft', exact: true });
+  await pairedDoctor.getByRole('button', { name: 'Edit medicines', exact: true }).click();
+  await pairedDoctor.getByLabel('Select Oseltamivir', { exact: true }).check();
+  await pairedDoctor.getByLabel('Doctor decision reason', { exact: true }).fill('Independent fictional doctor selection after source-based pair screening and RF limitations review.');
+  await pairedDoctor.getByLabel('I reviewed the selected medicines, fixed screened regimens, exclusions and model limitations for this visit.', { exact: true }).check();
+  await pairedDoctor.getByRole('button', { name: 'Approve selected medicines', exact: true }).click();
+  await visible(page.locator('#prescription-slip'));
+  assert.equal(await page.locator('#prescription-slip').getByText(/Oseltamivir/).count(), 1);
+  assert.equal(await page.locator('#prescription-slip').getByText(/Paracetamol/).count(), 0);
+  console.log('PASS: explicit source-bound pair review makes one candidate available, retains the duplicate exclusion, and flows through abstaining RF to independent doctor approval.');
   // Deliberately contradictory fixture facts verify that a mild dropdown cannot
   // bypass a severe finding retained in the source analysis.
   await ask({ action: 'reported_severe', visit: cases[1].visit });
-  await page.reload(); await choose(cases[1]); await assess(cases[1]);
+  await page.goto(origin + '/doctor/prescription-workspace'); await choose(cases[1]); await assess(cases[1]);
   await preview().click(); await visible(result());
   await visible(result().getByText(/^No medicine candidate is available\./));
   await visible(section().getByText('The analysis reports severe disease. Changing the assessment dropdown cannot remove this reported-source block; the finding needs clinical clarification.', { exact: true }));
-  assert.equal((await ask({ action: 'count' })).count, 6, 'Correction actions do not create or approve prescriptions');
+  assert.equal((await ask({ action: 'count' })).count, 7, 'Correction actions do not create extra assessments or prescriptions');
   await page.goto(origin + '/doctor/prescription-records');
   await visible(page.getByLabel('Saved prescription draft', { exact: true }));
   await ask({ action: 'revoke' });
