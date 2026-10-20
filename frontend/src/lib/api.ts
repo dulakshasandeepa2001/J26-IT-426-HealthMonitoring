@@ -59,9 +59,18 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}, cs
     }
   }
 
-  const response = await fetch(`${apiBaseUrl()}${path}`, {
-    ...options, headers, credentials: "include", cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiBaseUrl()}${path}`, {
+      ...options, headers, credentials: "include", cache: "no-store",
+    });
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw err;
+    }
+    const message = err instanceof Error ? err.message : "Failed to fetch";
+    throw new ApiError(`Unable to connect to the server (${message}). Please ensure the backend is running.`, 0);
+  }
   const body = await response.text();
   let data;
   try {

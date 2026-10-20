@@ -139,15 +139,28 @@ REST_FRAMEWORK = {
 # -----------------------------------------
 # CORS SETTINGS
 # -----------------------------------------
+LOCAL_DEV_PORTS = range(3000, 3010)
+LOCAL_DEV_ORIGINS = [
+    f"http://{host}:{port}"
+    for host in ("localhost", "127.0.0.1")
+    for port in LOCAL_DEV_PORTS
+]
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    *LOCAL_DEV_ORIGINS,
     "https://yuemlsjtzdpgclgnlogg.supabase.co",
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CSRF_TRUSTED_ORIGINS = [
+    *LOCAL_DEV_ORIGINS,
+    "https://yuemlsjtzdpgclgnlogg.supabase.co",
+]
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
