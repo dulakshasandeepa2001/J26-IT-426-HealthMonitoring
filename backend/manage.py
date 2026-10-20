@@ -6,6 +6,17 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    if sys.platform == 'win32':
+        if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+            try:
+                sys.stdout.reconfigure(encoding='utf-8')
+            except Exception:
+                pass
+        if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+            try:
+                sys.stderr.reconfigure(encoding='utf-8')
+            except Exception:
+                pass
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medicare_project.settings')
     try:
         from django.core.management import execute_from_command_line

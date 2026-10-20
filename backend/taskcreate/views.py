@@ -67,7 +67,7 @@ def get_tasks(request):
         doctor_id = data.get('doctor_id')
         task_date = data.get('task_date')
 
-        print(f"🔍 Fetching tasks for Doctor ID: {doctor_id} on Date: {task_date}")
+        print(f"[INFO] Fetching tasks for Doctor ID: {doctor_id} on Date: {task_date}")
 
         # Validate required fields
         if not doctor_id:
@@ -92,7 +92,7 @@ def get_tasks(request):
             'priority'
         ).order_by('start_time')
 
-        print(f"✅ Found {len(tasks)} tasks")
+        print(f"[SUCCESS] Found {len(tasks)} tasks")
 
         return JsonResponse({
             'success': True,
@@ -105,7 +105,7 @@ def get_tasks(request):
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
     except Exception as e:
-        print(f"❌ Error fetching tasks: {str(e)}")
+        print(f"[ERROR] Error fetching tasks: {str(e)}")
         return JsonResponse(
             {'error': f'Failed to fetch tasks: {str(e)}'},
             status=500
@@ -120,13 +120,13 @@ def health_check(request):
 def delete_task(request, task_id):
     """Delete a task by ID"""
     try:
-        print(f"🗑️ Attempting to delete task ID: {task_id}")
+        print(f"[INFO] Attempting to delete task ID: {task_id}")
         
         # Check if task exists
         try:
             task = Task.objects.get(task_id=task_id)
         except Task.DoesNotExist:
-            print(f"❌ Task {task_id} not found")
+            print(f"[ERROR] Task {task_id} not found")
             return JsonResponse({
                 'success': False,
                 'error': 'Task not found'
@@ -139,7 +139,7 @@ def delete_task(request, task_id):
         # Delete the task
         task.delete()
         
-        print(f"✅ Task {task_id} deleted successfully: '{task_title}' on {task_date}")
+        print(f"[SUCCESS] Task {task_id} deleted successfully: '{task_title}' on {task_date}")
         
         return JsonResponse({
             'success': True,
@@ -151,7 +151,7 @@ def delete_task(request, task_id):
             }
         }, status=200)
     except Exception as e:
-        print(f"❌ Error deleting task {task_id}: {str(e)}")
+        print(f"[ERROR] Error deleting task {task_id}: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': f'Failed to delete task: {str(e)}'

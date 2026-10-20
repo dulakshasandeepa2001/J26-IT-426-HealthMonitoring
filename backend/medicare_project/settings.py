@@ -10,6 +10,12 @@ import socket
 # BASE DIRECTORY
 # -----------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = BASE_DIR / '.env'
+if ENV_FILE.exists():
+    from decouple import RepositoryEnv, Config
+    env_config = Config(RepositoryEnv(str(ENV_FILE)))
+else:
+    env_config = config
 
 # -----------------------------------------
 # SECURITY
@@ -78,11 +84,11 @@ WSGI_APPLICATION = 'medicare_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('SUPABASE_DB_NAME', default='postgres'),
-        'USER': config('SUPABASE_DB_USER', default='postgres'),
-        'PASSWORD': config('SUPABASE_DB_PASSWORD', default=''),
-        'HOST': config('SUPABASE_DB_HOST', default='aws-1-ap-southeast-2.pooler.supabase.com'),
-        'PORT': config('SUPABASE_DB_PORT', default='5432'),
+        'NAME': env_config('SUPABASE_DB_NAME', default='postgres'),
+        'USER': env_config('SUPABASE_DB_USER', default='postgres.wixgbvdcwteghicynwvz'),
+        'PASSWORD': env_config('SUPABASE_DB_PASSWORD', default='Ddugiborn@2001'),
+        'HOST': env_config('SUPABASE_DB_HOST', default='aws-1-ap-southeast-2.pooler.supabase.com'),
+        'PORT': env_config('SUPABASE_DB_PORT', default='5432'),
         'OPTIONS': {
             'sslmode': 'require',
         },

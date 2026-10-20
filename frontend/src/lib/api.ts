@@ -26,7 +26,12 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {/
     }
 
     if (!response.ok) {
-      throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
+      let errorMessage = data.error || data.message || `Request failed with status ${response.status}`;
+      if (typeof errorMessage === "string" && (errorMessage.includes("<!DOCTYPE") || errorMessage.includes("<html"))) {
+        const titleMatch = errorMessage.match(/<title>(.*?)<\/title>/i);
+        errorMessage = titleMatch ? titleMatch[1] : `Server error (${response.status})`;
+      }
+      throw new Error(errorMessage);
     }
 
     return data;
