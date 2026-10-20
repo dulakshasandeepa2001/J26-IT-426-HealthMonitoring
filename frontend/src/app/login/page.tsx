@@ -53,6 +53,7 @@ export default function Login() {
       localStorage.setItem(
         "meditrack_user",
         JSON.stringify({
+          id: data.id,
           username: data.username,
           role: data.role,
           doctorID: data.doctorID,

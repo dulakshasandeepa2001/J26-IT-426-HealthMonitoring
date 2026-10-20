@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { apiRequest } from "@/lib/api";
 import { 
   Calendar, 
@@ -362,7 +363,23 @@ export default function DoctorDashboard() {
         </div>
         
         {/* Live Consultation Badge & Doctor Profile */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/doctor/lab-review"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 text-xs font-semibold transition"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Lab Review (OCR)</span>
+          </Link>
+
+          <Link
+            href="/disease-intelligence"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 hover:bg-teal-500/20 text-xs font-semibold transition"
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Outbreak Intel</span>
+          </Link>
+
           <button 
             onClick={() => setIsListening(!isListening)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${

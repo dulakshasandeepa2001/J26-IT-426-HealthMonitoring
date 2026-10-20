@@ -21,9 +21,9 @@ git push -u origin feature-login
 # goto backend 
 cd backend
 # startvirtual machine
-.\venv\Scripts\Activate
+.\Venv\Scripts\Activate
 # start project 
-python manage.py run server
+python manage.py runserver
 
 # start frontend
 cd frontend

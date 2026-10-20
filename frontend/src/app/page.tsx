@@ -15,7 +15,10 @@ import {
   Award, 
   Stethoscope, 
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  LogOut,
+  User,
+  FileText
 } from "lucide-react";
 
 interface Doctor {
@@ -29,12 +32,53 @@ interface Doctor {
   working_hospital: string;
 }
 
+interface UserSession {
+  username: string;
+  role: string;
+  doctorID?: string;
+}
+
 export default function Home() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  
+  useEffect(() => {
+    setIsMounted(true);
+    const storedUser = localStorage.getItem("meditrack_user");
+    if (storedUser) {
+      try {
+        setUserSession(JSON.parse(storedUser));
+      } catch (e) {
+        localStorage.removeItem("meditrack_user");
+      }
+    }
+
+    async function loadDoctors() {
+      try {
+        const data = await apiRequest("/get-doctor/");
+        setDoctors(data.doctors || []);
+      } catch (err) {
+        console.error("Failed to load doctor registry:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDoctors();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("meditrack_user");
+    setUserSession(null);
+  };
+
+  const dashboardUrl = userSession?.role === "admin" 
+    ? "/admin/dashboard" 
+    : userSession?.role === "doctor" 
+    ? "/doctor/dashboard" 
+    : "/patient/dashboard";
 
   const filteredDoctors = doctors.filter((doc) =>
     doc.doctors_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -56,19 +100,71 @@ export default function Home() {
             </span>
           </div>
 
-          <nav className="flex items-center space-x-4">
-            <Link 
-              href="/login" 
-              className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200"
-            >
-              Sign In
-            </Link>
-            <Link 
-              href="/register" 
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 text-sm font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:scale-105"
-            >
-              Get Started
-            </Link>
+          <nav className="flex items-center space-x-3 sm:space-x-4">
+            {isMounted && userSession ? (
+              <>
+                {/* Visible ONLY AFTER login */}
+                <Link 
+                  href="/disease-intelligence" 
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center space-x-1.5"
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Disease Intelligence</span>
+                </Link>
+
+                {(userSession.role === "doctor" || userSession.role === "admin") && (
+                  <Link 
+                    href="/doctor/lab-review" 
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition flex items-center space-x-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Lab Review</span>
+                  </Link>
+                )}
+
+                {userSession.role === "patient" && (
+                  <Link 
+                    href="/patient/lab-reports" 
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center space-x-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>My Lab Reports</span>
+                  </Link>
+                )}
+
+                <Link 
+                  href={dashboardUrl} 
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 text-sm font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:scale-105"
+                >
+                  Dashboard
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="text-xs font-medium text-slate-400 hover:text-rose-400 transition-colors flex items-center space-x-1 cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Visible BEFORE login (Public) */}
+                <Link 
+                  href="/login" 
+                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  href="/register" 
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 text-sm font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_15px_rgba(20,184,166,0.3)] hover:scale-105"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -99,19 +195,31 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Link 
-                href="/register" 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105 flex items-center justify-center space-x-2"
-              >
-                <span>Register as a Patient</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link 
-                href="/login" 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-semibold hover:bg-slate-800 transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <span>Doctor Portal Login</span>
-              </Link>
+              {isMounted && userSession ? (
+                <Link 
+                  href={dashboardUrl} 
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105 flex items-center justify-center space-x-2"
+                >
+                  <span>Open {userSession.role === "doctor" ? "Doctor" : userSession.role === "admin" ? "Admin" : "Patient"} Dashboard</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <>
+                  <Link 
+                    href="/register" 
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all duration-200 shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105 flex items-center justify-center space-x-2"
+                  >
+                    <span>Register as a Patient</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                  <Link 
+                    href="/login" 
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-semibold hover:bg-slate-800 transition-all duration-200 flex items-center justify-center space-x-2"
+                  >
+                    <span>Doctor Portal Login</span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -259,7 +367,7 @@ export default function Home() {
 
                     <div className="mt-4 pt-3 flex justify-between items-center text-xs">
                       <Link 
-                        href="/login" 
+                        href={isMounted && userSession ? (userSession.role === "patient" ? "/patient/dashboard" : dashboardUrl) : "/login"} 
                         className="text-teal-400 hover:text-teal-300 font-semibold flex items-center space-x-1 transition-colors group/link"
                       >
                         <span>Check Availability</span>

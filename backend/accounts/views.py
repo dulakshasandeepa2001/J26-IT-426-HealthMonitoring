@@ -82,6 +82,7 @@ def login_user(request):
 
         return JsonResponse({
             "message": "Login successful",
+            "id": user.id,
             "username": user.username,
             "role": user.role,
             "doctorID": doctor_id,
@@ -108,13 +109,32 @@ def get_users(request):
 
 @api_view(['GET'])
 def get_doctor(request):
-    """Get all pre-registered doctors from register_DoctorID table."""
+    """Get all registered and approved doctors."""
     try:
-        doctors = Doctor.objects.all().values(
+        doctors = list(Doctor.objects.all().values(
             'doctor_id', 'register_id', 'doctor_nicnumber',
             'doctors_name', 'dob', 'degrees', 'university', 'working_hospital'
-        )
-        return JsonResponse({'doctors': list(doctors)})
+        ))
+        existing_ids = {d['doctor_id'] for d in doctors}
+
+        # Also include any approved doctors from User table if not already present
+        user_doctors = User.objects.filter(role='doctor', is_approved=True)
+        for u in user_doctors:
+            doc_id = u.doctorID or f"DOC-{u.id:04d}"
+            if doc_id not in existing_ids:
+                doctors.append({
+                    'doctor_id': doc_id,
+                    'register_id': f"REG-{u.id:04d}",
+                    'doctor_nicnumber': u.NIC_number or f"NIC-{u.id}",
+                    'doctors_name': f"Dr. {u.username}",
+                    'dob': str(u.birthday) if u.birthday else "1990-01-01",
+                    'degrees': u.degrees or "MBBS",
+                    'university': u.university or "Medical Faculty",
+                    'working_hospital': u.working_hospital or "General Hospital",
+                })
+                existing_ids.add(doc_id)
+
+        return JsonResponse({'doctors': doctors})
     except Exception as e:
         return JsonResponse({'error': f'Failed to get doctors: {str(e)}'}, status=500)
 
@@ -133,8 +153,8 @@ def get_pending_doctors(request):
 
 
 @api_view(['POST'])
-def approve_doctor(request, pk): #pk means  
-    """Admin approves a pending doctor — creates their User account."""
+def approve_doctor(request, pk):
+    """Admin approves a pending doctor — creates their User account and Doctor profile."""
     try:
         pending = PendingDoctor.objects.get(id=pk, status='pending')
 
@@ -156,6 +176,20 @@ def approve_doctor(request, pk): #pk means
         )
         user.set_password(pending.password)
         user.save()
+
+        # Ensure Doctor record exists in register_DoctorID table
+        Doctor.objects.update_or_create(
+            doctor_id=doc_id,
+            defaults={
+                'register_id': matched_doc.register_id if matched_doc else f"REG-{pending.id:04d}",
+                'doctor_nicnumber': pending.NIC_number,
+                'doctors_name': f"Dr. {pending.username}",
+                'dob': pending.birthday,
+                'degrees': pending.degrees or "MBBS",
+                'university': pending.university or "Medical Faculty",
+                'working_hospital': pending.working_hospital or "General Hospital",
+            }
+        )
 
         pending.status = 'approved'
         pending.save()

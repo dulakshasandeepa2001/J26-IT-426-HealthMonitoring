@@ -1,0 +1,132 @@
+{
+  "model_name": "Random Forest Classifier (Ensemble)",
+  "algorithm_family": "Tree-based Ensemble",
+  "dataset_source": "100% Real Kaggle Diagnosed CBC Hospital Dataset (N = 1269 Patients)",
+  "synthetic_data_used": false,
+  "is_real_hospital_data": true,
+  "trained_date": "2026-10-19",
+  "sample_count": 1269,
+  "classes": [
+    "Healthy Normal Baseline",
+    "Thrombocytopenia (Platelet Collapse / Dengue Risk)",
+    "Acute Leukocytosis / Infection Response",
+    "Iron Deficiency Anemia",
+    "Normocytic / Chronic Anemia"
+  ],
+  "feature_names": [
+    "hemoglobin",
+    "wbc",
+    "platelets",
+    "neutrophils",
+    "lymphocytes",
+    "hematocrit"
+  ],
+  "benchmark_comparison": {
+    "Logistic Regression (Baseline)": {
+      "accuracy": 0.7717,
+      "f1_macro": 0.7657,
+      "cv_mean": 0.762,
+      "precision_macro": 0.762,
+      "recall_macro": 0.7824
+    },
+    "Gradient Boosting Classifier": {
+      "accuracy": 0.8425,
+      "f1_macro": 0.8832,
+      "cv_mean": 0.881,
+      "precision_macro": 0.881,
+      "recall_macro": 0.8861
+    },
+    "Random Forest Classifier (Ensemble)": {
+      "accuracy": 0.874,
+      "f1_macro": 0.9054,
+      "cv_mean": 0.885,
+      "precision_macro": 0.9036,
+      "recall_macro": 0.9074
+    }
+  },
+  "winning_metrics": {
+    "accuracy": 0.874,
+    "accuracy_percentage": "87.40%",
+    "f1_score_macro": 0.9054,
+    "precision_macro": 0.9036,
+    "recall_sensitivity_macro": 0.9074,
+    "five_fold_cv_mean": 0.885
+  },
+  "per_class_metrics": {
+    "Healthy Normal Baseline": {
+      "precision": 0.9853,
+      "recall": 1.0,
+      "f1-score": 0.9926,
+      "support": 67
+    },
+    "Thrombocytopenia (Platelet Collapse / Dengue Risk)": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 17
+    },
+    "Acute Leukocytosis / Infection Response": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9
+    },
+    "Iron Deficiency Anemia": {
+      "precision": 0.66,
+      "recall": 0.6875,
+      "f1-score": 0.6735,
+      "support": 48
+    },
+    "Normocytic / Chronic Anemia": {
+      "precision": 0.8727,
+      "recall": 0.8496,
+      "f1-score": 0.861,
+      "support": 113
+    }
+  },
+  "confusion_matrix": [
+    [
+      67,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      17,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      9,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      33,
+      14
+    ],
+    [
+      0,
+      0,
+      0,
+      17,
+      96
+    ]
+  ],
+  "feature_importances": {
+    "hemoglobin": 0.4348,
+    "platelets": 0.2386,
+    "wbc": 0.1519,
+    "hematocrit": 0.0836,
+    "neutrophils": 0.0477,
+    "lymphocytes": 0.0434
+  }
+}

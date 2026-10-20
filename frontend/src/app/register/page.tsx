@@ -4,9 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
-import { Stethoscope, Lock, User, Mail, Phone, Calendar, Landmark, AlertCircle, ArrowLeft, GraduationCap,University } from "lucide-react";
-import { text } from "stream/consumers";
-import { AnyRecord } from "dns";
+import { Stethoscope, Lock, User, Mail, Phone, Calendar, Landmark, AlertCircle, ArrowLeft, GraduationCap, University } from "lucide-react";
 
 interface PendingDoctor {
   id: number;

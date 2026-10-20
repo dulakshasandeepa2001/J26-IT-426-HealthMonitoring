@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { apiRequest } from "@/lib/api";
 import { 
   Search, 
@@ -15,7 +16,8 @@ import {
   ShieldAlert, 
   Info,
   CalendarCheck,
-  Building2
+  Building2,
+  FileText
 } from "lucide-react";
 
 interface Doctor {
@@ -156,6 +158,13 @@ export default function PatientDashboard() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <Link
+              href="/patient/lab-reports"
+              className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>My Lab Reports</span>
+            </Link>
             <span className="text-xs text-slate-400 hidden sm:inline">
               Welcome, <strong className="text-white">{userSession?.username}</strong>
             </span>

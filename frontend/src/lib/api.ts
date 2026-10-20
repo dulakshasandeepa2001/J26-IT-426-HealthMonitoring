@@ -3,10 +3,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';// b
 export async function apiRequest(endpoint: string, options: RequestInit = {}) {//request endpoint is string and method of how to send the request and options is an object that contains the request options
   const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const isFormData = options.body instanceof FormData;
+  const headers = isFormData
+    ? { ...options.headers }
+    : {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
 
   try {
     const response = await fetch(url, {
@@ -27,9 +30,8 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {/
     }
 
     return data;
-  } catch (error){ {
+  } catch (error) {
     console.error(`API Error in ${endpoint}:`, error);
     throw error;
   }
-}
 }
