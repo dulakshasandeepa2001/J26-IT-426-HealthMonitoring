@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { apiRequest } from "@/lib/api";
-import { useDoctor } from "@/features/doctor-dashboard/DoctorContext";
-import PrescriptionHistory from "@/features/doctor-dashboard/PrescriptionHistory";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { 
+  Stethoscope, 
+  LogOut, 
+  Settings, 
   User, 
   Mic, 
   MicOff, 
@@ -13,16 +15,29 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle, 
+  FileText, 
+  Send, 
+  Pill, 
   Activity, 
   Users, 
   Sparkles,
   ChevronRight,
+  Printer,
   HeartPulse,
   ClipboardList,
+  History,
   Calendar,
+  Search,
+  ExternalLink,
+  ShieldAlert,
+  ArrowRight,
   RefreshCw,
-  X
+  X,
+  Power,
+  Radio,
+  Upload
 } from "lucide-react";
+import { apiRequest, apiBaseUrl } from "@/lib/api";
 
 interface Task {
   task_id: number;
@@ -37,17 +52,271 @@ interface Task {
   is_completed?: boolean;
 }
 
+interface PastMedication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
+interface PastPrescription {
+  id: string;
+  date: string;
+  doctor: string;
+  clinic: string;
+  diagnosis: string;
+  medicines: PastMedication[];
+  notes?: string;
+  receiptNumber: string;
+}
+
+interface Patient {
+  id: string;
+  appointmentId?: number;
+  token: string;
+  name: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  allergies: string[];
+  location?: string;
+  complaint: string;
+  labHistory: string[];
+  time: string;
+  status?: string;
+  phone?: string;
+  pastPrescriptions: PastPrescription[];
+}
+
+const SAMPLE_QUEUE: Patient[] = [
+  {
+    id: "PAT-101",
+    token: "#01",
+    name: "Kasun Perera",
+    age: 34,
+    gender: "Male",
+    bloodGroup: "O+",
+    allergies: ["Penicillin", "Aspirin"],
+    location: "Colombo District (Western Province)",
+    complaint: "High fever (>38.5°C), persistent dry cough, body aches for 3 days.",
+    labHistory: ["FBC (Platelets: 165,000 /μL - Borderline)", "Dengue NS1 Antigen: Negative (Day 2)", "CRP: 18 mg/L"],
+    time: "09:15 AM",
+    pastPrescriptions: [
+      {
+        id: "RX-2026-881",
+        receiptNumber: "REC-0881",
+        date: "14 Aug 2026",
+        doctor: "Dr. Nimal Silva",
+        clinic: "MediTrack Outpatient Clinic",
+        diagnosis: "Acute Bronchitis",
+        medicines: [
+          { name: "Azithromycin 500mg", dosage: "1 Tablet", frequency: "OD (Once daily)", duration: "3 Days" },
+          { name: "Salbutamol Inhaler 100mcg", dosage: "2 Puffs", frequency: "PRN (When needed)", duration: "As required" },
+          { name: "Cetirizine 10mg", dosage: "1 Tablet", frequency: "Nocte (At bedtime)", duration: "5 Days" }
+        ],
+        notes: "Advised chest X-ray if persistent coughing exceeds 10 days. Ensure oral rehydration."
+      },
+      {
+        id: "RX-2026-412",
+        receiptNumber: "REC-0412",
+        date: "02 May 2026",
+        doctor: "Dr. K. Perera",
+        clinic: "General Medical OPD",
+        diagnosis: "Viral Pharyngitis",
+        medicines: [
+          { name: "Paracetamol 500mg", dosage: "2 Tablets", frequency: "TDS (Every 8h)", duration: "3 Days" },
+          { name: "Chlorpheniramine 4mg", dosage: "1 Tablet", frequency: "BD (Twice daily)", duration: "3 Days" }
+        ],
+        notes: "Warm saline gargle 3 times a day. Rest recommended."
+      },
+      {
+        id: "RX-2026-105",
+        receiptNumber: "REC-0105",
+        date: "10 Jan 2026",
+        doctor: "Dr. S. Jayasinghe",
+        clinic: "ENT Specialized Unit",
+        diagnosis: "Seasonal Allergic Rhinitis",
+        medicines: [
+          { name: "Montelukast 10mg", dosage: "1 Tablet", frequency: "Nocte", duration: "14 Days" },
+          { name: "Fluticasone Nasal Spray", dosage: "1 Spray/nostril", frequency: "BD", duration: "1 Month" }
+        ],
+        notes: "Avoid dust allergens and air conditioner draft."
+      }
+    ]
+  },
+  {
+    id: "PAT-102",
+    token: "#02",
+    name: "Nimali Fernando",
+    age: 28,
+    gender: "Female",
+    bloodGroup: "A+",
+    allergies: ["Sulfa Drugs"],
+    location: "Gampaha (Western Province)",
+    complaint: "Throbbing frontal headache, sinus pressure, nasal congestion.",
+    labHistory: ["Past Blood Pressure: 118/76 mmHg", "No chronic conditions recorded"],
+    time: "09:30 AM",
+    pastPrescriptions: [
+      {
+        id: "RX-2026-620",
+        receiptNumber: "REC-0620",
+        date: "20 Jul 2026",
+        doctor: "Dr. R. Silva",
+        clinic: "MediTrack General Clinic",
+        diagnosis: "Acute Frontal Sinusitis",
+        medicines: [
+          { name: "Amoxicillin-Clavulanate 625mg", dosage: "1 Tablet", frequency: "BD (Twice daily)", duration: "5 Days" },
+          { name: "Pseudoephedrine 30mg", dosage: "1 Tablet", frequency: "TDS", duration: "4 Days" }
+        ],
+        notes: "Steam inhalation recommended twice daily."
+      },
+      {
+        id: "RX-2026-190",
+        receiptNumber: "REC-0190",
+        date: "15 Feb 2026",
+        doctor: "Dr. W.G. Dulaksha",
+        clinic: "MediTrack Outpatient Clinic",
+        diagnosis: "Tension Headache",
+        medicines: [
+          { name: "Paracetamol 500mg", dosage: "1-2 Tablets", frequency: "PRN (As needed)", duration: "3 Days" },
+          { name: "Vitamin B-Complex", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
+        ],
+        notes: "Improve sleep hygiene and reduce screen exposure."
+      }
+    ]
+  },
+  {
+    id: "PAT-103",
+    token: "#03",
+    name: "Mohamed Rizwan",
+    age: 52,
+    gender: "Male",
+    bloodGroup: "B+",
+    allergies: ["None known"],
+    location: "Kandy (Central Province)",
+    complaint: "Routine Type-2 Diabetes follow up, mild peripheral numbness.",
+    labHistory: ["HbA1c: 7.2% (Last month)", "FBS: 138 mg/dL", "Serum Creatinine: 1.0 mg/dL"],
+    time: "09:45 AM",
+    pastPrescriptions: [
+      {
+        id: "RX-2026-904",
+        receiptNumber: "REC-0904",
+        date: "28 Aug 2026",
+        doctor: "Dr. C. Fernando",
+        clinic: "Endocrine & Diabetes Care Center",
+        diagnosis: "T2DM Regular Review",
+        medicines: [
+          { name: "Metformin 500mg", dosage: "1 Tablet", frequency: "BD (After meals)", duration: "3 Months" },
+          { name: "Glimepiride 1mg", dosage: "1 Tablet", frequency: "Mane (Morning)", duration: "3 Months" }
+        ],
+        notes: "Strict dietary carbohydrate moderation. Fasting lipid profile due next visit."
+      },
+      {
+        id: "RX-2026-550",
+        receiptNumber: "REC-0550",
+        date: "12 Jun 2026",
+        doctor: "Dr. W.G. Dulaksha",
+        clinic: "MediTrack OPD",
+        diagnosis: "Diabetic Neuropathy Early Signs",
+        medicines: [
+          { name: "Pregabalin 50mg", dosage: "1 Capsule", frequency: "Nocte (Night)", duration: "1 Month" },
+          { name: "Methylcobalamin 500mcg", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
+        ],
+        notes: "Foot care examination performed. No active ulcers."
+      }
+    ]
+  },
+  {
+    id: "PAT-104",
+    token: "#04",
+    name: "Anusha Kumari",
+    age: 41,
+    gender: "Female",
+    bloodGroup: "AB+",
+    allergies: ["Ibuprofen"],
+    complaint: "Joint stiffness and knee inflammation, worsens in the morning.",
+    labHistory: ["ESR: 32 mm/hr", "Uric Acid: 5.4 mg/dL"],
+    time: "10:00 AM",
+    pastPrescriptions: [
+      {
+        id: "RX-2026-912",
+        receiptNumber: "REC-0912",
+        date: "05 Sep 2026",
+        doctor: "Dr. D. Liyanage",
+        clinic: "Rheumatology & Joint Care",
+        diagnosis: "Osteoarthritis (Bilateral Knees)",
+        medicines: [
+          { name: "Paracetamol 1000mg", dosage: "2 Tablets", frequency: "TDS PRN", duration: "7 Days" },
+          { name: "Glucosamine Sulfate 1500mg", dosage: "1 Sachet", frequency: "OD with water", duration: "2 Months" },
+          { name: "Topical Diclofenac Gel", dosage: "Apply thin layer", frequency: "TDS", duration: "1 Tube" }
+        ],
+        notes: "Avoid high-impact exercises. Daily gentle quadriceps stretches advised."
+      },
+      {
+        id: "RX-2026-380",
+        receiptNumber: "REC-0380",
+        date: "18 Apr 2026",
+        doctor: "Dr. Nimal Silva",
+        clinic: "MediTrack General OPD",
+        diagnosis: "Hyperuricemia Check",
+        medicines: [
+          { name: "Colchicine 0.5mg", dosage: "1 Tablet", frequency: "BD", duration: "3 Days" },
+          { name: "Allopurinol 100mg", dosage: "1 Tablet", frequency: "OD", duration: "1 Month" }
+        ],
+        notes: "Increase water intake to at least 2.5 Liters daily. Reduce red meat."
+      }
+    ]
+  }
+];
+
 export default function DoctorDashboard() {
-  const {
-    doctorId, queue, currentPatientIndex, setCurrentPatientIndex, currentPatient,
-    isListening, setIsListening, transcript, setTranscript,
-    setHistorySearch, setSelectedReceipt,
-  } = useDoctor();
+  const router = useRouter();
+
+  // Doctor session state
+  const [doctorName, setDoctorName] = useState("Dr. W.G. Dulaksha");
+  const [hospital, setHospital] = useState("MediTrack General Hospital");
+
+  // Patient Queue & Active Patient State
+  const [queue, setQueue] = useState<Patient[]>([]);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [currentPatientIndex, setCurrentPatientIndex] = useState(0);
+  const [isUsingDemoQueue, setIsUsingDemoQueue] = useState(false);
+  const [queueStats, setQueueStats] = useState<{
+    total: number;
+    waiting: number;
+    serving: number;
+    completed: number;
+    now_serving_token: string | null;
+  }>({ total: 0, waiting: 0, serving: 0, completed: 0, now_serving_token: null });
+  const [updatingQueueStatus, setUpdatingQueueStatus] = useState(false);
+  const currentPatient = queue[currentPatientIndex] || null;
+
+  // Search filter for past prescription history
+  const [historySearch, setHistorySearch] = useState("");
+
+  // Selected past receipt for detailed view modal
+  const [selectedReceipt, setSelectedReceipt] = useState<PastPrescription | null>(null);
+
+  // AI Voice Consultation & OpenAI Whisper ASR State
+  const [isListening, setIsListening] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [isWhisperTranscribing, setIsWhisperTranscribing] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
+  const recordingTimerRef = React.useRef<any>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const [transcript, setTranscript] = useState(
+    "Doctor, the patient reports high fever, severe headache, and nausea for 3 days."
+  );
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [analyzingAi, setAnalyzingAi] = useState(false);
 
   // Sidebar tab switcher: Queue vs Tasks
   const [sidebarTab, setSidebarTab] = useState<"queue" | "tasks">("queue");
 
   // Doctor Tasks state (get_tasks)
+  const [doctorId, setDoctorId] = useState("DOC-0001");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [tasksError, setTasksError] = useState("");
@@ -68,8 +337,83 @@ export default function DoctorDashboard() {
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [creatingTask, setCreatingTask] = useState(false);
 
-  // Core getTasks function to retrieve scheduled tasks from backend /get-tasks/
-  const getTasks = useCallback(async (customDate?: string, customDocId?: string) => {
+  // Live Availability State (Instant 1-Click Availability without needing tasks/schedules)
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [availableUntilTime, setAvailableUntilTime] = useState("13:00");
+  const [availableUntilDisplay, setAvailableUntilDisplay] = useState<string | null>(null);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [isInitialLoginPrompt, setIsInitialLoginPrompt] = useState(false);
+  const [savingAvailability, setSavingAvailability] = useState(false);
+
+  // Helper to add hours/minutes for quick availability presets
+  const getOffsetTime = (hours: number, minutes: number = 0) => {
+    const d = new Date();
+    d.setHours(d.getHours() + hours);
+    d.setMinutes(d.getMinutes() + minutes);
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  // Fetch live availability from backend
+  const getDoctorAvailability = async (customDocId?: string) => {
+    const targetDocId = customDocId || doctorId || "DOC-0001";
+    try {
+      const data = await apiRequest(`/api/doctor/get-availability/?doctor_id=${targetDocId}`, {
+        method: "GET",
+      });
+      if (data) {
+        const avail = Boolean(data.is_available);
+        setIsAvailable(avail);
+        if (data.available_until) {
+          setAvailableUntilDisplay(data.available_until);
+        }
+        // If not available and not yet asked during this session, prompt the doctor
+        const promptKey = `meditrack_prompted_${targetDocId}_${new Date().toISOString().split("T")[0]}`;
+        const alreadyPrompted = sessionStorage.getItem(promptKey);
+        if (!avail && !alreadyPrompted) {
+          setShowAvailabilityModal(true);
+          setIsInitialLoginPrompt(true);
+          sessionStorage.setItem(promptKey, "true");
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load doctor availability:", e);
+    }
+  };
+
+  // Update live availability in backend (Supabase)
+  const handleUpdateAvailability = async (newAvail: boolean, customTime?: string) => {
+    setSavingAvailability(true);
+    const chosenTime = customTime || availableUntilTime || "13:00";
+    try {
+      const data = await apiRequest("/api/doctor/set-availability/", {
+        method: "POST",
+        body: JSON.stringify({
+          doctor_id: doctorId || "DOC-0001",
+          doctor_name: doctorName || "Doctor",
+          is_available: newAvail,
+          available_until: newAvail ? chosenTime : null,
+        }),
+      });
+
+      if (data) {
+        setIsAvailable(Boolean(data.is_available));
+        setAvailableUntilDisplay(data.available_until || null);
+        if (newAvail && chosenTime) {
+          setAvailableUntilTime(chosenTime);
+        }
+        setShowAvailabilityModal(false);
+        setIsInitialLoginPrompt(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update availability";
+      alert("Error: " + msg);
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
+  const getTasks = async (customDate?: string, customDocId?: string) => {
     const targetDate = customDate || selectedTaskDate;
     const targetDocId = customDocId || doctorId || "DOC-0001";
 
@@ -100,7 +444,7 @@ export default function DoctorDashboard() {
     } finally {
       setTasksLoading(false);
     }
-  }, [selectedTaskDate, doctorId]);
+  };
 
   // Create Task Function
   const handleCreateTask = async (e: React.FormEvent) => {
@@ -145,18 +489,183 @@ export default function DoctorDashboard() {
     }
   };
 
-  // Keep the existing schedule API synchronized with the doctor and chosen date.
+  // Fetch real doctor queue from backend
+  const fetchDoctorQueue = async (customDocId?: string, customDate?: string) => {
+    const targetDocId = customDocId || doctorId || "DOC-0001";
+    const targetDate = customDate || selectedTaskDate;
+    setQueueLoading(true);
+    try {
+      const data = await apiRequest(
+        `/api/doctor/queue/?doctor_id=${encodeURIComponent(targetDocId)}&date=${encodeURIComponent(targetDate)}`
+      );
+      if (data && data.queue && data.queue.length > 0) {
+        const mappedQueue: Patient[] = data.queue.map((item: any, index: number) => {
+          const fallbackSample = SAMPLE_QUEUE[index % SAMPLE_QUEUE.length];
+          return {
+            id: `PAT-${item.patient_id || item.id}`,
+            appointmentId: item.id,
+            token: item.token_label || `#${String(item.token_number).padStart(2, "0")}`,
+            name: item.patient_name || `Patient ${item.token_number}`,
+            age: item.patient_age || 30,
+            gender: "Patient",
+            bloodGroup: "O+",
+            allergies: ["Penicillin", "Aspirin"],
+            complaint: item.reason || "Routine Medical Consultation",
+            labHistory: ["Vitals taken at reception", `Contact: ${item.patient_phone || "N/A"}`],
+            time: item.created_at || "09:30 AM",
+            status: item.status,
+            phone: item.patient_phone,
+            pastPrescriptions: fallbackSample?.pastPrescriptions || [],
+          };
+        });
+        setQueue(mappedQueue);
+        setIsUsingDemoQueue(false);
+        if (data.stats) {
+          setQueueStats(data.stats);
+        }
+        const servingIdx = mappedQueue.findIndex((p: Patient) => p.status === "serving");
+        if (servingIdx !== -1) {
+          setCurrentPatientIndex(servingIdx);
+        } else {
+          const firstWaiting = mappedQueue.findIndex((p: Patient) => p.status === "booked");
+          if (firstWaiting !== -1) {
+            setCurrentPatientIndex(firstWaiting);
+          } else {
+            setCurrentPatientIndex(0);
+          }
+        }
+      } else {
+        setQueue([]);
+        setIsUsingDemoQueue(false);
+        setQueueStats({ total: 0, waiting: 0, serving: 0, completed: 0, now_serving_token: null });
+      }
+    } catch (e) {
+      console.warn("Failed to load doctor queue:", e);
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
+  // Call / Serve Patient
+  const handleCallPatient = async (targetPatient?: Patient) => {
+    const p = targetPatient || queue[currentPatientIndex];
+    if (!p) return;
+    setUpdatingQueueStatus(true);
+    try {
+      if (p.appointmentId) {
+        await apiRequest("/api/appointments/update-status/", {
+          method: "POST",
+          body: JSON.stringify({
+            appointment_id: p.appointmentId,
+            status: "serving",
+          }),
+        });
+        await fetchDoctorQueue();
+      } else {
+        // Demo queue mode
+        setQueue((prev) =>
+          prev.map((item, idx) => (idx === currentPatientIndex ? { ...item, status: "serving" } : item))
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update queue status";
+      alert("Error: " + msg);
+    } finally {
+      setUpdatingQueueStatus(false);
+    }
+  };
+
+  // Complete Consultation
+  const handleCompleteConsultation = async () => {
+    const p = queue[currentPatientIndex];
+    if (!p) return;
+    setUpdatingQueueStatus(true);
+    try {
+      if (p.appointmentId) {
+        await apiRequest("/api/appointments/update-status/", {
+          method: "POST",
+          body: JSON.stringify({
+            appointment_id: p.appointmentId,
+            status: "completed",
+          }),
+        });
+        await fetchDoctorQueue();
+      } else {
+        // Demo queue mode
+        setQueue((prev) =>
+          prev.map((item, idx) => (idx === currentPatientIndex ? { ...item, status: "completed" } : item))
+        );
+        handleNextPatient();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to complete consultation";
+      alert("Error: " + msg);
+    } finally {
+      setUpdatingQueueStatus(false);
+    }
+  };
+
+  // Initialize doctor session
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fetching the schedule is synchronization with the existing backend.
-    void getTasks();
-  }, [getTasks]);
+    let currentDocId = "DOC-0001";
+    const stored = localStorage.getItem("meditrack_user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.username) {
+          const raw = parsed.username.replace(/^dr[._\s]*/i, "");
+          const cleanName = raw.charAt(0).toUpperCase() + raw.slice(1);
+          setDoctorName(`Dr. ${cleanName}`);
+        }
+        if (parsed.doctorID) {
+          currentDocId = parsed.doctorID;
+          setDoctorId(parsed.doctorID);
+        }
+      } catch (e) {
+        // use default
+      }
+    }
+    getTasks(selectedTaskDate, currentDocId);
+    getDoctorAvailability(currentDocId);
+    fetchDoctorQueue(currentDocId, selectedTaskDate);
+  }, []);
+
+  // Reload tasks & queue when selectedTaskDate changes
+  useEffect(() => {
+    if (selectedTaskDate) {
+      getTasks(selectedTaskDate);
+      fetchDoctorQueue(doctorId, selectedTaskDate);
+    }
+  }, [selectedTaskDate]);
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("meditrack_user");
+    router.push("/login");
+  };
 
   // Next Patient Action
-  const handleNextPatient = () => {
-    if (currentPatientIndex < queue.length - 1) {
+  const handleNextPatient = async () => {
+    const nextWaiting =
+      queue.find((p, idx) => idx > currentPatientIndex && p.status === "booked") ||
+      queue.find((p) => p.status === "booked");
+
+    if (nextWaiting) {
+      const nextIdx = queue.findIndex((p) => p.id === nextWaiting.id);
+      setCurrentPatientIndex(nextIdx);
+      if (nextWaiting.appointmentId) {
+        await handleCallPatient(nextWaiting);
+      }
+      setIsListening(false);
+      setTranscript("Listening for patient consultation notes...");
+      setAiAnalysis(null);
+      setHistorySearch("");
+      setSelectedReceipt(null);
+    } else if (currentPatientIndex < queue.length - 1) {
       setCurrentPatientIndex((prev) => prev + 1);
       setIsListening(false);
       setTranscript("Listening for patient consultation notes...");
+      setAiAnalysis(null);
       setHistorySearch("");
       setSelectedReceipt(null);
     } else {
@@ -164,28 +673,222 @@ export default function DoctorDashboard() {
     }
   };
 
-  // Toggle Voice Recording
-  const toggleListening = () => {
+  // 1. Audio Recording with MediaRecorder (Streams Audio directly to OpenAI Whisper)
+  const toggleListening = async () => {
     if (!isListening) {
-      setIsListening(true);
-      setTranscript(
-        "Voice input active: Doctor discussing symptom severity, duration of chills, and evaluating breathing rate..."
-      );
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert("Audio recording is not supported in this browser. Please upload an audio file or type notes.");
+          return;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? "audio/webm;codecs=opus"
+          : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "";
+
+        const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        audioChunksRef.current = [];
+
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        recorder.onstop = async () => {
+          stream.getTracks().forEach((track) => track.stop());
+          clearInterval(recordingTimerRef.current);
+          setRecordingSeconds(0);
+
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: recorder.mimeType || "audio/webm",
+          });
+
+          if (audioBlob.size > 0) {
+            await handleSendAudioToWhisper(audioBlob);
+          }
+        };
+
+        recorder.start(250);
+        setMediaRecorder(recorder);
+        setIsListening(true);
+        setRecordingSeconds(0);
+        recordingTimerRef.current = setInterval(() => {
+          setRecordingSeconds((prev) => prev + 1);
+        }, 1000);
+      } catch (err: unknown) {
+        console.error("Microphone access error:", err);
+        alert("Microphone access was denied or is unavailable. Please allow mic permissions or upload an audio file.");
+      }
     } else {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
       setIsListening(false);
+      clearInterval(recordingTimerRef.current);
     }
   };
 
+  // 2. Direct Audio Pipeline to Backend Whisper ASR + Clinical AI Diagnostic Model
+  const handleSendAudioToWhisper = async (audioBlobOrFile: Blob | File) => {
+    setIsWhisperTranscribing(true);
+    setAnalyzingAi(true);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlobOrFile, "consultation_recording.webm");
+      formData.append("patient_id", String(currentPatient?.id || 12));
+      formData.append("doctor_id", String(doctorId || 2));
+      formData.append("location", currentPatient?.location || "Colombo District");
+
+      const res = await fetch(`${apiBaseUrl()}/api/consultation/analyze-voice/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data && (data.status === "success" || data.status === "warning" || data.payload)) {
+        if (data.payload?.transcript_summary) {
+          setTranscript(data.payload.transcript_summary);
+        }
+        if (data.payload) {
+          setAiAnalysis(data.payload);
+        }
+      } else {
+        alert(data.message || data.error || "Failed to process audio with Whisper.");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Audio upload failed";
+      alert("Error: " + msg);
+    } finally {
+      setIsWhisperTranscribing(false);
+      setAnalyzingAi(false);
+    }
+  };
+
+  // 3. Audio File Upload Handler (.wav, .mp3, .m4a, .webm)
+  const handleAudioFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleSendAudioToWhisper(file);
+    if (e.target) e.target.value = "";
+  };
+
+  // Analyze Voice Consultation with Backend AI Model
+  const handleAnalyzeVoiceConsultation = async () => {
+    if (!transcript.trim()) {
+      alert("Please record or enter consultation notes first.");
+      return;
+    }
+
+    setAnalyzingAi(true);
+    try {
+      const data = await apiRequest("/api/consultation/analyze-voice/", {
+        method: "POST",
+        body: JSON.stringify({
+          transcript: transcript,
+          patient_id: currentPatient?.id || 12,
+          doctor_id: doctorId || 2,
+          location: currentPatient?.location || "Colombo District",
+        }),
+      });
+
+      if (data && (data.status === "success" || data.status === "warning" || data.payload)) {
+        setAiAnalysis(data.payload);
+      } else {
+        alert(data.message || data.error || "AI Model could not identify clinical symptoms from this text.");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Voice analysis failed";
+      alert("Error: " + msg);
+    } finally {
+      setAnalyzingAi(false);
+    }
+  };
+
+  // Filter past prescriptions based on search input
+  const filteredPastPrescriptions = (currentPatient?.pastPrescriptions || []).filter((rx) =>
+    rx.diagnosis.toLowerCase().includes(historySearch.toLowerCase()) ||
+    rx.doctor.toLowerCase().includes(historySearch.toLowerCase()) ||
+    rx.medicines.some((m) => m.name.toLowerCase().includes(historySearch.toLowerCase()))
+  );
 
   return (
     <div className="flex flex-1 flex-col text-slate-900">
       
-      <div className="mx-auto w-full max-w-[1700px] px-4 pt-6 sm:px-6">
-        <h1 className="text-2xl font-extrabold tracking-tight">Doctor Dashboard</h1>
-        <p className="mt-1 text-xs text-slate-500">Patient details, consultation notes, prescription history and clinical schedule.</p>
-        <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-          <strong>Sample patient overview.</strong> Queue, patient details, notes and past prescriptions use the illustrative data. Voice input is a simulation. The schedule uses the existing backend.
-        </p>
+      {/* ========================================================================= */}
+      {/* 1. TOP HEADER: Site Logo (Left), Doctor Info, Settings, Logout (Right)    */}
+      {/* ========================================================================= */}
+      <div className="mx-auto w-full max-w-[1700px] px-4 pt-6 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Doctor Clinical Dashboard</h1>
+          <p className="mt-1 text-xs text-slate-500">Live consultation, AI voice diagnostics, real-time queue, and prescription history.</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setIsInitialLoginPrompt(false);
+              setShowAvailabilityModal(true);
+            }}
+            className={`group flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+              isAvailable
+                ? "bg-gradient-to-r from-emerald-500/10 via-emerald-50 to-teal-50 border-emerald-300 hover:border-emerald-400"
+                : "bg-slate-100/90 border-slate-300 hover:border-slate-400"
+            }`}
+            title="Click to adjust live availability hours or go offline"
+          >
+            <div className="relative flex items-center justify-center">
+              {isAvailable ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                </>
+              ) : (
+                <span className="inline-flex rounded-full h-3 w-3 bg-slate-400"></span>
+              )}
+            </div>
+
+            <div className="text-left">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-black tracking-wide ${isAvailable ? "text-emerald-900" : "text-slate-700"}`}>
+                  {isAvailable ? "ACCEPTING PATIENTS" : "CURRENTLY OFFLINE"}
+                </span>
+                <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${
+                  isAvailable 
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" 
+                    : "bg-slate-200 text-slate-600 border-slate-300"
+                }`}>
+                  {isAvailable ? "LIVE" : "PAUSED"}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                {isAvailable 
+                  ? `Available Until: ${availableUntilDisplay || availableUntilTime} (Click to edit)`
+                  : "Click here to set available time & accept bookings"}
+              </p>
+            </div>
+
+            <div className={`p-1.5 rounded-xl border transition-all ml-1 ${
+              isAvailable 
+                ? "bg-emerald-100 text-emerald-800 border-emerald-200 group-hover:bg-emerald-200" 
+                : "bg-white text-slate-500 border-slate-200 group-hover:bg-slate-200"
+            }`}>
+              <Power className="w-3.5 h-3.5" />
+            </div>
+          </button>
+          <Link
+            href="/doctor/prescription-workspace"
+            className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition-all cursor-pointer"
+          >
+            <Pill className="w-3.5 h-3.5" />
+            Prescription Workspace
+          </Link>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -194,13 +897,13 @@ export default function DoctorDashboard() {
       {/* Column 2 (5/12): Current Patient & Central Voice Mic                      */}
       {/* Column 3 (4/12): Patient Reception & Past Prescription History (Right)   */}
       {/* ========================================================================= */}
-      <main className="flex-grow max-w-[1700px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-12 gap-6">
+      <main className="flex-grow max-w-[1700px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* ======================================================================= */}
         {/* ======================================================================= */}
         {/* COLUMN 1: "Next Patient" Queue OR Doctor Scheduled Tasks (get_tasks)    */}
         {/* ======================================================================= */}
-        <div className="xl:col-span-1 2xl:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-4">
 
           {/* Tab Switcher: Queue vs Tasks */}
           <div className="flex p-1 bg-slate-200/80 rounded-2xl border border-slate-300/60">
@@ -232,83 +935,228 @@ export default function DoctorDashboard() {
           {sidebarTab === "queue" && (
             <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Live Consultation Queue</span>
-                <span className="text-xs font-bold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200">
-                  {currentPatientIndex + 1} of {queue.length}
-                </span>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Live Consultation Queue</span>
+                  <span className="text-[10px] text-slate-400">
+                    {queue.length > 0 ? `Patient ${currentPatientIndex + 1} of ${queue.length}` : "No active bookings"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => fetchDoctorQueue()}
+                    disabled={queueLoading}
+                    className="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition-all cursor-pointer"
+                    title="Refresh Live Queue"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${queueLoading ? "animate-spin text-purple-600" : ""}`} />
+                  </button>
+                  {isUsingDemoQueue ? (
+                    <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                      Demo Mode
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200">
+                      Live ({queue.length})
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* BIG NEXT PATIENT BUTTON */}
-              <button
-                onClick={handleNextPatient}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Next Patient</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {/* Live Queue Statistics Strip */}
+              <div className="grid grid-cols-4 gap-1 p-2 bg-slate-50 rounded-2xl border border-slate-200/80 text-center">
+                <div className="p-1">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 block">Total</span>
+                  <span className="text-xs font-black text-slate-800">{queueStats.total || queue.length}</span>
+                </div>
+                <div className="p-1 border-l border-slate-200">
+                  <span className="text-[9px] uppercase font-bold text-amber-600 block">Waiting</span>
+                  <span className="text-xs font-black text-amber-700">{queueStats.waiting}</span>
+                </div>
+                <div className="p-1 border-l border-slate-200">
+                  <span className="text-[9px] uppercase font-bold text-purple-600 block">Serving</span>
+                  <span className="text-xs font-black text-purple-700">{queueStats.serving}</span>
+                </div>
+                <div className="p-1 border-l border-slate-200">
+                  <span className="text-[9px] uppercase font-bold text-emerald-600 block">Done</span>
+                  <span className="text-xs font-black text-emerald-700">{queueStats.completed}</span>
+                </div>
+              </div>
 
-              {/* Waiting Queue List */}
+              {/* Doctor Availability Live Alert in Queue */}
+              {!isAvailable ? (
+                <div 
+                  onClick={() => {
+                    setIsInitialLoginPrompt(false);
+                    setShowAvailabilityModal(true);
+                  }}
+                  className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-100/70 transition-all shadow-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-bold text-amber-900">Currently Offline</div>
+                      <div className="text-[10px] text-amber-700">Patients cannot book live queue tokens</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-extrabold bg-amber-600 text-white px-2.5 py-1 rounded-xl shadow-xs hover:bg-amber-700">
+                    Go Live
+                  </span>
+                </div>
+              ) : (
+                <div 
+                  onClick={() => {
+                    setIsInitialLoginPrompt(false);
+                    setShowAvailabilityModal(true);
+                  }}
+                  className="p-3 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-emerald-100/80 transition-all shadow-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                    </span>
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-900">Accepting Appointments</div>
+                      <div className="text-[10px] text-emerald-700">Until {availableUntilDisplay || availableUntilTime} &bull; Click to adjust</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2 py-0.5 rounded-lg shadow-xs">
+                    Adjust
+                  </span>
+                </div>
+              )}
+
+              {/* DYNAMIC CALL / SERVE / COMPLETE BUTTONS */}
+              {currentPatient ? (
+                <div className="space-y-2">
+                  {currentPatient.status === "serving" ? (
+                    <button
+                      onClick={handleCompleteConsultation}
+                      disabled={updatingQueueStatus}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{updatingQueueStatus ? "Updating..." : `Complete Consultation (${currentPatient.token})`}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleCallPatient(currentPatient)}
+                      disabled={updatingQueueStatus}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/20 hover:shadow-purple-600/35 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Radio className="w-4 h-4 animate-pulse" />
+                      <span>{updatingQueueStatus ? "Updating..." : `Call & Serve Token ${currentPatient.token}`}</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleNextPatient}
+                    disabled={updatingQueueStatus}
+                    className="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Next Patient in Queue</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Waiting Queue List or Empty State */}
               <div className="space-y-2.5 pt-2 border-t border-slate-100">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Queue Timeline</div>
                 
-                <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
-                  {queue.map((p, idx) => {
-                    const isActive = idx === currentPatientIndex;
-                    const isCompleted = idx < currentPatientIndex;
+                {queue.length === 0 ? (
+                  <div className="p-6 text-center bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-500 space-y-2">
+                    <Users className="w-7 h-7 text-purple-400 mx-auto" />
+                    <p className="font-bold text-slate-800">No Patients in Queue</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      No appointments booked for this date yet. Bookings from the Patient Portal or Mobile App will automatically flow here!
+                    </p>
+                    <button
+                      onClick={() => {
+                        setQueue(SAMPLE_QUEUE);
+                        setIsUsingDemoQueue(true);
+                        setCurrentPatientIndex(0);
+                      }}
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-50 px-3 py-1.5 rounded-xl border border-purple-200 cursor-pointer transition-all"
+                    >
+                      <span>Load Demo Queue Preview</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+                    {queue.map((p, idx) => {
+                      const isActive = idx === currentPatientIndex;
+                      const isServing = p.status === "serving";
+                      const isCompleted = p.status === "completed";
 
-                    return (
-                      <button
-                        type="button"
-                        aria-label={`Select sample patient ${p.name}`}
-                        key={p.id}
-                        onClick={() => {
-                          setCurrentPatientIndex(idx);
-                          setSelectedReceipt(null);
-                        }}
-                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex w-full items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 ${
-                          isActive
-                            ? "bg-purple-50/80 border-purple-300 shadow-sm"
-                            : isCompleted
-                              ? "bg-slate-50/80 border-slate-200 opacity-60"
-                              : "bg-white border-slate-200 hover:border-slate-300"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`text-xs font-black px-2 py-1 rounded-xl ${
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => {
+                            setCurrentPatientIndex(idx);
+                            setSelectedReceipt(null);
+                          }}
+                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                             isActive
-                              ? "bg-purple-600 text-white shadow-sm"
-                              : isCompleted
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "bg-slate-100 text-slate-700"
-                          }`}>
-                            {p.token}
-                          </span>
-                          <div>
-                            <h4 className="text-xs font-bold text-slate-900 leading-snug">{p.name}</h4>
-                            <span className="text-[10px] text-slate-500">{p.age} Yrs &bull; {p.gender}</span>
+                              ? "bg-purple-50/80 border-purple-300 shadow-sm"
+                              : isServing
+                                ? "bg-emerald-50/70 border-emerald-200"
+                                : isCompleted
+                                  ? "bg-slate-50/80 border-slate-200 opacity-60"
+                                  : "bg-white border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs font-black px-2 py-1 rounded-xl ${
+                              isServing
+                                ? "bg-emerald-600 text-white shadow-sm"
+                                : isActive
+                                  ? "bg-purple-600 text-white shadow-sm"
+                                  : isCompleted
+                                    ? "bg-slate-200 text-slate-700"
+                                    : "bg-slate-100 text-slate-700"
+                            }`}>
+                              {p.token}
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-bold text-slate-900 leading-snug">{p.name}</h4>
+                              <span className="text-[10px] text-slate-500">{p.age} Yrs &bull; {p.gender}</span>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              {p.time}
+                            </span>
+                            {isServing && (
+                              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wide flex items-center gap-1 justify-end">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                In Consultation
+                              </span>
+                            )}
+                            {!isServing && isActive && (
+                              <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wide">
+                                Selected
+                              </span>
+                            )}
+                            {isCompleted && (
+                              <span className="text-[9px] font-bold text-slate-500 flex items-center gap-0.5 justify-end">
+                                <CheckCircle2 className="w-3 h-3" /> Done
+                              </span>
+                            )}
+                            {!isServing && !isCompleted && !isActive && (
+                              <span className="text-[9px] font-bold text-amber-600 uppercase tracking-wide">
+                                Waiting
+                              </span>
+                            )}
                           </div>
                         </div>
-
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            {p.time}
-                          </span>
-                          {isActive && (
-                            <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wide">
-                              Consulting
-                            </span>
-                          )}
-                          {isCompleted && (
-                            <span className="text-[9px] font-bold text-emerald-600 flex items-center gap-0.5 justify-end">
-                              <CheckCircle2 className="w-3 h-3" /> Done
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -352,7 +1200,6 @@ export default function DoctorDashboard() {
                 </span>
                 <input
                   type="date"
-                  aria-label="Schedule date"
                   value={selectedTaskDate}
                   onChange={(e) => setSelectedTaskDate(e.target.value)}
                   className="px-2 py-1 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600 cursor-pointer"
@@ -456,7 +1303,7 @@ export default function DoctorDashboard() {
         {/* ======================================================================= */}
         {/* COLUMN 2: Current Patient Details + Central Voice Mic (5 / 12 Cols)     */}
         {/* ======================================================================= */}
-        <div className="xl:col-span-1 2xl:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-6">
 
           {/* --------------------------------------------------------------------- */}
           {/* A. CURRENT PATIENT DETAILS BANNER                                    */}
@@ -477,6 +1324,21 @@ export default function DoctorDashboard() {
                         <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">
                           Token {currentPatient.token}
                         </span>
+                        {currentPatient.status === "serving" ? (
+                          <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
+                            In Consultation
+                          </span>
+                        ) : currentPatient.status === "completed" ? (
+                          <span className="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Completed
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full shadow-xs">
+                            Waiting in Queue
+                          </span>
+                        )}
                         <span className="text-[11px] font-mono text-slate-500 font-semibold">
                           ID: {currentPatient.id}
                         </span>
@@ -487,6 +1349,12 @@ export default function DoctorDashboard() {
                         <span><strong>Gender:</strong> {currentPatient.gender}</span>
                         <span className="text-slate-300">&bull;</span>
                         <span><strong>Blood Group:</strong> <strong className="text-purple-700">{currentPatient.bloodGroup}</strong></span>
+                        {currentPatient.phone && (
+                          <>
+                            <span className="text-slate-300">&bull;</span>
+                            <span><strong>Phone:</strong> {currentPatient.phone}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -561,35 +1429,80 @@ export default function DoctorDashboard() {
               Click the microphone to record clinical dialogue. AI automatically captures symptoms and medication requests.
             </p>
 
-            {/* Central Animated Mic Button */}
-            <div className="relative mb-6">
+            {/* Central Animated Mic Button & Recording Controls */}
+            <div className="relative mb-5 flex flex-col items-center">
               {isListening && (
                 <>
-                  <div className="absolute -inset-4 rounded-full bg-purple-500/20 animate-ping" />
-                  <div className="absolute -inset-8 rounded-full bg-purple-500/10 animate-pulse" />
+                  <div className="absolute -inset-4 rounded-full bg-rose-500/20 animate-ping" />
+                  <div className="absolute -inset-8 rounded-full bg-rose-500/10 animate-pulse" />
                 </>
               )}
 
               <button
                 onClick={toggleListening}
-                className={`relative w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
+                disabled={isWhisperTranscribing}
+                className={`relative w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-300 shadow-xl cursor-pointer disabled:opacity-50 ${
                   isListening
-                    ? "bg-purple-600 text-white shadow-purple-600/40 scale-105"
+                    ? "bg-rose-600 text-white shadow-rose-600/40 scale-105"
+                    : isWhisperTranscribing
+                    ? "bg-purple-600 text-white shadow-purple-600/40 animate-pulse"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 hover:border-purple-400"
                 }`}
               >
-                {isListening ? (
+                {isWhisperTranscribing ? (
+                  <>
+                    <RefreshCw className="w-8 h-8 animate-spin" />
+                    <span className="text-[9px] font-bold mt-1">Whisper...</span>
+                  </>
+                ) : isListening ? (
                   <>
                     <Mic className="w-9 h-9 animate-bounce" />
-                    <span className="text-[10px] font-bold mt-1">Listening...</span>
+                    <span className="text-[10px] font-bold mt-1">
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, "0")}:
+                      {String(recordingSeconds % 60).padStart(2, "0")}
+                    </span>
                   </>
                 ) : (
                   <>
                     <MicOff className="w-8 h-8 text-slate-500" />
-                    <span className="text-[10px] font-bold text-slate-500 mt-1">Start Voice</span>
+                    <span className="text-[10px] font-bold text-slate-500 mt-1">Record Audio</span>
                   </>
                 )}
               </button>
+
+              {/* Status Indicator under Mic */}
+              <div className="mt-3 flex items-center gap-2">
+                {isListening ? (
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5 animate-pulse">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                    Recording live consultation audio... Click mic to stop & transcribe with Whisper
+                  </span>
+                ) : isWhisperTranscribing ? (
+                  <span className="text-xs font-bold text-purple-600 flex items-center gap-1.5">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    OpenAI Whisper ASR is transcribing clinical audio...
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-slate-400 font-medium">Or</span>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 transition-all cursor-pointer"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      Upload Audio File (.wav/.mp3/.webm)
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Live Real-time Transcript Area */}
@@ -607,14 +1520,303 @@ export default function DoctorDashboard() {
                 )}
               </div>
               <textarea
-                aria-label="Consultation notes"
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
-                rows={2}
+                rows={3}
                 className="w-full bg-transparent border-none text-xs text-slate-800 focus:outline-none resize-none font-medium leading-relaxed"
                 placeholder="Doctor consultation notes will appear here in real time..."
               />
+
+              {/* Action Buttons: Clear & Analyze with AI Engine */}
+              <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTranscript("");
+                    setAiAnalysis(null);
+                  }}
+                  className="text-[11px] font-bold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                >
+                  Clear Notes
+                </button>
+                <button
+                  type="button"
+                  disabled={analyzingAi || !transcript.trim()}
+                  onClick={handleAnalyzeVoiceConsultation}
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-purple-600/25 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {analyzingAi ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      Analyzing with AI Engine...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Extract Symptoms & Predict Condition
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* AI DIAGNOSTIC & CLINICAL INTELLIGENCE RESULTS CARD */}
+            {aiAnalysis && (
+              <div className="w-full mt-4 bg-gradient-to-br from-purple-50/90 via-white to-indigo-50/90 border border-purple-200 rounded-3xl p-5 text-left shadow-md space-y-4 animate-in fade-in slide-in-from-top-3 duration-300">
+                
+                {/* Header Row: Primary Prediction, ICD-10, Severity & Confidence */}
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-purple-100">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-purple-600 bg-purple-100/80 px-2 py-0.5 rounded-full">
+                        AI Clinical Diagnostic Assessment
+                      </span>
+                      {aiAnalysis.primary_diagnosis?.icd_10_code && (
+                        <span className="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-md">
+                          ICD-10: {aiAnalysis.primary_diagnosis.icd_10_code}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-lg font-black text-slate-900 mt-1">
+                      {aiAnalysis.primary_diagnosis?.condition_label}
+                    </h4>
+                    {aiAnalysis.primary_diagnosis?.clinical_description && (
+                      <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                        {aiAnalysis.primary_diagnosis?.clinical_description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="inline-block text-xs font-black bg-purple-600 text-white px-3 py-1 rounded-xl shadow-xs">
+                      {Math.round((aiAnalysis.primary_diagnosis?.confidence || 0) * 100)}% Confidence
+                    </span>
+                    <span className={`block text-[10px] font-extrabold uppercase tracking-wider mt-1.5 ${
+                      aiAnalysis.primary_diagnosis?.severity_level === "Severe"
+                        ? "text-rose-600"
+                        : aiAnalysis.primary_diagnosis?.severity_level === "Moderate"
+                        ? "text-amber-600"
+                        : "text-emerald-600"
+                    }`}>
+                      Risk: {aiAnalysis.primary_diagnosis?.severity_level} (Score: {aiAnalysis.primary_diagnosis?.total_severity_score ?? 0})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Regional Location & Outbreak Surveillance Banner */}
+                {aiAnalysis.patient_location && (
+                  <div className="p-3.5 bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/80 border border-blue-200/80 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-blue-100 text-blue-700">
+                          <Activity className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 block">
+                            Regional Outbreak Surveillance &bull; {aiAnalysis.patient_location.province || "Western Province"}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800">
+                            Location: {aiAnalysis.patient_location.matched_query || aiAnalysis.patient_location.district}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        aiAnalysis.patient_location.alert_level === "High Risk"
+                          ? "bg-rose-100 text-rose-700 border-rose-300"
+                          : aiAnalysis.patient_location.alert_level === "Moderate-to-High Risk"
+                          ? "bg-amber-100 text-amber-800 border-amber-300"
+                          : "bg-emerald-100 text-emerald-700 border-emerald-300"
+                      }`}>
+                        {aiAnalysis.patient_location.alert_level || "Active Surveillance"}
+                      </span>
+                    </div>
+
+                    {aiAnalysis.regional_outbreak_surveillance?.active_clusters?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-blue-100/80">
+                        <span className="text-[10px] font-bold text-slate-500">Active Viral Clusters:</span>
+                        {aiAnalysis.regional_outbreak_surveillance.active_clusters.map((cluster: string, idx: number) => (
+                          <span key={idx} className="text-[10px] font-semibold bg-white text-indigo-700 border border-blue-200 px-2 py-0.5 rounded-md shadow-2xs">
+                            &bull; {cluster}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {aiAnalysis.patient_location.regional_advisory && (
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-medium bg-white/70 p-2 rounded-xl border border-blue-100">
+                        <strong>Regional Advisory:</strong> {aiAnalysis.patient_location.regional_advisory}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Clinical Allergies & Safety Warnings Alert */}
+                {aiAnalysis.extracted_clinical_notes?.patient_reported_allergies?.length > 0 ? (
+                  <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span className="text-xs font-black text-rose-950 uppercase tracking-wide">
+                          Critical Allergy Contraindication Alert
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase bg-rose-600 text-white px-2 py-0.5 rounded-md">
+                        Doctor Attention Required
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-[10px] font-bold text-rose-800 self-center">Reported Drug Allergens:</span>
+                      {aiAnalysis.extracted_clinical_notes.patient_reported_allergies.map((allergen: string, idx: number) => (
+                        <span key={idx} className="text-[11px] font-extrabold bg-white border border-rose-300 text-rose-700 px-2.5 py-0.5 rounded-lg shadow-2xs">
+                          &bull; {allergen}
+                        </span>
+                      ))}
+                    </div>
+
+                    {aiAnalysis.extracted_clinical_notes?.allergy_contraindications?.length > 0 && (
+                      <ul className="text-[11px] text-rose-900 font-medium space-y-1 bg-white/60 p-2 rounded-xl border border-rose-100">
+                        {aiAnalysis.extracted_clinical_notes.allergy_contraindications.map((warning: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                            <span>{warning}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : aiAnalysis.extracted_clinical_notes?.allergy_status === "No Known Drug Allergies (NKDA)" ? (
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2 text-xs font-bold text-emerald-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>No Known Drug Allergies (NKDA) reported by patient in dialogue.</span>
+                  </div>
+                ) : null}
+
+                {/* Current Ongoing Medications & Vitals Mentioned Row */}
+                {(aiAnalysis.extracted_clinical_notes?.patient_current_medications?.length > 0 || 
+                  (aiAnalysis.extracted_clinical_notes?.vital_signs_mentioned && Object.keys(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).length > 0)) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {/* Current Meds */}
+                    {aiAnalysis.extracted_clinical_notes?.patient_current_medications?.length > 0 && (
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          Current Ongoing Medications:
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {aiAnalysis.extracted_clinical_notes.patient_current_medications.map((med: string, idx: number) => (
+                            <span key={idx} className="text-[11px] font-semibold bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <Pill className="w-3 h-3 text-purple-600" />
+                              {med}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Vitals */}
+                    {aiAnalysis.extracted_clinical_notes?.vital_signs_mentioned && Object.keys(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).length > 0 && (
+                      <div className="p-3 bg-purple-50/60 border border-purple-200/80 rounded-2xl space-y-1.5">
+                        <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">
+                          Reported Vital Signs:
+                        </span>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          {Object.entries(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).map(([k, v]) => (
+                            <span key={k} className="bg-white border border-purple-200 px-2 py-0.5 rounded-md text-slate-800 font-semibold">
+                              <span className="capitalize text-slate-500">{k.replace('_', ' ')}:</span> {String(v)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Detected Symptoms Badges */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                    Extracted Clinical Symptoms ({aiAnalysis.extracted_symptoms?.length || 0}):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {aiAnalysis.extracted_symptoms?.map((sym: any, idx: number) => (
+                      <span
+                        key={idx}
+                        className="text-[11px] font-semibold bg-white border border-purple-200 text-slate-800 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-xs"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                        {sym.symptom_label}
+                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md ${
+                          sym.severity === "severe"
+                            ? "bg-rose-100 text-rose-700"
+                            : sym.severity === "moderate"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}>
+                          {sym.severity}
+                        </span>
+                        {sym.duration && sym.duration !== "unspecified" && (
+                          <span className="text-[9px] text-slate-500">
+                            ({sym.duration})
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Differential Diagnoses if present */}
+                {aiAnalysis.differential_diagnoses?.length > 0 && (
+                  <div className="pt-2 border-t border-purple-100/70">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
+                      Differential Diagnoses (Alternatives):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {aiAnalysis.differential_diagnoses.map((diff: any, idx: number) => (
+                        <span key={idx} className="text-xs bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-lg font-medium border border-slate-200">
+                          {diff.condition_label} ({Math.round(diff.confidence * 100)}%)
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommended Precautions */}
+                {aiAnalysis.recommended_precautions?.length > 0 && (
+                  <div className="pt-2 border-t border-purple-100/70">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
+                      Recommended Clinical Precautions:
+                    </span>
+                    <ul className="text-xs text-slate-700 space-y-1 font-medium">
+                      {aiAnalysis.recommended_precautions.map((prec: string, idx: number) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>{prec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 1-Click Action Button: Send to Component 3 Prescription Workspace */}
+                <div className="pt-3 border-t border-purple-200 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">
+                      Ready for Prescription Decision Support
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      Transfers verified diagnosis, allergies, and location to Component 3
+                    </span>
+                  </div>
+                  <Link
+                    href={`/doctor/prescription-workspace?patientId=${currentPatient?.id || 12}&condition=${aiAnalysis.primary_diagnosis?.condition_code || ''}&location=${encodeURIComponent(aiAnalysis.patient_location?.district || '')}`}
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold flex items-center gap-2 shadow-sm shadow-purple-600/20 transition-all cursor-pointer"
+                  >
+                    <Pill className="w-3.5 h-3.5" />
+                    Proceed to Prescription Workspace
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+
+              </div>
+            )}
 
           </section>
 
@@ -623,9 +1825,124 @@ export default function DoctorDashboard() {
         {/* ======================================================================= */}
         {/* COLUMN 3 (RIGHT): PATIENT PAST PRESCRIPTION & RECEPTION HISTORY (4/12) */}
         {/* ======================================================================= */}
-        <div className="xl:col-span-2 2xl:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-4">
           
-          <PrescriptionHistory />
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4 flex flex-col justify-between min-h-[640px]">
+            
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
+                    <History className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                      Prescription History
+                    </h3>
+                    <p className="text-[10px] text-slate-500">
+                      Past receipts & medications for {currentPatient?.name}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200">
+                  {currentPatient?.pastPrescriptions.length || 0} Records
+                </span>
+              </div>
+
+              {/* Search in Past Prescriptions */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search past medicine, diagnosis..."
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-600"
+                />
+              </div>
+
+              {/* Past Prescriptions Timeline / Receipt List */}
+              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                {filteredPastPrescriptions.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400 text-xs">
+                    <History className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                    <p className="font-semibold text-slate-500">No past prescription history found.</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Previous treatment records will appear here.</p>
+                  </div>
+                ) : (
+                  filteredPastPrescriptions.map((rx) => {
+                    const isSelected = selectedReceipt?.id === rx.id;
+
+                    return (
+                      <div
+                        key={rx.id}
+                        onClick={() => setSelectedReceipt(isSelected ? null : rx)}
+                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-2.5 ${
+                          isSelected
+                            ? "bg-purple-50/70 border-purple-300 shadow-sm"
+                            : "bg-slate-50/70 hover:bg-slate-100/70 border-slate-200"
+                        }`}
+                      >
+                        {/* Receipt Top: Date, Receipt ID, Diagnosis Badge */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3 h-3 text-purple-600" />
+                              <span className="text-xs font-bold text-slate-900">{rx.date}</span>
+                              <span className="text-[10px] font-mono text-slate-400">({rx.receiptNumber})</span>
+                            </div>
+                            <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
+                              {rx.doctor} &bull; {rx.clinic}
+                            </span>
+                          </div>
+
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 uppercase tracking-wide shrink-0">
+                            {rx.diagnosis}
+                          </span>
+                        </div>
+
+                        {/* Prescribed Medicines List */}
+                        <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
+                          {rx.medicines.map((med, mIdx) => (
+                            <div key={mIdx} className="flex justify-between items-center text-xs bg-white p-2 rounded-xl border border-slate-200/50">
+                              <div className="flex items-center gap-1.5">
+                                <Pill className="w-3 h-3 text-purple-600 shrink-0" />
+                                <span className="font-bold text-slate-800 text-[11px]">{med.name}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] text-slate-600 font-mono font-semibold block">{med.dosage}</span>
+                                <span className="text-[9px] text-slate-400 block">{med.frequency}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Doctor's Past Notes if present */}
+                        {rx.notes && (
+                          <p className="text-[10px] text-slate-600 italic bg-white/80 p-2 rounded-xl border border-slate-200/40">
+                            &ldquo;{rx.notes}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+            </div>
+
+            {/* Quick Practice Tip Box */}
+            <div className="pt-3 border-t border-slate-100">
+              <div className="p-3 bg-purple-50/60 border border-purple-100 rounded-2xl flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  <strong>Clinical Safety Note:</strong> Verify patient antibiotic sensitivity against previous responses prior to prescribing.
+                </p>
+              </div>
+            </div>
+
+          </div>
 
         </div>
 
@@ -646,7 +1963,6 @@ export default function DoctorDashboard() {
                 </div>
               </div>
               <button
-                aria-label="Close new task form"
                 onClick={() => setShowNewTaskModal(false)}
                 className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
@@ -753,6 +2069,207 @@ export default function DoctorDashboard() {
         </div>
       )}
 
+      {/* ========================================================================= */}
+      {/* 5. DOCTOR LIVE AVAILABILITY ADJUST MODAL & ON-LOGIN PROMPT                */}
+      {/* ========================================================================= */}
+      {showAvailabilityModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 p-6 text-white relative">
+              <button
+                onClick={() => {
+                  setShowAvailabilityModal(false);
+                  setIsInitialLoginPrompt(false);
+                }}
+                className="absolute top-5 right-5 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
+                  isAvailable 
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" 
+                    : "bg-purple-500/20 text-purple-200 border-purple-400/30"
+                }`}>
+                  {isInitialLoginPrompt ? "Doctor Login Check" : "Live Availability Control"}
+                </span>
+              </div>
+
+              <h3 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-purple-400" />
+                {isInitialLoginPrompt ? `Welcome, ${doctorName}!` : "Adjust Consultation Hours"}
+              </h3>
+              <p className="text-xs text-purple-200/80 mt-1 leading-relaxed">
+                {isInitialLoginPrompt 
+                  ? "Are you currently accepting patient appointments today? Adjust until what time you will be available for queue tokens."
+                  : "Set or adjust your active window. Patients on the mobile app can only book queue numbers while you are live."}
+              </p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              
+              {/* Online / Offline Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Consultation Status
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsAvailable(true)}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                      isAvailable
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-950 shadow-sm ring-2 ring-emerald-500/30"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-xl ${isAvailable ? "bg-emerald-500 text-white shadow-xs" : "bg-slate-200 text-slate-500"}`}>
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold leading-tight">Accept Patients</div>
+                      <div className="text-[10px] opacity-75">Online & Live</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAvailable(false)}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                      !isAvailable
+                        ? "bg-rose-50 border-rose-300 text-rose-950 shadow-sm ring-2 ring-rose-500/30"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-xl ${!isAvailable ? "bg-rose-500 text-white shadow-xs" : "bg-slate-200 text-slate-500"}`}>
+                      <Power className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold leading-tight">Remain Offline</div>
+                      <div className="text-[10px] opacity-75">Pause Bookings</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Working Window / Available Until (if Online is chosen) */}
+              {isAvailable && (
+                <div className="space-y-3 bg-purple-50/50 p-4 rounded-2xl border border-purple-100 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-purple-600" />
+                      Available Until (Consultation End Time):
+                    </label>
+                    <span className="text-xs font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-lg font-mono">
+                      {availableUntilTime}
+                    </span>
+                  </div>
+
+                  {/* 1-Click Quick Time Presets */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Quick Adjust Presets:
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(1, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +1 Hour
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(2, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +2 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime(getOffsetTime(3, 0))}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        +3 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("13:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 1:00 PM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("15:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 3:00 PM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailableUntilTime("17:00")}
+                        className="py-1.5 px-2 bg-white hover:bg-purple-100 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold text-slate-700 hover:text-purple-700 transition-all cursor-pointer"
+                      >
+                        Until 5:00 PM
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Or Manual Custom Time */}
+                  <div className="pt-2 border-t border-purple-100 flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-slate-600">Custom Time Picker:</span>
+                    <input
+                      type="time"
+                      value={availableUntilTime}
+                      onChange={(e) => setAvailableUntilTime(e.target.value)}
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAvailabilityModal(false);
+                    setIsInitialLoginPrompt(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingAvailability}
+                  onClick={() => handleUpdateAvailability(isAvailable, availableUntilTime)}
+                  className={`flex-1 py-2.5 rounded-xl text-white text-xs font-extrabold shadow-md transition-all cursor-pointer disabled:opacity-50 ${
+                    isAvailable
+                      ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                      : "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25"
+                  }`}
+                >
+                  {savingAvailability 
+                    ? "Updating..." 
+                    : isAvailable 
+                      ? "Save & Go Live" 
+                      : "Confirm Offline"}
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      
 
     </div>
   );

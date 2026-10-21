@@ -30,7 +30,11 @@ import {
   Thermometer,
   ShieldCheck,
   TrendingUp,
-  FileText
+  FileText,
+  RefreshCw,
+  X,
+  Ticket,
+  ClipboardList
 } from "lucide-react";
 
 interface Doctor {
@@ -116,10 +120,38 @@ export default function PatientDashboard() {
   const [availabilityError, setAvailabilityError] = useState("");
 
   // Live Queue Token State (Dan yana appointment number eka)
-  const [myToken, setMyToken] = useState("#08");
-  const [currentServingToken, setCurrentServingToken] = useState("#06");
-  const [patientsAhead, setPatientsAhead] = useState(2);
-  const [estimatedWaitMinutes, setEstimatedWaitMinutes] = useState(12);
+  const [hasLiveAppointment, setHasLiveAppointment] = useState(false);
+  const [liveAppointment, setLiveAppointment] = useState<{
+    id: number;
+    my_token: string;
+    my_token_number: number;
+    doctor_name: string;
+    doctor_id: string;
+    hospital_name: string;
+    appointment_date: string;
+    session_start_time: string;
+    current_serving_token: string;
+    patients_ahead: number;
+    estimated_wait_minutes: number;
+    status: string;
+    estimated_time: string;
+  } | null>(null);
+  const [myToken, setMyToken] = useState("#01");
+  const [currentServingToken, setCurrentServingToken] = useState("#01");
+  const [patientsAhead, setPatientsAhead] = useState(0);
+  const [estimatedWaitMinutes, setEstimatedWaitMinutes] = useState(10);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [cancellingAppointment, setCancellingAppointment] = useState(false);
+
+  // Booking Flow State
+  const [bookingReason, setBookingReason] = useState("");
+  const [submittingBooking, setSubmittingBooking] = useState(false);
+  const [bookingSuccessModal, setBookingSuccessModal] = useState<any>(null);
+
+  // Patient Appointments List Modal State
+  const [showAppointmentsModal, setShowAppointmentsModal] = useState(false);
+  const [patientAppointmentsList, setPatientAppointmentsList] = useState<any[]>([]);
+  const [loadingAppointmentsList, setLoadingAppointmentsList] = useState(false);
 
   // Daily Medication / Pill Adherence Schedule State (Bonna beth schedule)
   const [medications, setMedications] = useState<MedicationDose[]>([
@@ -248,6 +280,116 @@ export default function PatientDashboard() {
     }
   };
 
+  // Fetch live queue status for the logged-in patient
+  const fetchLiveQueue = async () => {
+    const username = userSession?.username;
+    if (!username) return;
+    setQueueLoading(true);
+    try {
+      const data = await apiRequest(`/api/appointments/my-queue/?username=${encodeURIComponent(username)}`);
+      if (data && data.has_appointment && data.appointment) {
+        setHasLiveAppointment(true);
+        setLiveAppointment(data.appointment);
+        setMyToken(data.appointment.my_token || "#01");
+        setCurrentServingToken(data.appointment.current_serving_token || "#01");
+        setPatientsAhead(data.appointment.patients_ahead ?? 0);
+        setEstimatedWaitMinutes(data.appointment.estimated_wait_minutes ?? 10);
+      } else {
+        setHasLiveAppointment(false);
+        setLiveAppointment(null);
+      }
+    } catch (e) {
+      console.warn("Could not fetch patient live queue:", e);
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
+  // Fetch patient appointments history
+  const fetchPatientAppointments = async () => {
+    const username = userSession?.username;
+    if (!username) return;
+    setLoadingAppointmentsList(true);
+    try {
+      const data = await apiRequest(`/api/patient/my-appointments/?username=${encodeURIComponent(username)}`);
+      if (data && data.appointments) {
+        setPatientAppointmentsList(data.appointments);
+      }
+    } catch (e) {
+      console.warn("Could not fetch appointment history:", e);
+    } finally {
+      setLoadingAppointmentsList(false);
+    }
+  };
+
+  // Poll live queue periodically
+  useEffect(() => {
+    if (userSession?.username) {
+      fetchLiveQueue();
+      fetchPatientAppointments();
+      const interval = setInterval(() => {
+        fetchLiveQueue();
+      }, 12000);
+      return () => clearInterval(interval);
+    }
+  }, [userSession]);
+
+  // Handle Book Queue Token
+  const handleBookToken = async (doc: Doctor, customDate?: string) => {
+    if (!userSession) {
+      alert("Please log in to book an appointment token.");
+      return;
+    }
+    setSubmittingBooking(true);
+    const targetDate = customDate || availabilityDate || new Date().toISOString().split("T")[0];
+    try {
+      const data = await apiRequest("/api/appointments/book/", {
+        method: "POST",
+        body: JSON.stringify({
+          doctor_id: doc.doctor_id,
+          doctor_name: doc.doctors_name,
+          hospital_name: doc.working_hospital,
+          appointment_date: targetDate,
+          username: userSession.username,
+          patient_username: userSession.username,
+          reason: bookingReason || "Routine Medical Checkup",
+        }),
+      });
+
+      if (data && data.appointment) {
+        setBookingReason("");
+        setBookingSuccessModal(data.appointment);
+        await fetchLiveQueue();
+        await fetchPatientAppointments();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to book appointment token.";
+      alert("Booking Notice: " + msg);
+    } finally {
+      setSubmittingBooking(false);
+    }
+  };
+
+  // Handle Cancel Appointment
+  const handleCancelAppointment = async (apptId: number) => {
+    if (!confirm("Are you sure you want to cancel this appointment token?")) return;
+    setCancellingAppointment(true);
+    try {
+      await apiRequest("/api/appointments/cancel/", {
+        method: "POST",
+        body: JSON.stringify({ appointment_id: apptId }),
+      });
+      alert("Your appointment token has been cancelled.");
+      await fetchLiveQueue();
+      await fetchPatientAppointments();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to cancel appointment.";
+      alert("Error: " + msg);
+    } finally {
+      setCancellingAppointment(false);
+    }
+  };
+
   useEffect(() => {
     if (selectedDoctor && availabilityDate) {
       checkDoctorAvailability();
@@ -298,9 +440,20 @@ export default function PatientDashboard() {
         {/* User Info & Actions */}
         <div className="flex items-center gap-3 sm:gap-4">
           
+          <button
+            onClick={() => {
+              fetchPatientAppointments();
+              setShowAppointmentsModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition-all cursor-pointer"
+          >
+            <ClipboardList className="w-3.5 h-3.5 text-purple-600" />
+            <span>My Appointments</span>
+          </button>
+
           <Link
             href="/patient/symptom-checker"
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 text-xs font-bold transition-all"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 text-xs font-bold transition-all"
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-600" />
             <span>AI Symptom Triage</span>
@@ -421,11 +574,45 @@ export default function PatientDashboard() {
                   <span className="text-xs font-bold uppercase tracking-wider text-purple-200">
                     Live Clinic Queue Status
                   </span>
+                  <button
+                    onClick={() => fetchLiveQueue()}
+                    disabled={queueLoading}
+                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all ml-1 cursor-pointer"
+                    title="Refresh Live Queue"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${queueLoading ? "animate-spin text-purple-300" : ""}`} />
+                  </button>
                 </div>
-                <span className="text-[11px] bg-white/15 px-3 py-1 rounded-full font-bold backdrop-blur-md">
-                  Active Consultation Ongoing
-                </span>
+                {hasLiveAppointment ? (
+                  liveAppointment?.status === "serving" ? (
+                    <span className="text-[11px] bg-emerald-400 text-emerald-950 px-3 py-1 rounded-full font-black animate-pulse flex items-center gap-1 shadow-md">
+                      <Radio className="w-3.5 h-3.5" /> Calling Token {myToken}!
+                    </span>
+                  ) : liveAppointment?.status === "completed" ? (
+                    <span className="text-[11px] bg-white/20 text-white px-3 py-1 rounded-full font-bold backdrop-blur-md">
+                      Consultation Completed
+                    </span>
+                  ) : (
+                    <span className="text-[11px] bg-white/15 px-3 py-1 rounded-full font-bold backdrop-blur-md">
+                      Queue Position Confirmed
+                    </span>
+                  )
+                ) : (
+                  <span className="text-[11px] bg-white/10 text-purple-200 px-3 py-1 rounded-full font-medium backdrop-blur-md">
+                    No Active Queue Token
+                  </span>
+                )}
               </div>
+
+              {/* Turn Announcement Banner */}
+              {hasLiveAppointment && liveAppointment?.status === "serving" && (
+                <div className="mt-4 p-3.5 bg-emerald-400 text-emerald-950 font-black rounded-2xl text-xs flex items-center justify-between shadow-lg animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <Radio className="w-4 h-4 animate-ping shrink-0" />
+                    <span>YOUR TURN NOW! The doctor is currently serving your token ({myToken}). Please enter the room!</span>
+                  </div>
+                </div>
+              )}
 
               {/* Main Token Display Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 text-center sm:text-left">
@@ -435,8 +622,14 @@ export default function PatientDashboard() {
                   <span className="text-xs text-purple-200 font-bold uppercase tracking-wider block mb-1">
                     Your Assigned Token
                   </span>
-                  <div className="text-4xl font-black text-white">{myToken}</div>
-                  <span className="text-[11px] text-emerald-300 font-bold mt-1 inline-block">Estimated turn in 10-15m</span>
+                  <div className="text-4xl font-black text-white">
+                    {hasLiveAppointment ? myToken : "#--"}
+                  </div>
+                  <span className="text-[11px] text-emerald-300 font-bold mt-1 inline-block">
+                    {hasLiveAppointment 
+                      ? (liveAppointment?.status === "serving" ? "In Room Right Now" : `Turn in ~${estimatedWaitMinutes}m`)
+                      : "No token booked yet"}
+                  </span>
                 </div>
 
                 {/* CURRENTLY SERVING (Dan yana appointment number eka) */}
@@ -447,7 +640,9 @@ export default function PatientDashboard() {
                   </span>
                   <div className="text-4xl font-black text-amber-300">{currentServingToken}</div>
                   <span className="text-[11px] text-purple-200 mt-1 inline-block">
-                    {patientsAhead} patients ahead of you
+                    {hasLiveAppointment
+                      ? `${patientsAhead} patients ahead of you`
+                      : "Live clinic consultation stream"}
                   </span>
                 </div>
 
@@ -456,8 +651,12 @@ export default function PatientDashboard() {
                   <span className="text-xs text-purple-200 font-bold uppercase tracking-wider block mb-1">
                     Est. Wait Time
                   </span>
-                  <div className="text-4xl font-black text-white">{estimatedWaitMinutes} <span className="text-lg font-bold">Mins</span></div>
-                  <span className="text-[11px] text-purple-200 mt-1 inline-block">Average ~6 min/patient</span>
+                  <div className="text-4xl font-black text-white">
+                    {hasLiveAppointment ? estimatedWaitMinutes : 0} <span className="text-lg font-bold">Mins</span>
+                  </div>
+                  <span className="text-[11px] text-purple-200 mt-1 inline-block">
+                    {hasLiveAppointment ? "Average ~8 min/patient" : "Slots currently open"}
+                  </span>
                 </div>
 
               </div>
@@ -465,22 +664,56 @@ export default function PatientDashboard() {
 
             {/* Doctor & Room Info Bar */}
             <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Stethoscope className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <span className="font-bold block text-white">Dr. Priyantha Perera (General Medicine)</span>
-                  <span className="text-purple-200 text-[11px]">Room 03 &bull; Colombo Outpatient Clinic</span>
-                </div>
-              </div>
+              {hasLiveAppointment && liveAppointment ? (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Stethoscope className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-bold block text-white">{liveAppointment.doctor_name}</span>
+                      <span className="text-purple-200 text-[11px]">
+                        {liveAppointment.hospital_name} &bull; {liveAppointment.appointment_date}
+                      </span>
+                    </div>
+                  </div>
 
-              <button 
-                onClick={() => alert(`Your Token ${myToken} is verified. Please remain near Room 03 when Token ${currentServingToken} is completed.`)}
-                className="px-4 py-2 rounded-xl bg-white text-purple-900 font-extrabold hover:bg-purple-50 transition-all shadow-md cursor-pointer"
-              >
-                View Digital Pass &rarr;
-              </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleCancelAppointment(liveAppointment.id)}
+                      disabled={cancellingAppointment}
+                      className="px-3 py-2 rounded-xl bg-rose-500/30 hover:bg-rose-500/50 text-rose-200 font-bold border border-rose-400/40 transition-all cursor-pointer"
+                    >
+                      {cancellingAppointment ? "Cancelling..." : "Cancel Token"}
+                    </button>
+                    <button 
+                      onClick={() => alert(`Digital Queue Pass:\nToken: ${myToken}\nDoctor: ${liveAppointment.doctor_name}\nHospital: ${liveAppointment.hospital_name}\nDate: ${liveAppointment.appointment_date}\nStatus: ${liveAppointment.status}`)}
+                      className="px-4 py-2 rounded-xl bg-white text-purple-900 font-extrabold hover:bg-purple-50 transition-all shadow-md cursor-pointer"
+                    >
+                      View Digital Pass &rarr;
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Stethoscope className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-bold block text-white">General Outpatient Clinic</span>
+                      <span className="text-purple-200 text-[11px]">Select a doctor below to book your queue token</span>
+                    </div>
+                  </div>
+
+                  <a 
+                    href="#doctors-directory"
+                    className="px-4 py-2 rounded-xl bg-white text-purple-900 font-extrabold hover:bg-purple-50 transition-all shadow-md inline-block"
+                  >
+                    Book Next Token &darr;
+                  </a>
+                </>
+              )}
             </div>
 
           </div>
@@ -673,7 +906,7 @@ export default function PatientDashboard() {
         {/* ----------------------------------------------------------------------- */}
         {/* ROW 3: Find Verified Medical Consultants & Real-time Schedule Checker   */}
         {/* ----------------------------------------------------------------------- */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+        <div id="doctors-directory" className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
           
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-100">
             <div>
@@ -791,12 +1024,175 @@ export default function PatientDashboard() {
                   ))}
                 </div>
               )}
+              {/* Quick Book Queue Token for Selected Doctor */}
+              <div className="p-4 bg-white rounded-2xl border border-purple-200 space-y-3 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <Ticket className="w-4 h-4 text-purple-600" />
+                    <span>Book Queue Token with {selectedDoctor.doctors_name}</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 self-start sm:self-auto">
+                    Session Date: {availabilityDate}
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <input
+                    type="text"
+                    placeholder="Chief Complaint / Reason for visit (e.g. High fever, cough, diabetes review)..."
+                    value={bookingReason}
+                    onChange={(e) => setBookingReason(e.target.value)}
+                    className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-600"
+                  />
+                  <button
+                    onClick={() => handleBookToken(selectedDoctor, availabilityDate)}
+                    disabled={submittingBooking}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    <span>{submittingBooking ? "Issuing Token..." : "Confirm & Book Token"}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
         </div>
 
       </main>
+
+      {/* Booking Success Confirmation Modal */}
+      {bookingSuccessModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl shadow-sm">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+
+            <div>
+              <h3 className="text-xl font-black text-slate-900">Queue Token Confirmed!</h3>
+              <p className="text-xs text-slate-500 mt-1">Your appointment has been recorded in the clinic database.</p>
+            </div>
+
+            <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200 text-left space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-500 font-semibold">Assigned Token:</span>
+                <span className="text-2xl font-black text-purple-700">{bookingSuccessModal.token_label}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-700">
+                <span className="font-semibold text-slate-500">Doctor:</span>
+                <span className="font-bold">{bookingSuccessModal.doctor_name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-700">
+                <span className="font-semibold text-slate-500">Hospital:</span>
+                <span>{bookingSuccessModal.hospital_name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-700">
+                <span className="font-semibold text-slate-500">Date:</span>
+                <span>{bookingSuccessModal.appointment_date}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-700">
+                <span className="font-semibold text-slate-500">Est. Wait:</span>
+                <span className="font-bold text-emerald-600">~{bookingSuccessModal.estimated_wait_minutes ?? 10} Mins</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setBookingSuccessModal(null);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="w-full py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md shadow-purple-600/25 transition-all cursor-pointer"
+            >
+              View in Live Queue Card &rarr;
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* My Appointments History Modal */}
+      {showAppointmentsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
+                  <ClipboardList className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">My Consultation Appointments</h3>
+                  <p className="text-[11px] text-slate-500">Active tokens and past history for {userSession?.username}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAppointmentsModal(false)}
+                className="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-500 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {loadingAppointmentsList ? (
+                <div className="py-12 text-center text-xs text-slate-500 flex flex-col items-center justify-center gap-2">
+                  <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Loading appointments...</span>
+                </div>
+              ) : patientAppointmentsList.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-500 space-y-2">
+                  <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="font-bold text-slate-700">No appointments found</p>
+                  <p className="text-[11px] text-slate-400">You haven't booked any doctor appointments yet.</p>
+                </div>
+              ) : (
+                patientAppointmentsList.map((appt) => (
+                  <div
+                    key={appt.id}
+                    className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-black px-3 py-1.5 rounded-xl bg-purple-600 text-white shadow-xs">
+                        {appt.token_label}
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 leading-snug">{appt.doctor_name}</h4>
+                        <p className="text-[11px] text-slate-500">{appt.hospital_name} &bull; {appt.appointment_date}</p>
+                        {appt.reason && (
+                          <p className="text-[11px] text-purple-700 font-medium mt-0.5">{appt.reason}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                        appt.status === "serving"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse"
+                          : appt.status === "completed"
+                            ? "bg-slate-200 text-slate-700"
+                            : appt.status === "cancelled"
+                              ? "bg-rose-100 text-rose-700"
+                              : "bg-purple-100 text-purple-800"
+                      }`}>
+                        {appt.status}
+                      </span>
+
+                      {appt.status === "booked" && (
+                        <button
+                          onClick={() => handleCancelAppointment(appt.id)}
+                          disabled={cancellingAppointment}
+                          className="px-2.5 py-1 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-4 mt-auto">

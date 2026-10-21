@@ -20,7 +20,8 @@ import {
   Stethoscope,
   Building2,
   FlaskConical,
-  MapPin
+  MapPin,
+  ShieldAlert
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -41,6 +42,9 @@ export default function Register() {
   const [labName, setLabName] = useState("");
   const [labAddress, setLabAddress] = useState("");
   const [licenseId, setLicenseId] = useState("");
+  const [officerId, setOfficerId] = useState("");
+  const [assignedArea, setAssignedArea] = useState("Colombo North");
+  const [mohOffice, setMohOffice] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,6 +83,12 @@ export default function Register() {
       return;
     }
 
+    if (role === "medical_officer" && (!officerId || !assignedArea)) {
+      setError("Please fill in Officer Registration ID and Assigned Health Area.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const now = new Date().toISOString();
       const uniToSubmit = selectedUniversity === "other" ? otherUniversity : selectedUniversity;
@@ -99,6 +109,9 @@ export default function Register() {
           lab_name: labName,
           lab_address: labAddress,
           license_id: licenseId,
+          officer_id: officerId,
+          assigned_area: assignedArea,
+          moh_office: mohOffice || `MOH Office - ${assignedArea}`,
           created_at: now,
           updated_at: now,
         }),
@@ -108,6 +121,11 @@ export default function Register() {
         setSuccess("Registration submitted for admin approval! You will be notified once reviewed.");
       } else if (role === "lab") {
         setSuccess("Laboratory registered successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      } else if (role === "medical_officer") {
+        setSuccess("Medical Officer / PHI registered successfully! Redirecting to login...");
         setTimeout(() => {
           router.push("/login");
         }, 2000);
@@ -310,8 +328,78 @@ export default function Register() {
                 <option value="patient">Patient Portal</option>
                 <option value="doctor">Doctor Portal (Requires Approval)</option>
                 <option value="lab">Laboratory Portal</option>
+                <option value="medical_officer">Medical Officer / PHI (Public Health Inspector)</option>
               </select>
             </div>
+
+            {/* Medical Officer / PHI Specific Additional Fields */}
+            {role === "medical_officer" && (
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 space-y-4 animate-in fade-in duration-300 mt-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
+                  <ShieldAlert className="w-4 h-4 text-emerald-600" />
+                  <span>Public Health Inspector / MOH Official Credentials</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Officer / PHI Registration ID *</label>
+                    <div className="relative">
+                      <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={officerId}
+                        onChange={(e) => setOfficerId(e.target.value)}
+                        placeholder="e.g. MOH-COL-04 or PHI-442"
+                        className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:border-emerald-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Assigned District / MOH Area *</label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <select
+                        value={assignedArea}
+                        onChange={(e) => setAssignedArea(e.target.value)}
+                        className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-medium focus:border-emerald-600 focus:outline-none"
+                      >
+                        <option value="Colombo North">Colombo North</option>
+                        <option value="Colombo South">Colombo South</option>
+                        <option value="Colombo East">Colombo East</option>
+                        <option value="Gampaha">Gampaha</option>
+                        <option value="Negombo">Negombo</option>
+                        <option value="Kalutara">Kalutara</option>
+                        <option value="Kandy">Kandy</option>
+                        <option value="Matale">Matale</option>
+                        <option value="Galle">Galle</option>
+                        <option value="Matara">Matara</option>
+                        <option value="Kurunegala">Kurunegala</option>
+                        <option value="Jaffna">Jaffna</option>
+                        <option value="Ratnapura">Ratnapura</option>
+                        <option value="Kegalle">Kegalle</option>
+                        <option value="Anuradhapura">Anuradhapura</option>
+                        <option value="Badulla">Badulla</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Regional MOH Office</label>
+                  <div className="relative">
+                    <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={mohOffice}
+                      onChange={(e) => setMohOffice(e.target.value)}
+                      placeholder="e.g. MOH Office Kaduwela / Colombo North Directorate"
+                      className="w-full pl-10 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:border-emerald-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Laboratory Specific Additional Fields */}
             {role === "lab" && (

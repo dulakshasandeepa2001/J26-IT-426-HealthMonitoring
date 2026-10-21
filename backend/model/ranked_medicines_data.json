@@ -1,0 +1,326 @@
+{
+  "influenza": {
+    "display_name": "Influenza",
+    "medicines": [
+      {
+        "name": "Paracetamol (Acetaminophen)",
+        "dosage": "500 mg Tablet",
+        "frequency": "1 Tablet TDS (3 times daily)",
+        "duration": "3 - 5 Days",
+        "instructions": "Take after meals for fever and body aches. Do not exceed 3000 mg in 24 hours.",
+        "clinical_role": "Antipyretic / Analgesic",
+        "rationale": "Primary fever and malaise relief; avoid Aspirin in viral infections.",
+        "base_suitability": 0.96,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 96
+      },
+      {
+        "name": "Oseltamivir (Tamiflu)",
+        "dosage": "75 mg Capsule",
+        "frequency": "1 Capsule BD (Twice daily)",
+        "duration": "5 Days",
+        "instructions": "Take with food to minimize GI upset. Complete full 5-day course.",
+        "clinical_role": "Antiviral (Neuraminidase inhibitor)",
+        "rationale": "FDA/WHO approved first-line antiviral against Influenza A and B within 48h.",
+        "base_suitability": 0.94,
+        "real_world_rating": 6.9,
+        "review_count": 253,
+        "useful_count": 2430,
+        "match_score": 94
+      },
+      {
+        "name": "Cetirizine Hydrochloride",
+        "dosage": "10 mg Tablet",
+        "frequency": "1 Tablet at bedtime",
+        "duration": "5 Days",
+        "instructions": "For sneezing, rhinorrhea and nasal congestion. May cause mild drowsiness.",
+        "clinical_role": "Antihistamine (2nd generation)",
+        "rationale": "Symptomatic relief for upper respiratory allergic and viral secretions.",
+        "base_suitability": 0.85,
+        "real_world_rating": 6.77,
+        "review_count": 321,
+        "useful_count": 5703,
+        "match_score": 85
+      },
+      {
+        "name": "Dextromethorphan Hydrobromide",
+        "dosage": "15 mg / 5ml Syrup",
+        "frequency": "10 ml every 6 - 8 hours PRN",
+        "duration": "3 - 5 Days",
+        "instructions": "Sip for persistent dry cough. Do not exceed recommended dosage.",
+        "clinical_role": "Antitussive (Cough suppressant)",
+        "rationale": "Centrally acting non-opioid suppressant for non-productive dry cough.",
+        "base_suitability": 0.81,
+        "real_world_rating": 4.62,
+        "review_count": 234,
+        "useful_count": 1612,
+        "match_score": 81
+      }
+    ]
+  },
+  "chickenpox": {
+    "display_name": "Chickenpox",
+    "medicines": [
+      {
+        "name": "Acyclovir",
+        "dosage": "800 mg Tablet",
+        "frequency": "1 Tablet 5 times daily (every 4 hrs awake)",
+        "duration": "7 Days",
+        "instructions": "Drink plenty of water. Complete full 7-day course to accelerate lesion crusting.",
+        "clinical_role": "Antiviral (DNA polymerase inhibitor)",
+        "rationale": "Significantly reduces vesicular lesion duration and systemic severity if started early.",
+        "base_suitability": 0.95,
+        "real_world_rating": 8.75,
+        "review_count": 4,
+        "useful_count": 82,
+        "match_score": 95
+      },
+      {
+        "name": "Calamine + Zinc Oxide Lotion",
+        "dosage": "Topical Suspension",
+        "frequency": "Apply gently 3 - 4 times daily PRN",
+        "duration": "7 Days",
+        "instructions": "Apply with cotton over itchy vesicular lesions. For external use only.",
+        "clinical_role": "Topical Antipruritic & Soothing Agent",
+        "rationale": "Soothes severe pruritus and prevents scratching-induced secondary bacterial infection.",
+        "base_suitability": 0.93,
+        "real_world_rating": 9.0,
+        "review_count": 2,
+        "useful_count": 67,
+        "match_score": 93
+      },
+      {
+        "name": "Paracetamol",
+        "dosage": "500 mg Tablet",
+        "frequency": "1 Tablet every 6 - 8 hours PRN",
+        "duration": "3 - 5 Days",
+        "instructions": "Take for fever and body ache. STRICTLY AVOID Aspirin and Ibuprofen.",
+        "clinical_role": "Antipyretic / Analgesic",
+        "rationale": "Safe antipyretic; Aspirin is strictly contraindicated due to fatal Reye's syndrome risk.",
+        "base_suitability": 0.91,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 91
+      },
+      {
+        "name": "Chlorpheniramine Maleate",
+        "dosage": "4 mg Tablet",
+        "frequency": "1 Tablet at night",
+        "duration": "5 Days",
+        "instructions": "Take at night to relieve intense nocturnal itching and promote restful sleep.",
+        "clinical_role": "Sedative Antihistamine",
+        "rationale": "Prevents nocturnal excoriation of cutaneous vesicles.",
+        "base_suitability": 0.83,
+        "real_world_rating": 8.87,
+        "review_count": 211,
+        "useful_count": 2015,
+        "match_score": 83
+      }
+    ]
+  },
+  "measles": {
+    "display_name": "Measles",
+    "medicines": [
+      {
+        "name": "Vitamin A (Retinol)",
+        "dosage": "200,000 IU Capsule",
+        "frequency": "1 Dose daily for 2 consecutive days",
+        "duration": "2 Days",
+        "instructions": "Administer orally immediately upon diagnosis under medical supervision.",
+        "clinical_role": "Essential Micronutrient / Immune Co-factor",
+        "rationale": "WHO protocol: dramatically reduces measles-induced corneal damage, blindness, and mortality.",
+        "base_suitability": 0.98,
+        "real_world_rating": 7.44,
+        "review_count": 169,
+        "useful_count": 3113,
+        "match_score": 98
+      },
+      {
+        "name": "Paracetamol",
+        "dosage": "500 mg Tablet",
+        "frequency": "1 Tablet TDS PRN",
+        "duration": "3 - 5 Days",
+        "instructions": "Take for high fever and malaise. Maintain continuous oral fluid intake.",
+        "clinical_role": "Antipyretic / Analgesic",
+        "rationale": "First-line antipyretic for high measles fever; safe profile.",
+        "base_suitability": 0.94,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 94
+      },
+      {
+        "name": "Saline Nasal Drops",
+        "dosage": "0.9% Sterile Drops",
+        "frequency": "2 - 3 drops in each nostril TDS",
+        "duration": "5 Days",
+        "instructions": "Clears thick nasal secretions and relieves upper airway obstruction.",
+        "clinical_role": "Nasal Decongestant (Supportive)",
+        "rationale": "Non-medicated gentle clearance for severe coryza and rhinitis.",
+        "base_suitability": 0.82,
+        "real_world_rating": 3.2,
+        "review_count": 5,
+        "useful_count": 13,
+        "match_score": 82
+      }
+    ]
+  },
+  "mumps": {
+    "display_name": "Mumps",
+    "medicines": [
+      {
+        "name": "Ibuprofen",
+        "dosage": "200 - 400 mg Tablet",
+        "frequency": "1 Tablet TDS strictly after meals",
+        "duration": "3 - 5 Days",
+        "instructions": "Take with or after food. Provides potent anti-inflammatory relief for salivary gland pain.",
+        "clinical_role": "NSAID / Anti-inflammatory",
+        "rationale": "NHS/CDC standard for reducing painful parotid salivary gland inflammation.",
+        "base_suitability": 0.95,
+        "real_world_rating": 8.1,
+        "review_count": 211,
+        "useful_count": 2558,
+        "match_score": 95
+      },
+      {
+        "name": "Paracetamol",
+        "dosage": "500 mg Tablet",
+        "frequency": "1 Tablet every 6 - 8 hours PRN",
+        "duration": "3 - 5 Days",
+        "instructions": "Alternate with or use for persistent fever and headache.",
+        "clinical_role": "Antipyretic / Analgesic",
+        "rationale": "Controls systemic fever without gastric irritation.",
+        "base_suitability": 0.92,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 92
+      },
+      {
+        "name": "Warm / Cold Salivary Compress",
+        "dosage": "Therapeutic Clean Compress",
+        "frequency": "Apply to jaw / swollen cheek 3 - 4 times daily",
+        "duration": "5 - 7 Days",
+        "instructions": "Apply gently over parotid swelling for 10-15 minutes to alleviate pain.",
+        "clinical_role": "Physical Supportive Therapy",
+        "rationale": "Non-pharmacological soothing of acute parotitis tension.",
+        "base_suitability": 0.88,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 88
+      }
+    ]
+  },
+  "viral_conjunctivitis": {
+    "display_name": "Viral conjunctivitis",
+    "medicines": [
+      {
+        "name": "Hypromellose (Artificial Tears)",
+        "dosage": "0.3% Sterile Eye Drops",
+        "frequency": "1 - 2 drops into affected eye(s) 4 times daily",
+        "duration": "7 Days",
+        "instructions": "Wash hands before instilling. Avoid touching dropper tip to the eye.",
+        "clinical_role": "Ophthalmic Demulcent / Lubricant",
+        "rationale": "CDC recommendation: provides symptomatic lubrication and washes away viral debris.",
+        "base_suitability": 0.97,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 97
+      },
+      {
+        "name": "Olopatadine Hydrochloride",
+        "dosage": "0.1% Ophthalmic Solution",
+        "frequency": "1 drop in each affected eye BD (every 12 hrs)",
+        "duration": "7 Days",
+        "instructions": "Provides fast relief for itching, redness and conjunctival edema.",
+        "clinical_role": "Mast Cell Stabilizer & H1 Antihistamine",
+        "rationale": "High patient satisfaction in drug reviews (7.1/10 rating) for ocular irritation.",
+        "base_suitability": 0.91,
+        "real_world_rating": 7.07,
+        "review_count": 46,
+        "useful_count": 428,
+        "match_score": 91
+      },
+      {
+        "name": "Cold Ocular Compress",
+        "dosage": "Sterile Clean Cloth / Cold Pack",
+        "frequency": "Apply over closed eyelids 3 times daily for 10 mins",
+        "duration": "5 - 7 Days",
+        "instructions": "Soothes burning sensation and eyelid swelling. Do not share cloths.",
+        "clinical_role": "Supportive Ophthalmic Therapy",
+        "rationale": "Vasoconstricts dilated conjunctival vessels and relieves burning.",
+        "base_suitability": 0.89,
+        "real_world_rating": 8.58,
+        "review_count": 101,
+        "useful_count": 855,
+        "match_score": 89
+      }
+    ]
+  },
+  "viral_gastroenteritis": {
+    "display_name": "Viral gastroenteritis",
+    "medicines": [
+      {
+        "name": "Oral Rehydration Salts (ORS Low-Osmolarity)",
+        "dosage": "1 Sachet in 1L Boiled Cooled Water",
+        "frequency": "200 - 300 ml after each loose stool / vomit",
+        "duration": "3 - 5 Days",
+        "instructions": "Sip slowly. Primary medical intervention to replace lost electrolytes and fluids.",
+        "clinical_role": "Oral Electrolyte Replacement Therapy",
+        "rationale": "WHO/UNICEF gold standard: prevents dehydration shock and electrolyte disturbance.",
+        "base_suitability": 0.98,
+        "real_world_rating": 8.75,
+        "review_count": 152,
+        "useful_count": 1662,
+        "match_score": 98
+      },
+      {
+        "name": "Zinc Sulfate",
+        "dosage": "20 mg Tablet",
+        "frequency": "1 Tablet daily with food",
+        "duration": "10 - 14 Days",
+        "instructions": "Take with meals. Continue full 10-14 days even after diarrhea resolves.",
+        "clinical_role": "Intestinal Mucosal Healing Agent",
+        "rationale": "Significantly shortens viral diarrhea duration and regenerates intestinal mucosa.",
+        "base_suitability": 0.94,
+        "real_world_rating": 7.6,
+        "review_count": 35,
+        "useful_count": 227,
+        "match_score": 94
+      },
+      {
+        "name": "Ondansetron",
+        "dosage": "4 - 8 mg Orally Disintegrating Tablet",
+        "frequency": "1 Tablet BD PRN for active vomiting",
+        "duration": "2 - 3 Days",
+        "instructions": "Dissolve on tongue 30 mins before rehydration drinks if experiencing intractable vomiting.",
+        "clinical_role": "5-HT3 Receptor Antagonist (Antiemetic)",
+        "rationale": "Rated 9.4/10 in drug reviews; controls intractable nausea to facilitate oral rehydration.",
+        "base_suitability": 0.9,
+        "real_world_rating": 8.18,
+        "review_count": 276,
+        "useful_count": 4743,
+        "match_score": 90
+      },
+      {
+        "name": "Paracetamol",
+        "dosage": "500 mg Tablet",
+        "frequency": "1 Tablet TDS PRN for abdominal cramps or fever",
+        "duration": "2 - 3 Days",
+        "instructions": "Take with sips of water. Avoid NSAIDs due to gastric mucosal irritation.",
+        "clinical_role": "Antipyretic / Analgesic",
+        "rationale": "Safe antipyretic without gastric ulceration risk.",
+        "base_suitability": 0.87,
+        "real_world_rating": 8.5,
+        "review_count": 25,
+        "useful_count": 50,
+        "match_score": 87
+      }
+    ]
+  }
+}

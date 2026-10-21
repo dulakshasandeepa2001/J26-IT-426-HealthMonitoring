@@ -100,6 +100,26 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
     }
   }
 
+  async function handleSaveReportedHistory() {
+    if (submitting.current || rx.loading) return;
+    submitting.current = true;
+    try {
+      await rx.reviewPatientContext({
+        allergy_status: allergyStatus,
+        allergies: identityHistory.allergies,
+        medicine_status: medicineStatus,
+        current_medicines: identityHistory.medicines,
+        reviewed: true,
+        expected_updated_at: context?.updated_at ?? null,
+        ...(activeClarification?.details ? { history_details: activeClarification.details } : {}),
+        medicine_plans: plans,
+      });
+      setReviewedKey(inputKey);
+    } finally {
+      submitting.current = false;
+    }
+  }
+
   return (
     <form onSubmit={submit} className="space-y-4">
       <p className="text-xs leading-relaxed text-slate-500">History is filled from this visit&apos;s reported analysis and saved patient history. Confirm it with the patient before saving. An empty or missing JSON list stays Unknown unless absence was confirmed.</p>
@@ -107,13 +127,67 @@ export function PatientContextForm({ rx, editorRef }: { rx: ReturnType<typeof us
         Saved patient history loaded. Confirm what is still current and update any changes before saving for this visit.
         {context.provenance.last_reviewed_at && ` Last reviewed: ${new Date(context.provenance.last_reviewed_at).toLocaleString()}.`}
       </p>}
-      {prefill.hasReported && <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
-        <p className="font-semibold">Reported JSON history — doctor review required</p>
-        {prefill.reportedAllergies.length > 0 && <p className="mt-1">Reported allergies: {prefill.reportedAllergies.join(", ")}</p>}
-        {prefill.reportedMedicines.length > 0 && <p className="mt-1">Reported medicines: {prefill.reportedMedicines.join(", ")}</p>}
-        {draft && JSON.stringify(fields) !== JSON.stringify(prefill.fields) && <button type="button" className="mt-2 font-semibold underline" disabled={rx.loading} onClick={() => { setDraft(null); setReviewedKey(null); }}>Use reported and saved history</button>}
-        {reviewedForVisit && <p className="mt-1">Your saved review is retained. Edit the history if these reported details need correction or inclusion.</p>}
-      </div>}
+      {prefill.hasReported && (
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/90 p-4 text-xs text-blue-900 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="font-bold text-sm text-blue-950 flex items-center gap-1.5">
+                <span>📋</span> Reported History Detected in Consultation JSON
+              </p>
+              {prefill.reportedAllergies.length > 0 ? (
+                <p className="text-blue-900">
+                  <strong>Reported Allergies:</strong>{" "}
+                  <span className="font-semibold text-rose-800 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                    {prefill.reportedAllergies.join(", ")}
+                  </span>
+                </p>
+              ) : (
+                <p className="text-slate-500 italic">No specific allergies detected in JSON.</p>
+              )}
+              {prefill.reportedMedicines.length > 0 ? (
+                <p className="text-blue-900">
+                  <strong>Reported Current Medicines:</strong>{" "}
+                  <span className="font-semibold text-blue-800 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200">
+                    {prefill.reportedMedicines.join(", ")}
+                  </span>
+                </p>
+              ) : (
+                <p className="text-slate-500 italic">No current medicines detected in JSON.</p>
+              )}
+              {draft && JSON.stringify(fields) !== JSON.stringify(prefill.fields) && (
+                <button
+                  type="button"
+                  className="mt-2 font-semibold underline block text-blue-800"
+                  disabled={rx.loading}
+                  onClick={() => { setDraft(null); setReviewedKey(null); }}
+                >
+                  Reset to reported JSON values
+                </button>
+              )}
+            </div>
+
+            {(!reviewedForVisit || dirty) && (
+              <button
+                type="button"
+                onClick={handleSaveReportedHistory}
+                disabled={rx.loading || submitting.current}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 active:scale-95 disabled:opacity-50 transition"
+                title="Save reported allergies and medicines directly to patient profile"
+              >
+                {rx.loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ClipboardCheck className="h-4 w-4" />
+                )}
+                Save to Patient Information
+              </button>
+            )}
+          </div>
+          {reviewedForVisit && !dirty && (
+            <p className="mt-2 text-emerald-800 font-medium">✓ Saved and reviewed for this visit.</p>
+          )}
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-2" aria-label="Patient history summary">
         <div className="rounded-xl border border-slate-200 p-3 text-xs"><h3 className="font-semibold text-slate-700">Allergies</h3>
           <p className="mt-1 whitespace-pre-line" data-testid="allergy-summary">{allergyStatus === "confirmed" ? allergyText : allergyStatus === "none" ? "None reported" : "Unknown / not established"}</p>

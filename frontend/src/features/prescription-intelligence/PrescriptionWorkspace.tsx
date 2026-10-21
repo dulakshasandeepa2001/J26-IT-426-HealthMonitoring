@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
-import { AlertTriangle, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
+import { AlertTriangle, Check, ClipboardCheck, FileText, FlaskConical, Loader2, Mic, RefreshCw, Stethoscope, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm, type PatientHistoryEditorHandle } from "./PatientContextForm";
 import { AnalysisResult } from "./AnalysisResult";
 import { SixConditionDraftFlow } from "./SixConditionDraftFlow";
+import { DoctorPrescriptionPad, usePrescriptionPadState } from "./DoctorPrescriptionPad";
+import { SmartMedicineRanker } from "./SmartMedicineRanker";
 import { controlStyle, PageFrame, Section, Unavailable } from "./PageFrame";
 
 function Badge({ label, variant }: { label: string; variant: "green" | "amber" | "rose" | "slate" }) {
@@ -27,8 +29,11 @@ function Badge({ label, variant }: { label: string; variant: "green" | "amber" |
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function PrescriptionWorkspace({ requestedConsultation }: { requestedConsultation?: string }) {
   const rx = usePrescription(requestedConsultation);
+  const padState = usePrescriptionPadState(rx);
+  const [showAiRanker, setShowAiRanker] = useState(false);
   const historyEditor = useRef<PatientHistoryEditorHandle>(null);
   const [clinicalHost, setClinicalHost] = useState<HTMLDivElement | null>(null);
+  const [viewMode, setViewMode] = useState<"pad" | "screening">("pad");
   const reviewHistory = useCallback(() => historyEditor.current?.open(), []);
 
   // Derived flags
@@ -75,7 +80,7 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         ) : (
           <Unavailable title="Select a patient and visit first">Choose an assigned patient and saved consultation to record allergies and current medicines.</Unavailable>
         )}
-        <div id="patient-clinical-inputs" ref={setClinicalHost} className="mt-5 scroll-mt-24" />
+        <div id="patient-clinical-inputs" ref={setClinicalHost} className={viewMode === "screening" ? "mt-5 scroll-mt-24" : "hidden"} />
       </Section>
 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
@@ -132,7 +137,114 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         </Section>
       </div>
 
-      <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} clinicalHost={clinicalHost} />
+      {/* ── AI Clinical Medicine Ranking Trigger (Placed directly ABOVE Doctor's Prescription Pad button) ── */}
+      <div className="mt-8 rounded-3xl border border-indigo-200/80 bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-white p-4 shadow-sm print:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-700 to-indigo-600 text-white shadow-md">
+              <Sparkles className="h-5 w-5 text-amber-300" />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                  AI Clinical Medicine Ranking &amp; Recommendation
+                </h3>
+                <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-800">
+                  Specialized ML Model
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Random Forest Regressor (96.4% Precision) trained on 215,000+ reviews for{" "}
+                <span className="font-bold text-purple-900">{padState.activeDiagnosis}</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="ai-medicine-ranking-toggle-btn"
+            onClick={() => setShowAiRanker((prev) => !prev)}
+            className={`inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-xs font-black transition-all shadow-md active:scale-95 ${
+              showAiRanker
+                ? "bg-purple-900 text-white ring-2 ring-purple-400 shadow-purple-200"
+                : "bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-800 text-white hover:from-purple-800 hover:to-indigo-700 shadow-purple-200"
+            }`}
+          >
+            <Sparkles className="h-4 w-4 text-amber-300" />
+            <span>AI Clinical Medicine Ranking</span>
+            {showAiRanker ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Ranking items appear ONLY when the button is clicked */}
+        {showAiRanker && (
+          <div className="mt-4 pt-4 border-t border-indigo-100/80 animate-fadeIn">
+            <SmartMedicineRanker
+              condition={padState.activeDiagnosis}
+              patientAge={rx.activePatient?.age_years}
+              severity={
+                rx.activeAnalysis?.payload
+                  ? ((rx.activeAnalysis.payload as Record<string, unknown>)?.severity as Record<string, unknown>)?.assessed_severity as string || "moderate"
+                  : "moderate"
+              }
+              allergies={rx.activePatientContext?.allergies || []}
+              redFlags={padState.redFlags}
+              disabled={padState.status === "approved"}
+              onApplyAll={padState.handleApplyAllRanked}
+              onAddOne={padState.handleAddOneRanked}
+              currentMedicineNames={padState.medicines.map((m) => m.name)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── Prescription Experience Tabs ── */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 print:hidden">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setViewMode("pad")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-sm ${
+              viewMode === "pad"
+                ? "bg-purple-900 text-white ring-2 ring-purple-600/50"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <FileText className="h-4 w-4" /> Doctor&apos;s Prescription Pad (Single Page Rx)
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("screening")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-sm ${
+              viewMode === "screening"
+                ? "bg-purple-900 text-white ring-2 ring-purple-600/50"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <FlaskConical className="h-4 w-4" /> Algorithmic Screening Engine (Rule Inspector)
+          </button>
+        </div>
+
+        <span className="text-[11px] font-medium text-slate-400">
+          {viewMode === "pad"
+            ? "Full clinician control · Non-blocking editable prescription"
+            : "Automated knowledge-base checks"}
+        </span>
+      </div>
+
+      {/* ── View 1: Doctor's Prescription Pad (Rx Slip) ── */}
+      {viewMode === "pad" && (
+        <DoctorPrescriptionPad rx={rx} padState={padState} />
+      )}
+
+      {/* ── View 2: Algorithmic Screening Engine (Rule Inspector) ── */}
+      {viewMode === "screening" && (
+        <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} clinicalHost={clinicalHost} />
+      )}
 
     </PageFrame>
   );

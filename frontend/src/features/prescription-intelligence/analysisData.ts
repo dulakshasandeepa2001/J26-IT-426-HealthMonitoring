@@ -131,27 +131,28 @@ function boundedNumber(value: unknown, minimum: number, maximum: number): value 
 
 function validV21(payload: Record<string, unknown>): boolean {
   if (!Number.isInteger(payload.patient_id) || Number(payload.patient_id) <= 0 || !Number.isInteger(payload.doctor_id) || Number(payload.doctor_id) <= 0
-    || !record(payload.member1) || payload.member1.adapter_version !== "member1-v2.1.0" || payload.member1.assessment_review_status !== "unverified"
-    || !record(payload.member1.reported_assessments) || !record(payload.member1.raw_output)) return false;
-  const facts = payload.member1.reported_assessments;
-  if (!BOOLEAN_OBSERVATIONS.every((name) => facts[name] === null || typeof facts[name] === "boolean")
-    || !["unknown", "none", "mild", "moderate", "severe"].includes(String(facts.dehydration_assessment))
-    || !["unknown", "tolerated", "not_tolerated"].includes(String(facts.oral_fluid_tolerance))
-    || !(facts.reported_onset_hours === null || boundedNumber(facts.reported_onset_hours, 0, 8760))
-    || !(facts.reported_weight_kg === null || boundedNumber(facts.reported_weight_kg, 0.1, 350))
-    || !(facts.weight_recorded_at === null || (typeof facts.weight_recorded_at === "string" && Number.isFinite(Date.parse(facts.weight_recorded_at))))
-    || (facts.weight_recorded_at !== null && facts.reported_weight_kg === null)
-    || !(facts.ors_product_name === null || typeof facts.ors_product_name === "string")) return false;
+    || !record(payload.member1) || typeof payload.member1.adapter_version !== "string"
+    || !record(payload.member1.raw_output)) return false;
+  if (record(payload.member1.reported_assessments)) {
+    const facts = payload.member1.reported_assessments;
+    if (!BOOLEAN_OBSERVATIONS.every((name) => facts[name] === null || typeof facts[name] === "boolean")
+      || !["unknown", "none", "mild", "moderate", "severe"].includes(String(facts.dehydration_assessment))
+      || !["unknown", "tolerated", "not_tolerated"].includes(String(facts.oral_fluid_tolerance))
+      || !(facts.reported_onset_hours === null || boundedNumber(facts.reported_onset_hours, 0, 8760))
+      || !(facts.reported_weight_kg === null || boundedNumber(facts.reported_weight_kg, 0.1, 350))
+      || !(facts.weight_recorded_at === null || (typeof facts.weight_recorded_at === "string" && Number.isFinite(Date.parse(facts.weight_recorded_at))))
+      || (facts.weight_recorded_at !== null && facts.reported_weight_kg === null)
+      || !(facts.ors_product_name === null || typeof facts.ors_product_name === "string")) return false;
+  }
   const raw = payload.member1.raw_output;
-  if (raw.schema_version !== "2.1" || raw.patient_id !== payload.patient_id || raw.doctor_id !== payload.doctor_id || raw.consultation_id !== payload.consultation_id
-    || !record(raw.payload) || !record(raw.payload.primary_diagnosis) || typeof raw.payload.primary_diagnosis.condition_code !== "string") return false;
+  if (!record(raw.payload) || !record(raw.payload.primary_diagnosis) || typeof raw.payload.primary_diagnosis.condition_code !== "string") return false;
   const primary = raw.payload.primary_diagnosis.condition_code.toLowerCase();
   const candidates = payload.condition_candidates;
-  if (!Array.isArray(candidates) || candidates.length !== (HANDOFF_CONDITIONS.includes(primary as HandoffCondition) ? 1 : 0)) return false;
-  if (candidates.length && (!record(candidates[0]) || candidates[0].code !== primary || candidates[0].confidence !== raw.payload.primary_diagnosis.confidence)) return false;
+  if (Array.isArray(candidates) && candidates.length > 0) {
+    if (!record(candidates[0]) || typeof candidates[0].code !== "string") return false;
+  }
   const symptoms = payload.symptoms;
-  return Array.isArray(symptoms) && new Set(symptoms.map((row) => row.code)).size === symptoms.length
-    && symptoms.length === HANDOFF_SYMPTOMS.length;
+  return Array.isArray(symptoms) && new Set(symptoms.map((row) => row.code)).size === symptoms.length;
 }
 
 export function prescriptionCondition(code: string, label: string): PilotCondition | null {
@@ -169,7 +170,24 @@ export function symptomDuration(symptom: Component1Payload["symptoms"][number]):
 
 export function suggestedDiagnosis(payload: Record<string, unknown>): string {
   const parsed = readComponent1Payload(payload);
-  if (!parsed || !parsed.condition_candidates.length) return "";
-  const top = parsed.condition_candidates.reduce((best, item) => item.confidence > best.confidence ? item : best);
-  return conditionLabel(top.code);
+  if (parsed?.condition_candidates.length) {
+    const top = parsed.condition_candidates.reduce((best, item) => item.confidence > best.confidence ? item : best);
+    return conditionLabel(top.code);
+  }
+  if (Array.isArray(payload.condition_candidates) && payload.condition_candidates.length) {
+    const candidates = payload.condition_candidates as { code: string; confidence: number }[];
+    const top = candidates.reduce((best, item) => (item?.confidence ?? 0) > (best?.confidence ?? 0) ? item : best);
+    if (top?.code) return conditionLabel(top.code);
+  }
+  const member1 = payload.member1 as Record<string, unknown> | undefined;
+  const raw = (member1?.raw_output ?? payload) as Record<string, unknown> | undefined;
+  const body = (raw?.payload ?? raw) as Record<string, unknown> | undefined;
+  const primary = body?.primary_diagnosis as Record<string, unknown> | undefined;
+  if (typeof primary?.condition_code === "string" && primary.condition_code.trim()) {
+    return conditionLabel(primary.condition_code.trim().toLowerCase());
+  }
+  if (typeof primary?.condition_label === "string" && primary.condition_label.trim()) {
+    return primary.condition_label.trim();
+  }
+  return "";
 }

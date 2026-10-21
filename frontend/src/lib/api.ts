@@ -1,6 +1,6 @@
 import { interfaceText } from "./productLanguage";
 
-function apiBaseUrl() {
+export function apiBaseUrl() {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
   // Keep local frontend and backend on the same host for SameSite session cookies.
   const host = typeof window === "undefined" ? "127.0.0.1" : window.location.hostname;
@@ -22,6 +22,10 @@ export interface SessionUser {
   lab_name: string | null;
   license_id: string | null;
   lab_address: string | null;
+  officer_id?: string | null;
+  assigned_area?: string | null;
+  moh_office?: string | null;
+  designation?: string | null;
 }
 
 // Memory only. Django still authenticates every protected request and validates
@@ -81,9 +85,8 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}, cs
   if (!response.ok) {
     if (reusedToken && response.status === 403 && /csrf/i.test(errorMessage(data))) {
       currentCsrfToken = null;
-      // Read-only previews and request-key protected review writes opt in.
-      // CSRF rejection happens before the view; refresh once, preserving the
-      // original request body/key and abort signal. Other failures never replay.
+      // Only explicit read-only preview callers opt into reuse. CSRF rejection
+      // happens before the view; refresh once, with the original abort signal.
       return apiRequest(path, options, "fresh");
     }
     throw new ApiError(errorMessage(data) || `Request failed with status ${response.status}`, response.status);

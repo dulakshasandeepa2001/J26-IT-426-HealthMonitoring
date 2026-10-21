@@ -23,8 +23,13 @@ export default function Login() {
         return;
       }
       localStorage.setItem("meditrack_user", JSON.stringify(user));
-      const role = ["admin", "doctor", "lab"].includes(user.role) ? user.role : "patient";
-      router.replace(`/${role}/dashboard`);
+      let route = "patient";
+      if (["admin", "doctor", "lab"].includes(user.role)) {
+        route = user.role;
+      } else if (["medical_officer", "phi"].includes(user.role)) {
+        route = "medical-officer";
+      }
+      router.replace(`/${route}/dashboard`);
     }).catch(() => { /* Keep login available if the backend is temporarily offline. */ });
     return () => { active = false; };
   }, [router]);
@@ -57,6 +62,10 @@ export default function Login() {
           lab_name: data.lab_name,
           license_id: data.license_id,
           lab_address: data.lab_address,
+          officer_id: data.officer_id || data.doctorID || data.license_id,
+          assigned_area: data.assigned_area,
+          moh_office: data.moh_office,
+          designation: data.designation,
         })
       );
 
@@ -66,6 +75,8 @@ export default function Login() {
         router.push("/doctor/dashboard");
       } else if (data.role === "lab") {
         router.push("/lab/dashboard");
+      } else if (data.role === "medical_officer" || data.role === "phi") {
+        router.push("/medical-officer/dashboard");
       } else {
         router.push("/patient/dashboard");
       }
@@ -192,8 +203,19 @@ export default function Login() {
             </button>
           </form>
 
+          {/* Quick Demo Logins */}
+          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2 justify-center">
+            <button
+              type="button"
+              onClick={() => { setUsername("phi_officer"); setPassword("Password@123"); }}
+              className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>🛡️ Fill Medical Officer / PHI Demo</span>
+            </button>
+          </div>
+
           {/* Card Footer Link */}
-          <div className="text-center mt-8 pt-6 border-t border-slate-100 text-xs text-slate-500 font-medium">
+          <div className="text-center mt-4 text-xs text-slate-500 font-medium">
             Don&apos;t have an account yet?{" "}
             <Link href="/register" className="text-blue-600 hover:underline font-bold ml-1">
               Create Account

@@ -4,6 +4,7 @@ Django settings for medicare_project project.
 
 from pathlib import Path
 from decouple import Config, RepositoryEmpty, RepositoryEnv
+import socket
 from medicare_project.database import build_database_config
 
 # -----------------------------------------
@@ -84,9 +85,42 @@ TEMPLATES = [
 WSGI_APPLICATION = 'medicare_project.wsgi.application'
 
 # -----------------------------------------
-# EXPLICIT DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 # -----------------------------------------
-DATABASES = {'default': build_database_config(config, BASE_DIR)}
+try:
+    DATABASES = {'default': build_database_config(config, BASE_DIR)}
+except Exception:
+    def is_supabase_reachable():
+        try:
+            s = socket.create_connection(('db.wixgbvdcwteghicynwvz.supabase.co', 5432), timeout=2)
+            s.close()
+            return True
+        except Exception:
+            return False
+
+    if is_supabase_reachable():
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'postgres',
+                'USER': 'postgres',
+                'PASSWORD': config('SUPABASE_DB_PASSWORD', default='Ddugiborn@2001'),
+                'HOST': 'db.wixgbvdcwteghicynwvz.supabase.co',
+                'PORT': '5432',
+                'OPTIONS': {
+                    'sslmode': 'require',
+                },
+            }
+        }
+        print("[INFO] Connected to Supabase PostgreSQL Database!")
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+        print("[INFO] Offline/Fallback mode: Falling back to local SQLite Database!")
 
 # -----------------------------------------
 # PASSWORD VALIDATION
@@ -139,6 +173,7 @@ REST_FRAMEWORK = {
 # -----------------------------------------
 # CORS SETTINGS
 # -----------------------------------------
+CORS_ALLOW_ALL_ORIGINS = True
 LOCAL_DEV_PORTS = range(3000, 3010)
 LOCAL_DEV_ORIGINS = [
     f"http://{host}:{port}"
@@ -148,6 +183,10 @@ LOCAL_DEV_ORIGINS = [
 
 CORS_ALLOWED_ORIGINS = [
     *LOCAL_DEV_ORIGINS,
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:8082",
+    "http://127.0.0.1:8082",
     "https://yuemlsjtzdpgclgnlogg.supabase.co",
 ]
 
@@ -159,6 +198,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     *LOCAL_DEV_ORIGINS,
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:8082",
+    "http://127.0.0.1:8082",
     "https://yuemlsjtzdpgclgnlogg.supabase.co",
 ]
 SESSION_COOKIE_HTTPONLY = True
@@ -173,3 +216,4 @@ COMPONENT1_SERVICE_USER_ID = config('COMPONENT1_SERVICE_USER_ID', default=0, cas
 # Optional read-only demonstration of frozen synthetic research fixtures.
 # Never enables real-patient model inputs, training, reviews or publication.
 PRESCRIPTION_EXPERIMENTAL_ML_ENABLED = config('PRESCRIPTION_EXPERIMENTAL_ML_ENABLED', default=False, cast=bool)
+

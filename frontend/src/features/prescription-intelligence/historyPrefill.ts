@@ -19,14 +19,70 @@ function merge(saved: string[], reported: string[]) {
     seen.add(key); return true;
   });
 }
+export function extractReportedHistory(payload: unknown): { allergies: string[]; medicines: string[] } {
+  if (!payload || typeof payload !== "object") return { allergies: [], medicines: [] };
+  const raw = payload as Record<string, unknown>;
+
+  // Check 1: member1 format (schema 2.0 / 2.1)
+  const m1 = raw.member1 as Record<string, unknown> | undefined;
+  const m1Raw = (m1?.raw_output as Record<string, unknown> | undefined) || m1;
+  const m1Payload = (m1Raw?.payload as Record<string, unknown> | undefined) || m1Raw;
+  const m1Notes = m1Payload?.extracted_clinical_notes as Record<string, unknown> | undefined;
+
+  // Check 2: Direct payload format (e.g. from predict_voice or C1)
+  const directPayload = (raw.payload as Record<string, unknown> | undefined) || raw;
+  const directNotes = directPayload?.extracted_clinical_notes as Record<string, unknown> | undefined;
+
+  // Check 3: Top-level notes
+  const notes = m1Notes || directNotes || (raw.extracted_clinical_notes as Record<string, unknown> | undefined);
+
+  let allergies: string[] = [];
+  let medicines: string[] = [];
+
+  if (notes) {
+    const rawAllergies = notes.patient_reported_allergies ?? notes.allergies;
+    if (Array.isArray(rawAllergies)) {
+      allergies = rawAllergies.map(String).map((s) => s.trim()).filter(Boolean);
+    }
+    const rawMeds = notes.patient_current_medications ?? notes.current_medicines ?? notes.medications;
+    if (Array.isArray(rawMeds)) {
+      medicines = rawMeds.map(String).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+
+  // Check 4: Direct keys if notes weren't structured
+  if (allergies.length === 0) {
+    const fallbackAllergies = directPayload.patient_reported_allergies ?? directPayload.allergies ?? raw.patient_reported_allergies ?? raw.allergies;
+    if (Array.isArray(fallbackAllergies)) {
+      allergies = fallbackAllergies.map(String).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+
+  if (medicines.length === 0) {
+    const fallbackMeds = directPayload.patient_current_medications ?? directPayload.current_medicines ?? directPayload.medications ?? raw.patient_current_medications ?? raw.current_medicines ?? raw.medications;
+    if (Array.isArray(fallbackMeds)) {
+      medicines = fallbackMeds.map(String).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+
+  return { allergies, medicines };
+}
+
 export function patientHistoryPrefill(visit: Consultation, analysis: ConsultationAnalysis | null, context: PatientContext | null) {
   const saved = context?.patient === visit.patient ? context : null;
   const parsed = analysis?.consultation === visit.id ? readComponent1Payload(analysis.payload) : null;
   const linked = parsed?.patient_id === visit.patient && parsed.consultation_id === visit.id
     && (parsed.schema_version === "1.0" || parsed.doctor_id === visit.doctor);
   const notes = linked ? parsed.member1?.raw_output.payload.extracted_clinical_notes : null;
-  const allergies = notes?.patient_reported_allergies ?? [];
-  const medicines = notes?.patient_current_medications ?? [];
+
+  // Resilient extraction: use parsed notes if valid, or extract from analysis.payload
+  const reported = notes ? {
+    allergies: notes.patient_reported_allergies ?? [],
+    medicines: notes.patient_current_medications ?? []
+  } : extractReportedHistory(analysis?.payload);
+
+  const allergies = reported.allergies;
+  const medicines = reported.medicines;
   const reviewed = saved?.provenance.last_reviewed_consultation === visit.id
     && saved.provenance.last_reviewed_by === visit.doctor;
   const baseAllergies = saved?.allergy_status === "confirmed" ? saved.allergies : [];

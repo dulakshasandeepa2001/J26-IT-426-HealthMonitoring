@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth import base_user
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -11,7 +12,7 @@ class User(AbstractUser):
         ('doctor', 'Doctor'),
         ('patient', 'Patient'),
         ('lab', 'Lab'),
-        
+        ('medical_officer', 'Medical Officer / PHI'),
     )
 
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -26,6 +27,18 @@ class User(AbstractUser):
     lab_name = models.CharField(max_length=150, blank=True, null=True)
     lab_address = models.CharField(max_length=255, blank=True, null=True)
     license_id = models.CharField(max_length=50, blank=True, null=True)
+
+    @property
+    def officer_id(self):
+        return self.doctorID or self.license_id
+
+    @property
+    def assigned_area(self):
+        return self.working_hospital
+
+    @property
+    def moh_office(self):
+        return self.lab_name
 
     def __str__(self):
         return self.username
@@ -89,5 +102,52 @@ class Laborator(models.Model):
     
     class Meta:
         db_table = 'laborator'
-    
-    
+
+
+class Appointment(models.Model):
+    STATUS_CHOICES = (
+        ('booked', 'Booked / Waiting'),
+        ('serving', 'Now Serving'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
+    doctor_id = models.CharField(max_length=50)
+    doctor_name = models.CharField(max_length=150)
+    hospital_name = models.CharField(max_length=200, blank=True, null=True)
+    appointment_date = models.DateField()
+    session_start_time = models.TimeField(blank=True, null=True)
+    session_end_time = models.TimeField(blank=True, null=True)
+    token_number = models.IntegerField()
+    token_label = models.CharField(max_length=10)
+    estimated_time = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='booked')
+    reason = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'patient_appointments'
+        ordering = ['appointment_date', 'token_number']
+        unique_together = ('doctor_id', 'appointment_date', 'token_number')
+
+    def __str__(self):
+        return f"{self.token_label} - {self.doctor_name} on {self.appointment_date} ({self.patient.username})"
+
+
+class DoctorLiveAvailability(models.Model):
+    doctor_id = models.CharField(max_length=50, unique=True)
+    doctor_name = models.CharField(max_length=150)
+    is_available = models.BooleanField(default=False)
+    available_until = models.TimeField(blank=True, null=True)
+    available_date = models.DateField(default=datetime.date.today)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'doctor_live_availability'
+
+    def __str__(self):
+        status = f"Available until {self.available_until}" if self.is_available else "Offline"
+        return f"{self.doctor_name} ({self.doctor_id}) - {status}"
