@@ -1,0 +1,4256 @@
+[
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_aches_relief",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "435cc65c4938a8256d013332b3cdbcbdd05f075dfbac9555a3f32407c6905a2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-flu-fever-aches",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "oseltamivir-75mg-capsule",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "influenza_antiviral",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-flu-2026",
+      "dailymed-oseltamivir",
+      "who-flu-2024"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "75",
+      "doses_per_day": 2,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "2c8d99df29d3a693594fdf3a2bcb3264aaa180a4293cfb36502d58717ba1654b",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-flu-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "vaccine_interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "75b42144026e43ec10910809ab88a0a000204cb9a8757e990ccf60d2dcec4028",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-varicella-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "acyclovir-800mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "varicella_antiviral",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-varicella-guidance",
+      "dailymed-acyclovir"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "800",
+      "doses_per_day": 4,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "5bafe03714e78e5b7e2671c24e8ef4110a2648cc7ba492c8fbee13be04e380ec",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-varicella-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "indication_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "itching_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-calamine"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": null,
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "Shake the container before use; apply to affected skin only when itching needs relief. Keep away from eyes. Get clinician advice for worsening symptoms, symptoms persisting beyond 7 days, or recurring symptoms. External use; no fixed amount, daily frequency or course is specified by this label.",
+      "interval_hours": null,
+      "max_daily_amount_mg": null,
+      "max_doses_per_day": null,
+      "review_after_days": 7,
+      "route": "topical",
+      "schedule_type": "topical_prn",
+      "unit": null
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "498ad7e945949fcf0b3063151f26fdeef6cfb8f7f4b0637bbe2326914e71ae2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-varicella-itch",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "topical_precaution",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "measles",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-measles-care",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-measles"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a6dacdb1f3bda5d6a56948aaad768a8fbe872d844430d63be4299403498cf6e6",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-measles-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_pain_relief",
+    "clinical_validation": false,
+    "condition": "mumps",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-mumps"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a5015a9dfb9374266c01105511187afccc0649e5d4e84653e18337773a6ed241",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__standard-1-mumps-fever-pain",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__standard"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_aches_relief",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "acetaminophen"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "435cc65c4938a8256d013332b3cdbcbdd05f075dfbac9555a3f32407c6905a2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-flu-fever-aches",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "oseltamivir-75mg-capsule",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "influenza_antiviral",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-flu-2026",
+      "dailymed-oseltamivir",
+      "who-flu-2024"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "oseltamivir"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "75",
+      "doses_per_day": 2,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "2c8d99df29d3a693594fdf3a2bcb3264aaa180a4293cfb36502d58717ba1654b",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-flu-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "vaccine_interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "acetaminophen"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "75b42144026e43ec10910809ab88a0a000204cb9a8757e990ccf60d2dcec4028",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-varicella-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "acyclovir-800mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "varicella_antiviral",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-varicella-guidance",
+      "dailymed-acyclovir"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "acyclovir"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "800",
+      "doses_per_day": 4,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "5bafe03714e78e5b7e2671c24e8ef4110a2648cc7ba492c8fbee13be04e380ec",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-varicella-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "indication_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "itching_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-calamine"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "calamine"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": null,
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "Shake the container before use; apply to affected skin only when itching needs relief. Keep away from eyes. Get clinician advice for worsening symptoms, symptoms persisting beyond 7 days, or recurring symptoms. External use; no fixed amount, daily frequency or course is specified by this label.",
+      "interval_hours": null,
+      "max_daily_amount_mg": null,
+      "max_doses_per_day": null,
+      "review_after_days": 7,
+      "route": "topical",
+      "schedule_type": "topical_prn",
+      "unit": null
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "498ad7e945949fcf0b3063151f26fdeef6cfb8f7f4b0637bbe2326914e71ae2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-varicella-itch",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "topical_precaution",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "measles",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-measles-care",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-measles"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "acetaminophen"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a6dacdb1f3bda5d6a56948aaad768a8fbe872d844430d63be4299403498cf6e6",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-measles-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_pain_relief",
+    "clinical_validation": false,
+    "condition": "mumps",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-mumps"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [
+        "acetaminophen"
+      ],
+      "allergy_status": "confirmed",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a5015a9dfb9374266c01105511187afccc0649e5d4e84653e18337773a6ed241",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__matching_allergy-1-mumps-fever-pain",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "blocked",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__matching_allergy"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_aches_relief",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "435cc65c4938a8256d013332b3cdbcbdd05f075dfbac9555a3f32407c6905a2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-flu-fever-aches",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "oseltamivir-75mg-capsule",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "influenza_antiviral",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-flu-2026",
+      "dailymed-oseltamivir",
+      "who-flu-2024"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "75",
+      "doses_per_day": 2,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "2c8d99df29d3a693594fdf3a2bcb3264aaa180a4293cfb36502d58717ba1654b",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-flu-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "vaccine_interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "1000",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "75b42144026e43ec10910809ab88a0a000204cb9a8757e990ccf60d2dcec4028",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-varicella-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "acyclovir-800mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "varicella_antiviral",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-varicella-guidance",
+      "dailymed-acyclovir"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "800",
+      "doses_per_day": 4,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "5bafe03714e78e5b7e2671c24e8ef4110a2648cc7ba492c8fbee13be04e380ec",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-varicella-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "indication_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "itching_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-calamine"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": null,
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "Shake the container before use; apply to affected skin only when itching needs relief. Keep away from eyes. Get clinician advice for worsening symptoms, symptoms persisting beyond 7 days, or recurring symptoms. External use; no fixed amount, daily frequency or course is specified by this label.",
+      "interval_hours": null,
+      "max_daily_amount_mg": null,
+      "max_doses_per_day": null,
+      "review_after_days": 7,
+      "route": "topical",
+      "schedule_type": "topical_prn",
+      "unit": null
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "498ad7e945949fcf0b3063151f26fdeef6cfb8f7f4b0637bbe2326914e71ae2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-varicella-itch",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "matches_selected_rule",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "topical_precaution",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "measles",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-measles-care",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-measles"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a6dacdb1f3bda5d6a56948aaad768a8fbe872d844430d63be4299403498cf6e6",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-measles-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_pain_relief",
+    "clinical_validation": false,
+    "condition": "mumps",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-mumps"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "unknown",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a5015a9dfb9374266c01105511187afccc0649e5d4e84653e18337773a6ed241",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__unknown_medicine-1-mumps-fever-pain",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "cannot_validate",
+      "interaction": "cannot_validate",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__unknown_medicine"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_aches_relief",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "500.0",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "435cc65c4938a8256d013332b3cdbcbdd05f075dfbac9555a3f32407c6905a2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-flu-fever-aches",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "mismatch",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "oseltamivir-75mg-capsule",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "influenza_antiviral",
+    "clinical_validation": false,
+    "condition": "influenza",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-flu-2026",
+      "dailymed-oseltamivir",
+      "who-flu-2024"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "37.5",
+      "doses_per_day": 2,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "2c8d99df29d3a693594fdf3a2bcb3264aaa180a4293cfb36502d58717ba1654b",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-flu-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "mismatch",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "vaccine_interaction",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-oseltamivir"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "500.0",
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "For verified fever or aches, use only while symptoms need relief. Space doses by at least 6 hours; limit to 3 doses (3000 mg) per 24 hours. Seek review for worsening fever or fever beyond 3 days, or worsening pain or pain beyond 10 days. This is not a fixed treatment course.",
+      "interval_hours": 6,
+      "max_daily_amount_mg": 3000,
+      "max_doses_per_day": 3,
+      "review_after_days": 3,
+      "route": "oral",
+      "schedule_type": "oral_prn",
+      "unit": "mg"
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "75b42144026e43ec10910809ab88a0a000204cb9a8757e990ccf60d2dcec4028",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-varicella-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "mismatch",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "acyclovir-800mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "varicella_antiviral",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-varicella-guidance",
+      "dailymed-acyclovir"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": "400.0",
+      "doses_per_day": 4,
+      "duration_days": 5,
+      "route": "oral",
+      "unit": "mg"
+    },
+    "purpose": "antiviral",
+    "review_gate_evaluated": false,
+    "rule_hash": "5bafe03714e78e5b7e2671c24e8ef4110a2648cc7ba492c8fbee13be04e380ec",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-varicella-antiviral",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "mismatch",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "renal",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "onset",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "indication_scope",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-acyclovir",
+          "cdc-varicella-guidance"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "calamine-zinc-oxide-lotion",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "itching_relief",
+    "clinical_validation": false,
+    "condition": "chickenpox",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-chickenpox",
+      "dailymed-calamine"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": {
+      "amount": null,
+      "doses_per_day": null,
+      "duration_days": null,
+      "instructions": "FICTIONAL WRONG INSTRUCTIONS",
+      "interval_hours": null,
+      "max_daily_amount_mg": null,
+      "max_doses_per_day": null,
+      "review_after_days": 7,
+      "route": "topical",
+      "schedule_type": "topical_prn",
+      "unit": null
+    },
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "498ad7e945949fcf0b3063151f26fdeef6cfb8f7f4b0637bbe2326914e71ae2d",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-varicella-itch",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "mismatch",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "topical_precaution",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "blocked"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-calamine",
+          "cdc-chickenpox"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_relief",
+    "clinical_validation": false,
+    "condition": "measles",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "cdc-measles-care",
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-measles"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a6dacdb1f3bda5d6a56948aaad768a8fbe872d844430d63be4299403498cf6e6",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-measles-fever",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  },
+  {
+    "approved": false,
+    "candidate_id": "paracetamol-500mg-tablet",
+    "clinical_review_status": "not_reviewed",
+    "clinical_role": "fever_or_pain_relief",
+    "clinical_validation": false,
+    "condition": "mumps",
+    "criteria_version": "selected-rule-imitation-rf-2026-10-20-v1",
+    "evidence_references": [
+      "dailymed-paracetamol",
+      "fda-acetaminophen-names",
+      "nhs-mumps"
+    ],
+    "fact_origin": "new_controlled_fictional_fixture; not_copied_patient_facts",
+    "label_method": "rule_derived",
+    "patient_features": {
+      "age_years": 13,
+      "allergies": [],
+      "allergy_status": "none",
+      "care_setting": "outpatient",
+      "condition_severity": "mild",
+      "current_medicines": [],
+      "hepatic_assessment": "standard",
+      "influenza_guideline": "CDC_2026",
+      "laiv_timing": "no_conflict",
+      "medicine_status": "none",
+      "onset_hours": 12,
+      "red_flags": "none",
+      "renal_assessment": "standard",
+      "special_population": "standard",
+      "symptom_durations": {
+        "body_aches": 12,
+        "fever": 12,
+        "itching": 12,
+        "jaw_pain": 12
+      },
+      "symptoms_reviewed": true,
+      "topical_assessment": "standard",
+      "varicella_risk": "risk_group_confirmed",
+      "verified_symptoms": [
+        "fever",
+        "body_aches",
+        "itching",
+        "jaw_pain"
+      ],
+      "weight_kg": 55
+    },
+    "prescription_eligible": false,
+    "proposed_regimen": null,
+    "purpose": "symptom_relief",
+    "review_gate_evaluated": false,
+    "rule_hash": "a5015a9dfb9374266c01105511187afccc0649e5d4e84653e18337773a6ed241",
+    "rule_version": "pp1-rules-2026-10-14-v3",
+    "scenario_id": "RF-RULE-train__low_dose-1-mumps-fever-pain",
+    "split": "train",
+    "synthetic_only": true,
+    "targets": {
+      "allergy": "no_selected_issue",
+      "dose": "cannot_validate",
+      "duplicate_ingredient": "no_selected_issue",
+      "interaction": "no_selected_issue",
+      "purpose_applicability": "provisional_relevance"
+    },
+    "teacher_checks": [
+      {
+        "category": "clinical_scope",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "special_population",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "age",
+        "source_ids": [],
+        "status": "passed"
+      },
+      {
+        "category": "allergy",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "duplicate_ingredient",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "interaction",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "hepatic",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "symptom_relevance",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "passed"
+      },
+      {
+        "category": "dose",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "cannot_validate"
+      },
+      {
+        "category": "coverage",
+        "source_ids": [
+          "dailymed-paracetamol",
+          "fda-acetaminophen-names"
+        ],
+        "status": "warning"
+      }
+    ],
+    "template_family": "train__low_dose"
+  }
+]

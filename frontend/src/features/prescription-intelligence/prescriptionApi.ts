@@ -51,6 +51,13 @@ export interface PatientContextReview {
   reviewed: boolean;
   expected_updated_at: string | null;
   history_details?: HistoryDetails;
+  medicine_plans?: CurrentMedicinePlan[];
+}
+
+export interface CurrentMedicinePlan { recorded_text: string; action: "undecided" | "continue" | "change" | "stop"; note: string }
+export interface CurrentMedicinePlanRecord {
+  version: string; details: CurrentMedicinePlan[]; consultation_id: string;
+  reviewed_by: number; reviewed_at: string; status: "proposed_only"; changes_active_history: false;
 }
 
 export interface AllergyIdentity { recorded_text: string; identity: string; reaction: string; reaction_date: string | null; clarification_note: string }

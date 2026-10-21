@@ -1,0 +1,35 @@
+{
+  "environment": {
+    "cloudpickle": "3.1.2",
+    "joblib": "1.6.0",
+    "narwhals": "2.27.1",
+    "numpy": "2.5.4",
+    "python": "3.13.3",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.7.0"
+  },
+  "outputs": {
+    "audit.json": "b9b9a514eb0b9f4cba523ea37e6f9bba45075fa952cf924760fd5cc7637c98e8",
+    "candidate_rows.jsonl": "71e24fbee35a87a5018b4cf3bef3b18c70f17581ac140247a6ff987a394e0c71",
+    "cases.jsonl": "dbf794d3ac860944e54184023556b257121fc32e3941b50969e3077c8627f9b3",
+    "evaluation.json": "9269c0d6be6d073894c752e7e9255655349bcba9e9214b26f2a51aa90e6971b0",
+    "evaluation.md": "7b98d8a5b052e14143ec05bbe271c39a0a5d30317707ee913aaaa3a7168a2068",
+    "inputs/MediTrack_Synthetic_200.xlsx": "08e587f88b737f40ad311f139b8e15df169c21567964f0a5050b69444e6ad25b",
+    "inputs/patient_scenarios_200.csv": "3dbaba97ec14768365167a1e92929acf4d7dfa937acac91ca422c3b39c6f85ef",
+    "inspection_batch.json": "3dc6aa7a3c6e9a79b94c9f479b133623183ea8d567909b4b8c84f443f49a18cc",
+    "inspection_rows.csv": "59ceeff00991bad406d4289208b366c60125c8b019114c8d88fb08fd779c7aa6",
+    "model.joblib": "8a8bf9f506d15a834a5d54bbc94840f8683b016ee10f24d018ea4fefe51f7f84",
+    "plan.json": "0e66bdd9edea4cb0c801a2f6dc2eec918c93459e4a3838df07e8ce0c2bd9ab56",
+    "predictions.json": "c5994f468f30e9c4bc8ec9da5772c958e2ad03661b8caf257a221dd007a99041",
+    "test_errors.json": "bbeca8210d1bad74eb506f551947138d62729a6d4a35086bedc6714923647558"
+  },
+  "sources": {
+    "__init__.py": "41f3b89edd1a0848d9c6a6b4aa98c9e1a166520226535bd8c999b652b0e412ea",
+    "data.py": "3c3dbf81da566a5b7ac41b54dbee273b45c28afff5801b3a582611db51cbb2ac",
+    "experiment.py": "1c829354181b0fe8d24cb294dc8e57bd980ca0f0366318089d364fb4120f40aa",
+    "plan.json": "0f4afbacdba6ba0ab4147ca2791cd82dfd1a9b0fad0c9302409fb75bd280112c",
+    "requirements.txt": "137c207d29bbf2cae5119bc66382af8926bc0e83ec905501ab225d4ed0124923"
+  },
+  "version": "synthetic-200-symptom-match-random-forest-2026-10-20-v1"
+}

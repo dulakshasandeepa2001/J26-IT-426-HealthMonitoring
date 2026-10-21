@@ -81,8 +81,9 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}, cs
   if (!response.ok) {
     if (reusedToken && response.status === 403 && /csrf/i.test(errorMessage(data))) {
       currentCsrfToken = null;
-      // Only explicit read-only preview callers opt into reuse. CSRF rejection
-      // happens before the view; refresh once, with the original abort signal.
+      // Read-only previews and request-key protected review writes opt in.
+      // CSRF rejection happens before the view; refresh once, preserving the
+      // original request body/key and abort signal. Other failures never replay.
       return apiRequest(path, options, "fresh");
     }
     throw new ApiError(errorMessage(data) || `Request failed with status ${response.status}`, response.status);

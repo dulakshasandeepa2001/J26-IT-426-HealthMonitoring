@@ -65,8 +65,10 @@ try {
   for (const name of ['Zanamivir', 'Peramivir', 'Baloxavir', 'Valacyclovir', 'Vitamin A', 'Loperamide', 'Bismuth', 'Zinc', 'Oral rehydration']) {
     await pick(name);
     const safety = panel().getByRole('region', { name: /^Safety rule review for / });
-    assert.equal(await safety.getByRole('combobox').inputValue(), 'pending', name);
-    assert.equal(await safety.locator('option[value="reviewed"]').count(), 0, name);
+    assert.equal(await safety.getByRole('combobox').inputValue(), 'reviewed', name);
+    assert.equal(await safety.locator('option[value="reviewed"]').count(), 1, name);
+    assert.match(await safety.locator('option[value="reviewed"]').textContent(), /Reference safety scope reviewed/);
+    assert.equal(await safety.getByRole('button', { name: 'Save safety rule review', exact: true }).isDisabled(), true);
     await panel().getByText(/Exact product identity or executable rule coverage is incomplete/).waitFor({ state: 'visible' });
   }
   await pick('Hypromellose');

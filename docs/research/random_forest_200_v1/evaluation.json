@@ -1,0 +1,1869 @@
+{
+  "active_application_model_replaced": false,
+  "algorithm": "sklearn.ensemble.RandomForestClassifier",
+  "api_enabled": false,
+  "audit": {
+    "candidate_rows": 636,
+    "case_count": 200,
+    "conditions": {
+      "chickenpox": 34,
+      "influenza": 34,
+      "measles": 33,
+      "mumps": 33,
+      "viral_conjunctivitis": 33,
+      "viral_gastroenteritis": 33
+    },
+    "csv_xlsx_overlapping_case_fields_agree": true,
+    "input_selection": "CSV supplies all 52 context fields; XLSX supplies 636 candidate-purpose toy labels. These are the same 200 cases, not 400.",
+    "inspection_case_count": 12,
+    "inspection_row_ids": [
+      "SYN-0001::paracetamol",
+      "SYN-0001::oseltamivir",
+      "SYN-0001::baloxavir_marboxil",
+      "SYN-0001::peramivir",
+      "SYN-0001::zanamivir",
+      "SYN-0002::paracetamol",
+      "SYN-0002::oseltamivir",
+      "SYN-0002::baloxavir_marboxil",
+      "SYN-0002::peramivir",
+      "SYN-0002::zanamivir",
+      "SYN-0035::paracetamol",
+      "SYN-0035::acyclovir",
+      "SYN-0035::calamine_zinc_oxide",
+      "SYN-0035::valacyclovir",
+      "SYN-0036::paracetamol",
+      "SYN-0036::acyclovir",
+      "SYN-0036::calamine_zinc_oxide",
+      "SYN-0036::valacyclovir",
+      "SYN-0069::paracetamol",
+      "SYN-0069::vitamin_a",
+      "SYN-0070::paracetamol",
+      "SYN-0070::vitamin_a",
+      "SYN-0102::paracetamol",
+      "SYN-0102::ibuprofen",
+      "SYN-0103::paracetamol",
+      "SYN-0103::ibuprofen",
+      "SYN-0135::hypromellose",
+      "SYN-0135::carboxymethylcellulose_sodium",
+      "SYN-0136::hypromellose",
+      "SYN-0136::carboxymethylcellulose_sodium",
+      "SYN-0168::ors",
+      "SYN-0168::bismuth_subsalicylate",
+      "SYN-0168::loperamide",
+      "SYN-0168::zinc",
+      "SYN-0169::ors",
+      "SYN-0169::bismuth_subsalicylate",
+      "SYN-0169::loperamide",
+      "SYN-0169::zinc"
+    ],
+    "label_balance": {
+      "0": 88,
+      "1": 172,
+      "unlabelled": 376
+    },
+    "labelled_rows": 260,
+    "provenance": {
+      "all_verified_input_flags_remain_false": true,
+      "clinical_review_status": "not_reviewed",
+      "independent_clinical_validation": false,
+      "label_method": "rule_derived",
+      "producer_readme_available": false
+    },
+    "sources": {
+      "MediTrack_Synthetic_200.xlsx": {
+        "bytes": 58873,
+        "sha256": "08e587f88b737f40ad311f139b8e15df169c21567964f0a5050b69444e6ad25b"
+      },
+      "patient_scenarios_200.csv": {
+        "bytes": 117093,
+        "sha256": "3dbaba97ec14768365167a1e92929acf4d7dfa937acac91ca422c3b39c6f85ef"
+      }
+    },
+    "split_counts": {
+      "test": {
+        "candidate_rows": 163,
+        "cases": 51,
+        "families": 12,
+        "labelled_rows": 66
+      },
+      "train": {
+        "candidate_rows": 395,
+        "cases": 124,
+        "families": 30,
+        "labelled_rows": 161
+      },
+      "validation": {
+        "candidate_rows": 78,
+        "cases": 25,
+        "families": 6,
+        "labelled_rows": 33
+      }
+    },
+    "target_availability": {
+      "clinical_relevance_labels": 0,
+      "clinical_safety_labels": 0,
+      "dose_labels": 0,
+      "independent_clinician_reviews": 0
+    },
+    "template_families": 48,
+    "template_family_leakage": false,
+    "unlabelled_rows": 376,
+    "version": "synthetic-200-symptom-match-random-forest-2026-10-20-v1"
+  },
+  "clinical_review_status": "not_reviewed",
+  "coverage": {
+    "trained_generic_candidates": [
+      "bismuth_subsalicylate",
+      "calamine_zinc_oxide",
+      "carboxymethylcellulose_sodium",
+      "hypromellose",
+      "ibuprofen",
+      "loperamide",
+      "ors",
+      "paracetamol"
+    ],
+    "untrained_candidates": [
+      "acyclovir",
+      "baloxavir_marboxil",
+      "oseltamivir",
+      "peramivir",
+      "valacyclovir",
+      "vitamin_a",
+      "zanamivir",
+      "zinc"
+    ]
+  },
+  "environment": {
+    "cloudpickle": "3.1.2",
+    "joblib": "1.6.0",
+    "narwhals": "2.27.1",
+    "numpy": "2.5.4",
+    "python": "3.13.3",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.7.0"
+  },
+  "group_support": [
+    {
+      "candidates": [
+        "acyclovir",
+        "valacyclovir"
+      ],
+      "condition": "chickenpox",
+      "labels": {
+        "unlabelled": 68
+      },
+      "purpose": "antiviral",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "calamine_zinc_oxide"
+      ],
+      "condition": "chickenpox",
+      "labels": {
+        "0": 11,
+        "1": 11,
+        "unlabelled": 12
+      },
+      "purpose": "itch_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "paracetamol"
+      ],
+      "condition": "chickenpox",
+      "labels": {
+        "0": 8,
+        "1": 16,
+        "unlabelled": 10
+      },
+      "purpose": "symptom_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "baloxavir_marboxil",
+        "oseltamivir",
+        "peramivir",
+        "zanamivir"
+      ],
+      "condition": "influenza",
+      "labels": {
+        "unlabelled": 136
+      },
+      "purpose": "antiviral",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "paracetamol"
+      ],
+      "condition": "influenza",
+      "labels": {
+        "0": 7,
+        "1": 18,
+        "unlabelled": 9
+      },
+      "purpose": "symptom_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "vitamin_a"
+      ],
+      "condition": "measles",
+      "labels": {
+        "unlabelled": 33
+      },
+      "purpose": "adjunct_requires_separate_criteria",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "paracetamol"
+      ],
+      "condition": "measles",
+      "labels": {
+        "0": 8,
+        "1": 8,
+        "unlabelled": 17
+      },
+      "purpose": "symptom_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "ibuprofen",
+        "paracetamol"
+      ],
+      "condition": "mumps",
+      "labels": {
+        "0": 12,
+        "1": 38,
+        "unlabelled": 16
+      },
+      "purpose": "symptom_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "carboxymethylcellulose_sodium",
+        "hypromellose"
+      ],
+      "condition": "viral_conjunctivitis",
+      "labels": {
+        "0": 14,
+        "1": 38,
+        "unlabelled": 14
+      },
+      "purpose": "eye_lubrication",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "zinc"
+      ],
+      "condition": "viral_gastroenteritis",
+      "labels": {
+        "unlabelled": 33
+      },
+      "purpose": "adjunct_requires_separate_criteria",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "bismuth_subsalicylate",
+        "loperamide"
+      ],
+      "condition": "viral_gastroenteritis",
+      "labels": {
+        "0": 22,
+        "1": 26,
+        "unlabelled": 18
+      },
+      "purpose": "diarrhea_symptom_relief",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    },
+    {
+      "candidates": [
+        "ors"
+      ],
+      "condition": "viral_gastroenteritis",
+      "labels": {
+        "0": 6,
+        "1": 17,
+        "unlabelled": 10
+      },
+      "purpose": "rehydration_support",
+      "ranking_performance_claimed": false,
+      "within_scenario_preference_variation": false
+    }
+  ],
+  "independent_clinical_validation": false,
+  "label_method": "rule_derived",
+  "limitations": [
+    "All labels are supplied synthetic symptom-match rules, not independent clinician judgments or treatment outcomes.",
+    "Patient safety, interaction, contraindication and dose targets are absent; no such models were fitted.",
+    "The workbook omits full context fields; CSV and XLSX describe the same 200 cases and must not be concatenated as 400.",
+    "Blank labels remain unlabelled; undefined antiviral/adjunct tasks and incomplete targets abstain.",
+    "Family IDs include condition; broader generator context patterns and exact feature vectors can recur across splits. Novel-input metrics do not establish independent clinical validation.",
+    "Alternative medicines have identical toy targets within purpose. No preference labels or meaningful within-group ranking are supplied.",
+    "The best Random Forest is validation-selected among three declared settings, not presumed superior to the decision-tree baseline.",
+    "Headache mappings and generic candidate tasks differ from the old relevance experiment; their scores are not directly comparable.",
+    "Candidates are generic concepts; a symptom-match prediction supplies no exact formulation, product verification, dose or safety clearance.",
+    "Existing application artifacts and deterministic blocks are unchanged. This saved experiment is offline only."
+  ],
+  "majority_baseline_test_unique": {
+    "abstentions": 0,
+    "agreement_with_supplied_toy_labels": 0.6964285714285714,
+    "class_balance": {
+      "0": 17,
+      "1": 39
+    },
+    "confusion_matrix": {
+      "0": {
+        "0": 0,
+        "1": 17,
+        "abstained": 0
+      },
+      "1": {
+        "0": 0,
+        "1": 39,
+        "abstained": 0
+      }
+    },
+    "correct": 39,
+    "coverage": 1.0,
+    "errors_including_abstentions": 17,
+    "inputs": 56,
+    "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+    "macro_f1": 0.4105263157894737,
+    "macro_f1_supported_class_count": 2,
+    "per_class": {
+      "0": {
+        "f1": 0.0,
+        "precision": null,
+        "predicted_count": 0,
+        "recall": 0.0,
+        "support": 17
+      },
+      "1": {
+        "f1": 0.8210526315789474,
+        "precision": 0.6964285714285714,
+        "predicted_count": 56,
+        "recall": 1.0,
+        "support": 39
+      }
+    }
+  },
+  "medical_confidence_calibrated": false,
+  "overlap": {
+    "train--test": 21,
+    "train--validation": 12,
+    "validation--test": 10
+  },
+  "published": false,
+  "refitted_on_validation": false,
+  "safety_and_dose_models_trained": false,
+  "selected_configuration": "rf_depth8_leaf2",
+  "selected_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "class_weight": "balanced_subsample",
+    "criterion": "gini",
+    "max_depth": 8,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 2,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 200,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 20261020,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "selected_rf_test": {
+    "all_labelled_rows": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 0.9696969696969697,
+      "class_balance": {
+        "0": 23,
+        "1": 43
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 22,
+          "1": 1,
+          "abstained": 0
+        },
+        "1": {
+          "0": 1,
+          "1": 42,
+          "abstained": 0
+        }
+      },
+      "correct": 64,
+      "coverage": 1.0,
+      "errors_including_abstentions": 2,
+      "inputs": 66,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 0.9666329625884732,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 0.9565217391304348,
+          "precision": 0.9565217391304348,
+          "predicted_count": 23,
+          "recall": 0.9565217391304348,
+          "support": 23
+        },
+        "1": {
+          "f1": 0.9767441860465116,
+          "precision": 0.9767441860465116,
+          "predicted_count": 43,
+          "recall": 0.9767441860465116,
+          "support": 43
+        }
+      }
+    },
+    "inputs_seen_in_training": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 9,
+        "1": 12
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 9,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 12,
+          "abstained": 0
+        }
+      },
+      "correct": 21,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 21,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 9,
+          "recall": 1.0,
+          "support": 9
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 12,
+          "recall": 1.0,
+          "support": 12
+        }
+      }
+    },
+    "novel_unique_inputs": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 0.9428571428571428,
+      "class_balance": {
+        "0": 8,
+        "1": 27
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 7,
+          "1": 1,
+          "abstained": 0
+        },
+        "1": {
+          "0": 1,
+          "1": 26,
+          "abstained": 0
+        }
+      },
+      "correct": 33,
+      "coverage": 1.0,
+      "errors_including_abstentions": 2,
+      "inputs": 35,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 0.9189814814814814,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 0.875,
+          "precision": 0.875,
+          "predicted_count": 8,
+          "recall": 0.875,
+          "support": 8
+        },
+        "1": {
+          "f1": 0.9629629629629629,
+          "precision": 0.9629629629629629,
+          "predicted_count": 27,
+          "recall": 0.9629629629629629,
+          "support": 27
+        }
+      }
+    },
+    "unique_inputs": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 0.9642857142857143,
+      "class_balance": {
+        "0": 17,
+        "1": 39
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 16,
+          "1": 1,
+          "abstained": 0
+        },
+        "1": {
+          "0": 1,
+          "1": 38,
+          "abstained": 0
+        }
+      },
+      "correct": 54,
+      "coverage": 1.0,
+      "errors_including_abstentions": 2,
+      "inputs": 56,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 0.9577677224736048,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 0.9411764705882353,
+          "precision": 0.9411764705882353,
+          "predicted_count": 17,
+          "recall": 0.9411764705882353,
+          "support": 17
+        },
+        "1": {
+          "f1": 0.9743589743589743,
+          "precision": 0.9743589743589743,
+          "predicted_count": 39,
+          "recall": 0.9743589743589743,
+          "support": 39
+        }
+      }
+    }
+  },
+  "selection_subset": "novel_unique_inputs",
+  "selection_used_test": false,
+  "task": "binary supplied toy symptom-match classification; not clinical relevance, safety, dose or best-medicine ranking",
+  "template_patterns_across_partitions": {
+    "age_and_weight_missing": [
+      "test",
+      "train",
+      "validation"
+    ],
+    "allergy_history_unknown": [
+      "test",
+      "train"
+    ],
+    "assessment_fields_unknown": [
+      "test",
+      "train"
+    ],
+    "complete_reported_context": [
+      "test",
+      "train",
+      "validation"
+    ],
+    "reported_concern": [
+      "test",
+      "train",
+      "validation"
+    ],
+    "reported_current_product": [
+      "test",
+      "train",
+      "validation"
+    ],
+    "special_population_context": [
+      "train",
+      "validation"
+    ],
+    "unresolved_product_name": [
+      "train"
+    ]
+  },
+  "test_by_condition_and_purpose": {
+    "chickenpox::itch_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 0.8333333333333334,
+      "class_balance": {
+        "0": 3,
+        "1": 3
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 3,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 1,
+          "1": 2,
+          "abstained": 0
+        }
+      },
+      "correct": 5,
+      "coverage": 1.0,
+      "errors_including_abstentions": 1,
+      "inputs": 6,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 0.8285714285714285,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 0.8571428571428571,
+          "precision": 0.75,
+          "predicted_count": 4,
+          "recall": 1.0,
+          "support": 3
+        },
+        "1": {
+          "f1": 0.8,
+          "precision": 1.0,
+          "predicted_count": 2,
+          "recall": 0.6666666666666666,
+          "support": 3
+        }
+      }
+    },
+    "chickenpox::symptom_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 2,
+        "1": 5
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 2,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 5,
+          "abstained": 0
+        }
+      },
+      "correct": 7,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 7,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 2,
+          "recall": 1.0,
+          "support": 2
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 5,
+          "recall": 1.0,
+          "support": 5
+        }
+      }
+    },
+    "influenza::symptom_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 2,
+        "1": 5
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 2,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 5,
+          "abstained": 0
+        }
+      },
+      "correct": 7,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 7,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 2,
+          "recall": 1.0,
+          "support": 2
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 5,
+          "recall": 1.0,
+          "support": 5
+        }
+      }
+    },
+    "measles::symptom_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 2,
+        "1": 3
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 2,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 3,
+          "abstained": 0
+        }
+      },
+      "correct": 5,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 5,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 2,
+          "recall": 1.0,
+          "support": 2
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 3,
+          "recall": 1.0,
+          "support": 3
+        }
+      }
+    },
+    "mumps::symptom_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 4,
+        "1": 4
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 4,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 4,
+          "abstained": 0
+        }
+      },
+      "correct": 8,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 8,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 4,
+          "recall": 1.0,
+          "support": 4
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 4,
+          "recall": 1.0,
+          "support": 4
+        }
+      }
+    },
+    "viral_conjunctivitis::eye_lubrication": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 4,
+        "1": 10
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 4,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 10,
+          "abstained": 0
+        }
+      },
+      "correct": 14,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 14,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 4,
+          "recall": 1.0,
+          "support": 4
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 10,
+          "recall": 1.0,
+          "support": 10
+        }
+      }
+    },
+    "viral_gastroenteritis::diarrhea_symptom_relief": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 1.0,
+      "class_balance": {
+        "0": 4,
+        "1": 8
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 4,
+          "1": 0,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 8,
+          "abstained": 0
+        }
+      },
+      "correct": 12,
+      "coverage": 1.0,
+      "errors_including_abstentions": 0,
+      "inputs": 12,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 1.0,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 4,
+          "recall": 1.0,
+          "support": 4
+        },
+        "1": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted_count": 8,
+          "recall": 1.0,
+          "support": 8
+        }
+      }
+    },
+    "viral_gastroenteritis::rehydration_support": {
+      "abstentions": 0,
+      "agreement_with_supplied_toy_labels": 0.8571428571428571,
+      "class_balance": {
+        "0": 2,
+        "1": 5
+      },
+      "confusion_matrix": {
+        "0": {
+          "0": 1,
+          "1": 1,
+          "abstained": 0
+        },
+        "1": {
+          "0": 0,
+          "1": 5,
+          "abstained": 0
+        }
+      },
+      "correct": 6,
+      "coverage": 1.0,
+      "errors_including_abstentions": 1,
+      "inputs": 7,
+      "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+      "macro_f1": 0.7878787878787878,
+      "macro_f1_supported_class_count": 2,
+      "per_class": {
+        "0": {
+          "f1": 0.6666666666666666,
+          "precision": 1.0,
+          "predicted_count": 1,
+          "recall": 0.5,
+          "support": 2
+        },
+        "1": {
+          "f1": 0.9090909090909091,
+          "precision": 0.8333333333333334,
+          "predicted_count": 6,
+          "recall": 1.0,
+          "support": 5
+        }
+      }
+    }
+  },
+  "training": {
+    "class_balance": {
+      "0": 43,
+      "1": 95
+    },
+    "encoded_feature_count": 64,
+    "features": [
+      "condition",
+      "candidate_key",
+      "purpose",
+      "symptom_fever",
+      "symptom_body_aches",
+      "symptom_headache",
+      "symptom_cough",
+      "symptom_sore_throat",
+      "symptom_fatigue",
+      "symptom_rash",
+      "symptom_itching",
+      "symptom_parotid_swelling",
+      "symptom_eye_redness",
+      "symptom_eye_irritation",
+      "symptom_eye_dryness",
+      "symptom_watery_eyes",
+      "symptom_diarrhea",
+      "symptom_vomiting",
+      "symptom_abdominal_pain"
+    ],
+    "raw_labelled_rows": 161,
+    "unique_inputs": 138
+  },
+  "unlabelled_prediction_statuses": {
+    "abstained": 376
+  },
+  "validation": {
+    "decision_tree_depth6_leaf2": {
+      "all_labelled_rows": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.8181818181818182,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 12,
+            "1": 1,
+            "abstained": 0
+          },
+          "1": {
+            "0": 5,
+            "1": 15,
+            "abstained": 0
+          }
+        },
+        "correct": 27,
+        "coverage": 1.0,
+        "errors_including_abstentions": 6,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.8166666666666667,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.8,
+            "precision": 0.7058823529411765,
+            "predicted_count": 17,
+            "recall": 0.9230769230769231,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.8333333333333334,
+            "precision": 0.9375,
+            "predicted_count": 16,
+            "recall": 0.75,
+            "support": 20
+          }
+        }
+      },
+      "inputs_seen_in_training": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 1.0,
+        "class_balance": {
+          "0": 7,
+          "1": 5
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 7,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "abstained": 0
+          }
+        },
+        "correct": 12,
+        "coverage": 1.0,
+        "errors_including_abstentions": 0,
+        "inputs": 12,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 1.0,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 7,
+            "recall": 1.0,
+            "support": 7
+          },
+          "1": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 5,
+            "recall": 1.0,
+            "support": 5
+          }
+        }
+      },
+      "novel_unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.7142857142857143,
+        "class_balance": {
+          "0": 6,
+          "1": 15
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 5,
+            "1": 1,
+            "abstained": 0
+          },
+          "1": {
+            "0": 5,
+            "1": 10,
+            "abstained": 0
+          }
+        },
+        "correct": 15,
+        "coverage": 1.0,
+        "errors_including_abstentions": 6,
+        "inputs": 21,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.6971153846153846,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.625,
+            "precision": 0.5,
+            "predicted_count": 10,
+            "recall": 0.8333333333333334,
+            "support": 6
+          },
+          "1": {
+            "f1": 0.7692307692307693,
+            "precision": 0.9090909090909091,
+            "predicted_count": 11,
+            "recall": 0.6666666666666666,
+            "support": 15
+          }
+        }
+      },
+      "unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.8181818181818182,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 12,
+            "1": 1,
+            "abstained": 0
+          },
+          "1": {
+            "0": 5,
+            "1": 15,
+            "abstained": 0
+          }
+        },
+        "correct": 27,
+        "coverage": 1.0,
+        "errors_including_abstentions": 6,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.8166666666666667,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.8,
+            "precision": 0.7058823529411765,
+            "predicted_count": 17,
+            "recall": 0.9230769230769231,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.8333333333333334,
+            "precision": 0.9375,
+            "predicted_count": 16,
+            "recall": 0.75,
+            "support": 20
+          }
+        }
+      }
+    },
+    "rf_depth4_leaf2": {
+      "all_labelled_rows": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9090909090909091,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 17,
+            "abstained": 0
+          }
+        },
+        "correct": 30,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.907735321528425,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.896551724137931,
+            "precision": 0.8125,
+            "predicted_count": 16,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.918918918918919,
+            "precision": 1.0,
+            "predicted_count": 17,
+            "recall": 0.85,
+            "support": 20
+          }
+        }
+      },
+      "inputs_seen_in_training": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 1.0,
+        "class_balance": {
+          "0": 7,
+          "1": 5
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 7,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "abstained": 0
+          }
+        },
+        "correct": 12,
+        "coverage": 1.0,
+        "errors_including_abstentions": 0,
+        "inputs": 12,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 1.0,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 7,
+            "recall": 1.0,
+            "support": 7
+          },
+          "1": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 5,
+            "recall": 1.0,
+            "support": 5
+          }
+        }
+      },
+      "novel_unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.8571428571428571,
+        "class_balance": {
+          "0": 6,
+          "1": 15
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 6,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 12,
+            "abstained": 0
+          }
+        },
+        "correct": 18,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 21,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.8444444444444444,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.8,
+            "precision": 0.6666666666666666,
+            "predicted_count": 9,
+            "recall": 1.0,
+            "support": 6
+          },
+          "1": {
+            "f1": 0.8888888888888888,
+            "precision": 1.0,
+            "predicted_count": 12,
+            "recall": 0.8,
+            "support": 15
+          }
+        }
+      },
+      "unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9090909090909091,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 17,
+            "abstained": 0
+          }
+        },
+        "correct": 30,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.907735321528425,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.896551724137931,
+            "precision": 0.8125,
+            "predicted_count": 16,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.918918918918919,
+            "precision": 1.0,
+            "predicted_count": 17,
+            "recall": 0.85,
+            "support": 20
+          }
+        }
+      }
+    },
+    "rf_depth8_leaf2": {
+      "all_labelled_rows": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9393939393939394,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 2,
+            "1": 18,
+            "abstained": 0
+          }
+        },
+        "correct": 31,
+        "coverage": 1.0,
+        "errors_including_abstentions": 2,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.9379699248120301,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.9285714285714286,
+            "precision": 0.8666666666666667,
+            "predicted_count": 15,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.9473684210526315,
+            "precision": 1.0,
+            "predicted_count": 18,
+            "recall": 0.9,
+            "support": 20
+          }
+        }
+      },
+      "inputs_seen_in_training": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 1.0,
+        "class_balance": {
+          "0": 7,
+          "1": 5
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 7,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "abstained": 0
+          }
+        },
+        "correct": 12,
+        "coverage": 1.0,
+        "errors_including_abstentions": 0,
+        "inputs": 12,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 1.0,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 7,
+            "recall": 1.0,
+            "support": 7
+          },
+          "1": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 5,
+            "recall": 1.0,
+            "support": 5
+          }
+        }
+      },
+      "novel_unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9047619047619048,
+        "class_balance": {
+          "0": 6,
+          "1": 15
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 6,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 2,
+            "1": 13,
+            "abstained": 0
+          }
+        },
+        "correct": 19,
+        "coverage": 1.0,
+        "errors_including_abstentions": 2,
+        "inputs": 21,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.8928571428571428,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.8571428571428571,
+            "precision": 0.75,
+            "predicted_count": 8,
+            "recall": 1.0,
+            "support": 6
+          },
+          "1": {
+            "f1": 0.9285714285714286,
+            "precision": 1.0,
+            "predicted_count": 13,
+            "recall": 0.8666666666666667,
+            "support": 15
+          }
+        }
+      },
+      "unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9393939393939394,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 2,
+            "1": 18,
+            "abstained": 0
+          }
+        },
+        "correct": 31,
+        "coverage": 1.0,
+        "errors_including_abstentions": 2,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.9379699248120301,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.9285714285714286,
+            "precision": 0.8666666666666667,
+            "predicted_count": 15,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.9473684210526315,
+            "precision": 1.0,
+            "predicted_count": 18,
+            "recall": 0.9,
+            "support": 20
+          }
+        }
+      }
+    },
+    "rf_depth8_leaf4": {
+      "all_labelled_rows": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9090909090909091,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 17,
+            "abstained": 0
+          }
+        },
+        "correct": 30,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.907735321528425,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.896551724137931,
+            "precision": 0.8125,
+            "predicted_count": 16,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.918918918918919,
+            "precision": 1.0,
+            "predicted_count": 17,
+            "recall": 0.85,
+            "support": 20
+          }
+        }
+      },
+      "inputs_seen_in_training": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 1.0,
+        "class_balance": {
+          "0": 7,
+          "1": 5
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 7,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "abstained": 0
+          }
+        },
+        "correct": 12,
+        "coverage": 1.0,
+        "errors_including_abstentions": 0,
+        "inputs": 12,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 1.0,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 7,
+            "recall": 1.0,
+            "support": 7
+          },
+          "1": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "predicted_count": 5,
+            "recall": 1.0,
+            "support": 5
+          }
+        }
+      },
+      "novel_unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.8571428571428571,
+        "class_balance": {
+          "0": 6,
+          "1": 15
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 6,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 12,
+            "abstained": 0
+          }
+        },
+        "correct": 18,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 21,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.8444444444444444,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.8,
+            "precision": 0.6666666666666666,
+            "predicted_count": 9,
+            "recall": 1.0,
+            "support": 6
+          },
+          "1": {
+            "f1": 0.8888888888888888,
+            "precision": 1.0,
+            "predicted_count": 12,
+            "recall": 0.8,
+            "support": 15
+          }
+        }
+      },
+      "unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.9090909090909091,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 13,
+            "1": 0,
+            "abstained": 0
+          },
+          "1": {
+            "0": 3,
+            "1": 17,
+            "abstained": 0
+          }
+        },
+        "correct": 30,
+        "coverage": 1.0,
+        "errors_including_abstentions": 3,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.907735321528425,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.896551724137931,
+            "precision": 0.8125,
+            "predicted_count": 16,
+            "recall": 1.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.918918918918919,
+            "precision": 1.0,
+            "predicted_count": 17,
+            "recall": 0.85,
+            "support": 20
+          }
+        }
+      }
+    },
+    "training_majority": {
+      "all_labelled_rows": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.6060606060606061,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 0,
+            "1": 13,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 20,
+            "abstained": 0
+          }
+        },
+        "correct": 20,
+        "coverage": 1.0,
+        "errors_including_abstentions": 13,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.37735849056603776,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.0,
+            "precision": null,
+            "predicted_count": 0,
+            "recall": 0.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.7547169811320755,
+            "precision": 0.6060606060606061,
+            "predicted_count": 33,
+            "recall": 1.0,
+            "support": 20
+          }
+        }
+      },
+      "inputs_seen_in_training": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.4166666666666667,
+        "class_balance": {
+          "0": 7,
+          "1": 5
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 0,
+            "1": 7,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 5,
+            "abstained": 0
+          }
+        },
+        "correct": 5,
+        "coverage": 1.0,
+        "errors_including_abstentions": 7,
+        "inputs": 12,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.29411764705882354,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.0,
+            "precision": null,
+            "predicted_count": 0,
+            "recall": 0.0,
+            "support": 7
+          },
+          "1": {
+            "f1": 0.5882352941176471,
+            "precision": 0.4166666666666667,
+            "predicted_count": 12,
+            "recall": 1.0,
+            "support": 5
+          }
+        }
+      },
+      "novel_unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.7142857142857143,
+        "class_balance": {
+          "0": 6,
+          "1": 15
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 0,
+            "1": 6,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 15,
+            "abstained": 0
+          }
+        },
+        "correct": 15,
+        "coverage": 1.0,
+        "errors_including_abstentions": 6,
+        "inputs": 21,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.4166666666666667,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.0,
+            "precision": null,
+            "predicted_count": 0,
+            "recall": 0.0,
+            "support": 6
+          },
+          "1": {
+            "f1": 0.8333333333333334,
+            "precision": 0.7142857142857143,
+            "predicted_count": 21,
+            "recall": 1.0,
+            "support": 15
+          }
+        }
+      },
+      "unique_inputs": {
+        "abstentions": 0,
+        "agreement_with_supplied_toy_labels": 0.6060606060606061,
+        "class_balance": {
+          "0": 13,
+          "1": 20
+        },
+        "confusion_matrix": {
+          "0": {
+            "0": 0,
+            "1": 13,
+            "abstained": 0
+          },
+          "1": {
+            "0": 0,
+            "1": 20,
+            "abstained": 0
+          }
+        },
+        "correct": 20,
+        "coverage": 1.0,
+        "errors_including_abstentions": 13,
+        "inputs": 33,
+        "interpretation": "agreement with unreviewed rule-derived toy labels; not clinical accuracy",
+        "macro_f1": 0.37735849056603776,
+        "macro_f1_supported_class_count": 2,
+        "per_class": {
+          "0": {
+            "f1": 0.0,
+            "precision": null,
+            "predicted_count": 0,
+            "recall": 0.0,
+            "support": 13
+          },
+          "1": {
+            "f1": 0.7547169811320755,
+            "precision": 0.6060606060606061,
+            "predicted_count": 33,
+            "recall": 1.0,
+            "support": 20
+          }
+        }
+      }
+    }
+  },
+  "version": "synthetic-200-symptom-match-random-forest-2026-10-20-v1"
+}

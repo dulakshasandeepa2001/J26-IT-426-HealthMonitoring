@@ -73,13 +73,15 @@ class ConditionKnowledge(models.Model):
 
     def review_state(self, kind):
         from .condition_knowledge import rule_bindings
+        from .reference_reviews import reference_only_scope
         latest = next((row for row in self.reviews.all() if row.kind == kind), None)
+        reference_only = bool(kind == 'safety' and latest and latest.snapshot.get('review_scope') == 'reference_only')
         intact = self.content_hash == content_digest(self.content)
         if kind == 'safety':
             intact = intact and self.rules_hash == content_digest(self.rules)
-            if self.rules.get('implementation_bindings'):
+            if not reference_only and self.rules.get('implementation_bindings'):
                 intact = intact and self.rules['implementation_bindings'] == rule_bindings()
-            if 'clinical_implementation_bindings' in self.rules:
+            if not reference_only and 'clinical_implementation_bindings' in self.rules:
                 from .additional_candidates import clinical_bindings
                 intact = intact and self.rules['clinical_implementation_bindings'] == clinical_bindings()
         reason = None
@@ -90,9 +92,19 @@ class ConditionKnowledge(models.Model):
         elif not (latest.reviewer.is_active and latest.reviewer.is_approved and latest.reviewer.role == 'doctor'):
             reason = 'The previous reviewer is no longer an active approved doctor.'
         current = reason is None and latest.decision == 'reviewed'
+        # A genuine review of reference evidence/gaps is saved and reused, but
+        # can never satisfy the executable safety gate used by screening.
+        executable_gap = kind == 'safety' and reference_only_scope(self)
+        display_reason = reason
+        if not reason and reference_only:
+            display_reason = 'Reference scope decision only; executable safety coverage remains incomplete.'
+        elif not reason and executable_gap:
+            display_reason = 'Exact product or executable rules remain incomplete.'
         return {
             'status': latest.decision if latest and reason is None else 'pending',
-            'is_current': current, 'reason': reason,
+            'is_current': current and not reference_only and not executable_gap, 'reason': display_reason,
+            'review_scope': 'reference_only' if reference_only else 'executable' if kind == 'safety' else 'content',
+            'reference_review_is_current': current and reference_only,
             'reviewer_name': (latest.reviewer.get_full_name().strip() or latest.reviewer.username) if latest else None,
             'reviewed_at': latest.recorded_at.isoformat() if latest else None,
             'notes': latest.notes if latest else '',

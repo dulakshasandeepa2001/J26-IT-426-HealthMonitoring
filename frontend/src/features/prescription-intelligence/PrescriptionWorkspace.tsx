@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef } from "react";
-import { AlertTriangle, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { AlertTriangle, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm, type PatientHistoryEditorHandle } from "./PatientContextForm";
@@ -28,13 +28,14 @@ function Badge({ label, variant }: { label: string; variant: "green" | "amber" |
 export default function PrescriptionWorkspace({ requestedConsultation }: { requestedConsultation?: string }) {
   const rx = usePrescription(requestedConsultation);
   const historyEditor = useRef<PatientHistoryEditorHandle>(null);
+  const [clinicalHost, setClinicalHost] = useState<HTMLDivElement | null>(null);
   const reviewHistory = useCallback(() => historyEditor.current?.open(), []);
 
   // Derived flags
   const hasConsultation = !!rx.activeConsultation;
   const canConfirm = hasConsultation && rx.diagnosisContext.trim().length > 0 && !rx.diagnosisConfirmed;
   const diagnosis = rx.diagnoses.find((item) => item.consultation === rx.activeConsultation?.id);
-  const screeningKey = JSON.stringify([rx.activeConsultation?.id, rx.activePatient?.id, rx.activePatient?.birthday, rx.activePatientContext?.updated_at, rx.activeAnalysis?.payload, diagnosis]);
+  const screeningKey = JSON.stringify([rx.activeConsultation?.id, rx.activePatient?.id, rx.activePatient?.birthday, rx.activeAnalysis?.payload, diagnosis]);
 
   return (
     <PageFrame
@@ -68,12 +69,13 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         <EncounterSelector key={rx.activePatient?.id ?? "none"} rx={rx} />
       </Section>
 
-      <Section id="patient-medicine-history" title="Patient allergies and current medicines" icon={ClipboardCheck} className="scroll-mt-24">
+      <Section id="patient-medicine-history" title="Patient information" icon={ClipboardCheck} className="scroll-mt-24">
         {hasConsultation && rx.activePatient ? (
           <PatientContextForm key={`${rx.activeConsultation!.id}:${rx.activePatientContext?.updated_at ?? "new"}`} rx={rx} editorRef={historyEditor} />
         ) : (
           <Unavailable title="Select a patient and visit first">Choose an assigned patient and saved consultation to record allergies and current medicines.</Unavailable>
         )}
+        <div id="patient-clinical-inputs" ref={setClinicalHost} className="mt-5 scroll-mt-24" />
       </Section>
 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
@@ -130,12 +132,8 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
         </Section>
       </div>
 
-      <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} />
+      <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} clinicalHost={clinicalHost} />
 
-      <Section title="Evidence and medicine identity" icon={BookOpen}>
-        <p className="text-xs leading-relaxed text-slate-500">Saved drafts retain the patient inputs, original analysis, reviewed catalogue and safety profiles used for screening. Check current medicine identities in the patient form.</p>
-        <Link href="/doctor/medicine-knowledge" className="mt-3 inline-block text-xs font-semibold text-purple-700 underline">Open Medicine Knowledge and safety rule review</Link>
-      </Section>
     </PageFrame>
   );
 }

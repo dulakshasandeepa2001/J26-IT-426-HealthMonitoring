@@ -4,6 +4,11 @@ import type { ClinicalDetails, CheckStatus } from "./draftApi";
 import type { EvidenceSource } from "./medicineApi";
 
 export interface ClinicalAssessment extends ClinicalDetails {
+  ors_product_assessment?: "unknown" | "exact_reference_confirmed" | "different_or_unverified";
+  ors_metabolic_assessment?: "unknown" | "standard" | "requires_review";
+  ors_dietary_assessment?: "unknown" | "no_restrictions" | "requires_review";
+  ors_obstruction_assessment?: "unknown" | "none" | "suspected";
+  selected_pair_review?: { reviewed: boolean; expected_binding: string; note: string };
   condition_assessments: Record<string, boolean | null>;
   care_setting: "unknown" | "outpatient" | "hospital";
   condition_severity: "unknown" | "mild" | "moderate" | "severe";
@@ -17,6 +22,7 @@ export interface ClinicalAssessment extends ClinicalDetails {
   cardiovascular_assessment: "unknown" | "standard" | "requires_review";
 }
 export interface ScreeningInputs {
+  selected_pair_policy?: { available: boolean; reason: string; binding: string; version: string; scope: string; summary: string; source: EvidenceSource; candidate_id: string };
   consultation_id: string; supported_conditions: HandoffCondition[];
   engine_version: string; source_red_flag_assessment: "assessed" | "not_assessed";
   patient_age_years: number | null; dob_status: string; age_source: "registered_dob";
@@ -34,22 +40,29 @@ export interface ScreeningRegimen {
   interval_hours?: number | null; interval_hours_range?: number[]; max_doses_per_day?: number | null;
   max_daily_amount_mg?: number | null; review_after_days?: number | null; reassessment_limit_hours?: number;
   instructions?: string;
+  reconstitution_water_ml_per_sachet?: number;
 }
 export interface ScreeningCandidate {
   scope_id: string; medicine_id: string; generic_name: string; purpose: string; clinical_role: string;
   status: "unavailable" | "candidate_for_clinician_review"; screening_status: CheckStatus;
-  checks: { category: string; status: CheckStatus; message: string; source_ids: string[] }[];
+  checks: { category: string; status: CheckStatus; message: string; source_ids: string[];
+    blocks_availability?: boolean;
+    trace?: { backend_rule: string; inputs: Record<string, unknown> } }[];
+  review_trace?: Record<string, unknown>;
   regimen: ScreeningRegimen | null;
-  product: { strength: string; form: string; route: string; standard_concept: { rxcui: string; name: string } | null; reference_product_identifier?: string } | null;
+  product: { strength: string; form: string; route: string; ingredients: { name: string }[]; standard_concept: { rxcui: string; name: string } | null; reference_product_identifier?: string } | null;
   sources: (EvidenceSource | string)[];
 }
 export interface ScreeningResult {
+  selected_pair_policy?: { version: string; hash: string; applied: boolean; source: EvidenceSource; scope: string };
   mode: "deterministic_six_condition_draft"; engine_version: string; condition: HandoffCondition;
   candidates: ScreeningCandidate[];
   purpose_groups: { purpose: string; clinical_role: string; candidate_ids: string[];
     selection: "clinician_choice_required" | "single_candidate_applicability_only" }[];
   model_used: false; approved: false; published: false; prescription_eligible: false;
   clinical_validation_status: "not_validated"; limitations: string;
+  input_trace?: { clinical: ClinicalAssessment; registered_age_years: number | null;
+    source_observations: ScreeningInputs["source_observations"]; context_updated_at: string; regimen_workflow: string };
 }
 export interface ScreeningRequest {
   diagnosis_id: number; expected_context_updated_at: string; expected_analysis_hash: string; clinical: ClinicalAssessment;

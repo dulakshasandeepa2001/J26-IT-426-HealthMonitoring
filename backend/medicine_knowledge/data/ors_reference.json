@@ -1,0 +1,38 @@
+{
+  "version": "dioralyte-natural-reference-2026-10-21-v1",
+  "scope_id": "gi-dioralyte-natural-gsl",
+  "medicine_id": "dioralyte-natural-gsl-sachet",
+  "source": {
+    "id": "emc-dioralyte-natural-gsl-2774",
+    "publisher": "Phoenix Labs via electronic medicines compendium",
+    "title": "Dioralyte Natural Sachets (GSL) — Summary of Product Characteristics",
+    "url": "https://www.medicines.org.uk/emc/product/2774/smpc",
+    "published_date": "2024-01-26",
+    "accessed_date": "2026-10-21",
+    "sections": ["2", "4.1", "4.2", "4.3", "4.4", "4.5", "6.1", "8", "10"]
+  },
+  "reference_product_identifier": "UK PL 35104/0044",
+  "ingredients": [
+    {"name": "glucose", "strength": "3.56 g per sachet"},
+    {"name": "sodium chloride", "strength": "0.47 g per sachet"},
+    {"name": "potassium chloride", "strength": "0.30 g per sachet"},
+    {"name": "disodium hydrogen citrate", "strength": "0.53 g per sachet"}
+  ],
+  "excipients": ["saccharin sodium", "silicon dioxide"],
+  "scope": "Synthetic adults only; independently assessed standard outpatient context, acute diarrhoea up to 24 hours, no/mild dehydration, tolerated oral fluids, no concerning findings, known history and no current medicines. Exact UK reference product must be confirmed; no local equivalence, WHO low-osmolarity equivalence or fluid-deficit calculation is asserted.",
+  "regimen": {
+    "schedule_type": "oral_rehydration_after_stool",
+    "amount_range": [1, 2],
+    "unit": "sachet",
+    "route": "oral",
+    "frequency": "after_each_loose_stool",
+    "duration_days": null,
+    "doses_per_day": null,
+    "reconstitution_water_ml_per_sachet": 200,
+    "reassessment_limit_hours": 24,
+    "instructions": "For this exact reference product only: dissolve each sachet in exactly 200 mL drinking water. Do not use another diluent or boil the prepared solution. Prepare fresh; discard after one hour at room temperature or 24 hours refrigerated. No fixed daily frequency, course or fluid-deficit replacement plan is generated. Seek review sooner for worsening symptoms; persistent diarrhoea needs reassessment."
+  },
+  "label_method": "researcher_assigned",
+  "clinical_review_status": "not_reviewed",
+  "clinical_validation": false
+}

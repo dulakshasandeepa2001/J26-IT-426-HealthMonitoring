@@ -134,6 +134,18 @@ class HistoryDetailsSerializer(StrictSerializer):
     medicines = MedicineIdentitySerializer(many=True, max_length=50)
 
 
+class CurrentMedicinePlanSerializer(StrictSerializer):
+    """A proposed management note, never an active-medication status change."""
+    recorded_text = serializers.CharField(max_length=200)
+    action = serializers.ChoiceField(choices=('undecided', 'continue', 'change', 'stop'))
+    note = serializers.CharField(max_length=1000, allow_blank=True)
+
+    def validate(self, data):
+        if data['action'] != 'undecided' and len(data['note'].strip()) < 10:
+            raise serializers.ValidationError({'note': 'Describe the reason for this proposed action in at least 10 characters.'})
+        return data
+
+
 class PatientContextReviewSerializer(serializers.Serializer):
     allergy_status = serializers.ChoiceField(choices=('confirmed', 'none', 'unknown'))
     allergies = serializers.ListField(
@@ -146,6 +158,7 @@ class PatientContextReviewSerializer(serializers.Serializer):
     reviewed = serializers.BooleanField()
     expected_updated_at = serializers.DateTimeField(allow_null=True)
     history_details = HistoryDetailsSerializer(required=False)
+    medicine_plans = CurrentMedicinePlanSerializer(many=True, max_length=50, required=False)
 
     def to_internal_value(self, data):
         if isinstance(data, dict):
@@ -179,6 +192,10 @@ class PatientContextReviewSerializer(serializers.Serializer):
             from .history_identity import validate_details
             data['history_details'] = dict(HistoryDetailsSerializer(data['history_details']).data)
             validate_details(data['history_details'], data)
+        if 'medicine_plans' in data:
+            plans = data['medicine_plans']
+            if [row['recorded_text'] for row in plans] != data['current_medicines']:
+                raise serializers.ValidationError({'medicine_plans': 'Each proposed action must match the current recorded medicines in order. Refresh and review again.'})
         return data
 
 class ContextRevisionSerializer(serializers.ModelSerializer):

@@ -115,7 +115,7 @@ try {
     assert.equal(diagnoses[index].condition_code, codes[index]);
     await visible(page.getByText('Review/save allergies and current medicines for this visit first.', { exact: true }));
     assert.equal(await page.getByRole('button', { name: 'Continue to ML suggestions', exact: true }).isDisabled(), true);
-    assert.equal(await page.getByRole('button', { name: 'Preview medicine candidates', exact: true }).isDisabled(), true);
+    assert.equal(await page.getByRole('button', { name: 'Confirm inputs and screen medicines', exact: true }).isDisabled(), true);
     console.log('PASS: v2.1 ' + codes[index] + ' loads and confirms separately; source facts stay unverified.');
   }
   assert.deepEqual(patientContext, before);

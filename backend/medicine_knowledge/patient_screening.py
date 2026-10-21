@@ -18,6 +18,7 @@ from prescription_research import dataset as ds
 from .models import MedicineEntry, ConditionKnowledge, PatientScreeningDraft, content_digest
 from .additional_candidates import clinical_bindings
 from .screening_engine import ENGINE_VERSION, normalize_history, screen_candidate, finding
+from .screening_trace import review_trace, scope_trace, missing_review
 
 
 class ScreeningConflict(APIException):
@@ -81,8 +82,10 @@ def candidate_definitions(condition):
             continue
         profile = profiles.get(identity)
         gates = []
+        reviews = {'content': review_trace(row), 'safety': review_trace(profile, safety=True) if profile else missing_review()}
         if not row.review_is_current or not profile or not profile.review_is_current:
-            gates.append(finding('knowledge_review', 'cannot_validate', 'Current catalogue and executable-rule reviews are required for this version.'))
+            reasons = [kind + ': ' + ' '.join(state['reasons']) for kind, state in reviews.items() if not state['is_current']]
+            gates.append(finding('knowledge_review', 'cannot_validate', 'Current reviews are required. ' + ' '.join(reasons)))
         if profile:
             validate_profile(profile.content, row)
         rule = profile.content if profile else None
@@ -91,7 +94,7 @@ def candidate_definitions(condition):
                 'clinical_role': 'influenza_antiviral' if identity.startswith('oseltamivir') else 'varicella_antiviral' if identity.startswith('acyclovir') else 'itching_relief' if identity.startswith('calamine') else 'fever_or_pain_relief',
                 'target_symptoms': rule['parameters'].get('relevant_symptoms', []) if rule else []},
             'reference_profile': rule, 'content_hash': row.content_hash, 'rules_hash': profile.content_hash if profile else '',
-            'sources': row.content['sources'], 'gate_findings': gates})
+            'sources': row.content['sources'], 'gate_findings': gates, 'review_trace': reviews})
     for row in ConditionKnowledge.objects.order_by('pk').prefetch_related('reviews__reviewer'):
         product = row.content['product']
         if product:
@@ -99,16 +102,21 @@ def candidate_definitions(condition):
         if row.condition != condition:
             continue
         gates = []
+        reviews = scope_trace(row)
         if not row.review_state('content')['is_current'] or not row.review_state('safety')['is_current']:
-            gates.append(finding('knowledge_review', 'cannot_validate', 'This exact condition content and patient-screening rule version require current doctor reviews.'))
+            reasons = [kind + ': ' + (reviews[kind]['reason'] or 'Recorded decision is ' + reviews[kind]['status'] + '.') for kind in ('content', 'safety') if not reviews[kind]['is_current']]
+            gates.append(finding('knowledge_review', 'cannot_validate', 'This condition scope requires current reviews. ' + ' '.join(reasons)))
         if row.rules.get('clinical_implementation_bindings') != clinical_bindings():
             gates.append(finding('implementation_binding', 'cannot_validate', 'The condition scope is not bound to this patient-screening implementation.'))
         if row.medicine_id in medicines and (not medicines[row.medicine_id].review_is_current or row.medicine_id not in profiles or not profiles[row.medicine_id].review_is_current):
             gates.append(finding('base_product_review', 'cannot_validate', 'The underlying pilot product/rule review must remain current.'))
+        if row.medicine_id in medicines:
+            base = profiles.get(row.medicine_id)
+            reviews['base_product'] = {'content': review_trace(medicines[row.medicine_id]), 'safety': review_trace(base, safety=True) if base else missing_review()}
         candidates.append({'scope_id': row.pk, 'name': product['generic_name'] if product else row.content.get('display_name', 'ORS'),
             'product': product, 'policy': row.rules['policy'], 'reference_profile': row.rules.get('reference_profile'),
             'content_hash': row.content_hash, 'rules_hash': row.rules_hash,
-            'sources': product['sources'] if product else row.content.get('sources', row.content.get('unresolved_product', {}).get('source_urls', [])), 'gate_findings': gates})
+            'sources': product['sources'] if product else row.content.get('sources', row.content.get('unresolved_product', {}).get('source_urls', [])), 'gate_findings': gates, 'review_trace': reviews})
     return candidates, {k: row.content for k, row in profiles.items()}, products
 
 
@@ -151,6 +159,9 @@ def prepare(visit, actor, data):
         'condition': condition, 'candidates': results, 'purpose_groups': [{'purpose': purpose, 'clinical_role': role, 'candidate_ids': identities,
             'selection': 'clinician_choice_required' if len(identities) > 1 else 'single_candidate_applicability_only'} for (purpose, role), identities in groups.items()],
         'normalization': matches, 'model_used': False, 'clinical_validation_status': 'not_validated',
+        'input_trace': {'clinical': deepcopy(snapshot['clinical']), 'registered_age_years': snapshot['patient']['age_years'],
+            'source_observations': snapshot['source_observations'], 'context_updated_at': context['updated_at'],
+            'regimen_workflow': 'Automatic server rule reference before safety/dose validation; manual proposed-regimen entry is not part of this screen.'},
         'approved': False, 'published': False, 'prescription_eligible': False,
         'limitations': 'Unranked source-based candidates for clinician review. No automatic combination of alternatives, comprehensive interaction clearance or patient-facing prescription publication.'}
     plan_hash = digest_json({'snapshot': snapshot, 'result': result})
