@@ -142,12 +142,17 @@ try {
   const stamp = page.getByLabel('Doctor profile stamp', { exact: true });
   await visible(stamp.getByText('Fictional Reviewer', { exact: true }));
   await visible(stamp.getByText('Fictional Research University', { exact: true }));
-  await visible(stamp.getByText('Unsigned profile stamp · Research use only', { exact: true }));
+  await visible(stamp.getByText('Unsigned profile stamp', { exact: true }));
+  await visible(page.getByRole('img', { name: 'MediTrack logo', exact: true }));
+  assert.equal(await stamp.evaluate((node) => getComputedStyle(node).color), 'rgb(107, 33, 168)', 'Stamp uses purple ink');
   assert.equal(await page.locator('#prescription-slip').getByText('Name:', { exact: true }).count(), 1);
   assert.equal(await page.locator('#prescription-slip').getByText('Age:', { exact: true }).count(), 1);
   assert.equal(await page.locator('#prescription-slip').getByText(/Paracetamol/).count(), 1);
   assert.equal(await page.locator('#prescription-slip').getByText(/Oseltamivir/).count(), 0);
-  await visible(page.getByText('RESEARCH USE ONLY — NOT FOR DISPENSING', { exact: true }));
+  await visible(page.getByText('Prototype — not valid for dispensing', { exact: true }));
+  assert.equal(await page.getByText('RESEARCH USE ONLY — NOT FOR DISPENSING', { exact: true }).count(), 0);
+  assert.equal(await page.getByText(/^Signature \/ authorized seal:/).count(), 0);
+  assert.equal(await page.getByText(/^Doctor identity details are profile data/).count(), 0);
   assert.equal(/\b(?:PP1|demo|Component[ _-]?1|Member[ _-]?1)\b/i.test(await page.locator('body').innerText()), false, 'Print view uses product labels and retains research-use limits');
   for (const width of [1440, 390]) { await page.setViewportSize({ width, height: 1000 }); assert.equal(await page.locator('main').evaluate((node) => node.scrollWidth > node.clientWidth + 1), false); }
   await page.getByRole('button', { name: 'Print A6 prescription', exact: true }).click();

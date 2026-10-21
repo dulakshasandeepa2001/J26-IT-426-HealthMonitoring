@@ -78,7 +78,17 @@ def ingest_analysis(payload, actor, *, mode):
             raise ValidationError({'is_demo': 'Demo results require a demo consultation; real results require a non-demo consultation.'})
         existing = Analysis.objects.filter(consultation=consultation).first()
         if existing:
-            if existing.payload == normalized:
+            comparable = existing.payload
+            # Older v2.1 imports retained an obsolete two-condition warning.
+            # Preserve the immutable stored analysis, but accept an otherwise
+            # identical producer retry after removing only that exact warning.
+            if (payload.get('schema_version') == '2.1' and 'member1' in comparable):
+                from copy import deepcopy
+                comparable = deepcopy(comparable)
+                issues = comparable['member1'].get('mapping_issues', [])
+                obsolete = {'field': 'payload.primary_diagnosis.condition_code', 'reason': 'Analysis handoff is supported; medicine rules and the trained prescription model for this condition are not enabled.'}
+                comparable['member1']['mapping_issues'] = [issue for issue in issues if issue != obsolete]
+            if comparable == normalized:
                 return existing, False  # A producer retry is safe, including after confirmation.
             raise AnalysisConflict()
         if Diagnosis.objects.filter(consultation=consultation).exists():

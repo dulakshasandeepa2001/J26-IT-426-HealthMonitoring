@@ -60,6 +60,12 @@ try:
     for line in sys.stdin:
         try:
             message = json.loads(line)
+            if message.get('action') == 'import_exact_ors':
+                from django.core.management import call_command
+                from io import StringIO
+                call_command('seed_reference_ors', stdout=StringIO())
+                emit({'imported': True})  # Pending; browser must perform genuine isolated reviews.
+                continue
             if message.get('action') == 'count':
                 emit({'count': PatientScreeningDraft.objects.count()})
                 continue

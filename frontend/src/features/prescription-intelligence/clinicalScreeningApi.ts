@@ -4,6 +4,10 @@ import type { ClinicalDetails, CheckStatus } from "./draftApi";
 import type { EvidenceSource } from "./medicineApi";
 
 export interface ClinicalAssessment extends ClinicalDetails {
+  ors_product_assessment?: "unknown" | "exact_reference_confirmed" | "different_or_unverified";
+  ors_metabolic_assessment?: "unknown" | "standard" | "requires_review";
+  ors_dietary_assessment?: "unknown" | "no_restrictions" | "requires_review";
+  ors_obstruction_assessment?: "unknown" | "none" | "suspected";
   selected_pair_review?: { reviewed: boolean; expected_binding: string; note: string };
   condition_assessments: Record<string, boolean | null>;
   care_setting: "unknown" | "outpatient" | "hospital";
@@ -36,6 +40,7 @@ export interface ScreeningRegimen {
   interval_hours?: number | null; interval_hours_range?: number[]; max_doses_per_day?: number | null;
   max_daily_amount_mg?: number | null; review_after_days?: number | null; reassessment_limit_hours?: number;
   instructions?: string;
+  reconstitution_water_ml_per_sachet?: number;
 }
 export interface ScreeningCandidate {
   scope_id: string; medicine_id: string; generic_name: string; purpose: string; clinical_role: string;

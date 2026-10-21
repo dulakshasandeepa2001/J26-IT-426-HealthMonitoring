@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError, APIException
 from medicine_knowledge.models import PatientScreeningDraft
 from medicine_knowledge.patient_screening import authorized_visit, digest_json
-from medicine_knowledge.selected_screening import freshness, prepare
+from medicine_knowledge.complete_screening import freshness, prepare
 from prescription_context.experimental_ml import ExperimentUnavailable
 from .models import MedicineProposal, DoctorDecision
 from .inference import infer

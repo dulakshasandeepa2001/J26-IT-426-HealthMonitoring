@@ -11,6 +11,7 @@ import { blocksAvailability, reasonKey, sharedAssessmentReasons } from "./screen
 export function ClinicalRegimen({ regimen }: { regimen: ScreeningRegimen }) {
   return <div className="space-y-1 rounded-xl bg-purple-50 p-3 text-xs text-purple-900">
     {regimen.schedule_type === "topical_prn" ? <p>External use as needed; no fixed numeric amount or course.</p>
+      : regimen.schedule_type === "oral_rehydration_after_stool" ? <><p>{regimen.amount_range?.join("–")} sachets after each loose stool · oral. No fixed daily frequency or course.</p><p>Dissolve each sachet separately in exactly {regimen.reconstitution_water_ml_per_sachet} mL drinking water.</p></>
       : regimen.schedule_type === "ophthalmic_prn" ? <p>{regimen.amount_range?.join("–")} {regimen.unit}(s) in affected eye(s), as needed. No fixed daily schedule or course.</p>
       : regimen.schedule_type === "oral_prn" ? <>
         <p>{regimen.amount} {regimen.unit}, as needed · {regimen.route}</p>

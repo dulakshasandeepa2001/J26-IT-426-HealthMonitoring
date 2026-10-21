@@ -6,9 +6,10 @@ from prescription_context.models import PrescriptionContextConsultationanalysis 
 from prescription_context.member1_v21 import HANDOFF_CONDITIONS, BOOLEAN_OBSERVATIONS
 from prescription_context.patient_data import patient_age
 from .models import PatientScreeningDraft, content_digest
-from .selected_interactions import SelectedPreviewSerializer as SixConditionPreviewSerializer, SelectedSaveSerializer as SixConditionSaveSerializer, SelectedClinicalSerializer as SixConditionClinicalSerializer, pair_scope, policy
+from .ors_contracts import CompletePreviewSerializer as SixConditionPreviewSerializer, CompleteSaveSerializer as SixConditionSaveSerializer, CompleteClinicalSerializer as SixConditionClinicalSerializer
+from .selected_interactions import pair_scope, policy
 from .patient_screening import authorized_visit, draft_queryset, source_observations
-from .selected_screening import preview, save, freshness
+from .complete_screening import preview, save, freshness
 from .screening_engine import ENGINE_VERSION
 from .screening_availability import screening_database_operation
 

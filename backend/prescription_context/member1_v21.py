@@ -14,7 +14,9 @@ from .member1_adapter import (
 )
 
 HANDOFF_CONDITIONS = ('influenza', 'chickenpox', 'measles', 'mumps', 'viral_conjunctivitis', 'viral_gastroenteritis')
-PRESCRIPTION_CONDITIONS = ('influenza', 'chickenpox')
+# Handoff support is distinct from reviewed product coverage and ML support.
+# The active screening service accepts all six canonical conditions.
+PRESCRIPTION_CONDITIONS = HANDOFF_CONDITIONS
 SYMPTOM_ALIASES = {
     **LEGACY_ALIASES,
     'jaw pain': 'jaw_pain',
@@ -181,8 +183,6 @@ def adapt_member1_v21(payload):
     supported = code in HANDOFF_CONDITIONS
     if not supported:
         issues.append({'field': 'payload.primary_diagnosis.condition_code', 'reason': 'Primary condition is outside the six-condition handoff; no supported diagnosis is prefilled.'})
-    elif code not in PRESCRIPTION_CONDITIONS:
-        issues.append({'field': 'payload.primary_diagnosis.condition_code', 'reason': 'Analysis handoff is supported; medicine rules and the trained prescription model for this condition are not enabled.'})
     return {
         'schema_version': '2.1', 'analysis_reference': data['analysis_reference'],
         'patient_id': data['patient_id'], 'doctor_id': data['doctor_id'], 'consultation_id': str(data['consultation_id']),

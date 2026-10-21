@@ -250,3 +250,6 @@ an unsigned stamp using the recorded doctor profile details.
 [Step 24](STEP24.md) adds explicit bulk selection of available medicines,
 keeps combination review mandatory, and removes redundant review round trips.
 
+[Step 25](STEP25.md) corrects the six-condition JSON coverage warning and adds
+a separately reviewed exact-ORS synthetic adult pathway with explicit RF abstention.
+

@@ -54,6 +54,7 @@ export function PatientClinicalInputs({ metadata, condition, clinical, initial, 
     <legend className="mb-3 text-sm font-bold">Clinical inputs for this visit</legend>
     <div className="space-y-3 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-xs" role="region" aria-label="Patient review summary">
       <h3 className="font-bold">Prepared visit details</h3>
+      {condition === "viral_gastroenteritis" && <p className="text-slate-600">The optional exact ORS pathway covers Dioralyte Natural GSL, UK PL 35104/0044, in a limited synthetic adult context. Generic ORS and other sachets are not substitutes. Confirm the actual product and patient assessments separately; missing facts remain Unknown. <a href="https://www.medicines.org.uk/emc/product/2774/smpc" target="_blank" rel="noreferrer" className="font-semibold text-purple-700 underline">Read the exact reference label</a></p>}
       <p>Age from registered DOB: {metadata.patient_age_years ?? "Unavailable"}</p>
       <p className="text-slate-600">Check these proposed analysis findings, correct them below and leave missing facts Unknown. Use Confirm inputs and screen medicines to confirm this visit and request a preview in one action.</p>
       <dl className="grid gap-3 sm:grid-cols-2">

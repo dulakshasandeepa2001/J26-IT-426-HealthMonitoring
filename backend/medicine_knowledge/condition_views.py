@@ -11,6 +11,11 @@ from .contracts import ReviewRequestSerializer
 from prescription_context.analysis_contract import StrictSerializer
 from .models import ConditionKnowledge, ConditionKnowledgeReview, content_digest
 from .reference_reviews import reference_only_scope
+from .ors_reference import definition as ors_definition
+
+
+def shipped_definitions():
+    return definitions() + additional_definitions() + [ors_definition()]
 
 
 class ScopeReviewRequestSerializer(ReviewRequestSerializer):
@@ -61,7 +66,7 @@ class ConditionKnowledgeViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):
         data = contract.validated_data
         existing_id = self.get_object().pk
         try:
-            shipped = next((item for item in definitions() + additional_definitions() if item['id'] == existing_id), None)
+            shipped = next((item for item in shipped_definitions() if item['id'] == existing_id), None)
         except (OSError, ValueError, KeyError, TypeError) as error:
             failure = APIException('The verified knowledge bundle is unavailable; no scope version was changed.')
             failure.status_code = 503
@@ -89,7 +94,7 @@ class ConditionKnowledgeViewSet(DoctorAccess, viewsets.ReadOnlyModelViewSet):
         try:
             # Reference acknowledgement concerns the exact stored evidence/gaps,
             # never approval of the current executable implementation.
-            shipped = {} if reference_only else {row['id']: row for row in definitions() + additional_definitions()}
+            shipped = {} if reference_only else {row['id']: row for row in shipped_definitions()}
         except (OSError, ValueError, KeyError, TypeError) as error:
             failure = APIException('The versioned knowledge bundle changed or is unavailable. Refresh the imported scope before reviewing.')
             failure.status_code = 503
