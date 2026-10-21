@@ -1,0 +1,171 @@
+{
+  "baselines": [
+    "training_majority",
+    "decision_tree_depth6_leaf2"
+  ],
+  "clinical_review_status": "not_reviewed",
+  "conditions": {
+    "chickenpox": {
+      "candidates": {
+        "acyclovir": "antiviral",
+        "calamine_zinc_oxide": "itch_relief",
+        "paracetamol": "symptom_relief",
+        "valacyclovir": "antiviral"
+      },
+      "name": "Chickenpox"
+    },
+    "influenza": {
+      "candidates": {
+        "baloxavir_marboxil": "antiviral",
+        "oseltamivir": "antiviral",
+        "paracetamol": "symptom_relief",
+        "peramivir": "antiviral",
+        "zanamivir": "antiviral"
+      },
+      "name": "Influenza"
+    },
+    "measles": {
+      "candidates": {
+        "paracetamol": "symptom_relief",
+        "vitamin_a": "adjunct_requires_separate_criteria"
+      },
+      "name": "Measles"
+    },
+    "mumps": {
+      "candidates": {
+        "ibuprofen": "symptom_relief",
+        "paracetamol": "symptom_relief"
+      },
+      "name": "Mumps"
+    },
+    "viral_conjunctivitis": {
+      "candidates": {
+        "carboxymethylcellulose_sodium": "eye_lubrication",
+        "hypromellose": "eye_lubrication"
+      },
+      "name": "Viral conjunctivitis"
+    },
+    "viral_gastroenteritis": {
+      "candidates": {
+        "bismuth_subsalicylate": "diarrhea_symptom_relief",
+        "loperamide": "diarrhea_symptom_relief",
+        "ors": "rehydration_support",
+        "zinc": "adjunct_requires_separate_criteria"
+      },
+      "name": "Viral gastroenteritis"
+    }
+  },
+  "criteria_note": "The above toy symptom mappings reproduce the supplied labels, including headache. They are a separate task from the older relevance experiment and are not clinical treatment indications. The referenced producer README was not supplied.",
+  "dataset_version": "meditrack-synthetic-200-v1.0",
+  "deployment": "offline_only; existing application model and deterministic controls unchanged",
+  "excluded_inputs": [
+    "scenario_id",
+    "synthetic_patient_id",
+    "template_family_id",
+    "template_variant",
+    "context_pattern",
+    "suggested_split",
+    "toy_symptom_match_label",
+    "toy_label_reason",
+    "clinical_relevance_label",
+    "clinical_safety_label",
+    "approved_prescription_id",
+    "clinical_review_status",
+    "history_verified_for_visit",
+    "clinical_assessment_verified",
+    "onset_verified_by_doctor",
+    "age_months",
+    "age_years",
+    "weight_kg",
+    "allergies",
+    "current_medicines",
+    "influenza_guideline_pathway"
+  ],
+  "features": [
+    "condition",
+    "candidate_key",
+    "purpose",
+    "symptom_fever",
+    "symptom_body_aches",
+    "symptom_headache",
+    "symptom_cough",
+    "symptom_sore_throat",
+    "symptom_fatigue",
+    "symptom_rash",
+    "symptom_itching",
+    "symptom_parotid_swelling",
+    "symptom_eye_redness",
+    "symptom_eye_irritation",
+    "symptom_eye_dryness",
+    "symptom_watery_eyes",
+    "symptom_diarrhea",
+    "symptom_vomiting",
+    "symptom_abdominal_pain"
+  ],
+  "fit_weighting": "one vote per unique allowlisted training vector; reject conflicting labels",
+  "inspection_cases_per_condition": 2,
+  "label_provenance": "user-supplied workbook rule-derived toy labels; independently checked against the declared symptom-match criteria; no clinician labels or reviews invented",
+  "preprocessing": "DictVectorizer fitted only on unique labelled training inputs; present/absent/unknown remain distinct strings",
+  "random_state": 20261020,
+  "rf_candidates": [
+    {
+      "id": "rf_depth4_leaf2",
+      "max_depth": 4,
+      "min_samples_leaf": 2
+    },
+    {
+      "id": "rf_depth8_leaf2",
+      "max_depth": 8,
+      "min_samples_leaf": 2
+    },
+    {
+      "id": "rf_depth8_leaf4",
+      "max_depth": 8,
+      "min_samples_leaf": 4
+    }
+  ],
+  "rf_common": {
+    "class_weight": "balanced_subsample",
+    "max_features": "sqrt",
+    "n_estimators": 200,
+    "n_jobs": 1
+  },
+  "selection": "validation macro F1 on unique inputs absent from training; fall back explicitly to all unique validation inputs only if no novel inputs; stable declared order breaks ties; no test-based tuning",
+  "split_policy": "reuse supplied suggested_split only after checking entire template families and scenario IDs remain disjoint; audit repeated inputs and shared context patterns",
+  "task": "binary supplied toy symptom-match classification; not clinical relevance, safety, dose or best-medicine ranking",
+  "test_policy": "only the validation-selected RF and predeclared baselines; no refit on validation; metrics measure supplied toy labels only",
+  "toy_targets_by_candidate": {
+    "bismuth_subsalicylate": [
+      "diarrhea"
+    ],
+    "calamine_zinc_oxide": [
+      "itching"
+    ],
+    "carboxymethylcellulose_sodium": [
+      "eye_irritation",
+      "eye_dryness"
+    ],
+    "hypromellose": [
+      "eye_irritation",
+      "eye_dryness"
+    ],
+    "ibuprofen": [
+      "fever",
+      "body_aches",
+      "headache"
+    ],
+    "loperamide": [
+      "diarrhea"
+    ],
+    "ors": [
+      "diarrhea",
+      "vomiting"
+    ],
+    "paracetamol": [
+      "fever",
+      "body_aches",
+      "headache"
+    ]
+  },
+  "version": "synthetic-200-symptom-match-random-forest-2026-10-20-v1"
+}

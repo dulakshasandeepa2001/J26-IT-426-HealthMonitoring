@@ -219,21 +219,21 @@ export function usePrescription(requestedConsultation?: string) {
   }, [state.activeConsultation, state.loading, receiveAnalysis]);
 
   const selectPatient = useCallback((id: number) => {
-    if (state.loading) return;
+    if (state.loading || state.activePatient?.id === id) return;
     const patient = state.patients.find((item) => item.id === id) ?? null;
     const encounter = state.consultations.find((item) => item.patient === patient?.id) ?? null;
     rememberEncounter(encounter);
     setState((s) => selectEncounter({ ...s, error: null }, patient, encounter));
-  }, [state.loading, state.patients, state.consultations, rememberEncounter]);
+  }, [state.loading, state.activePatient?.id, state.patients, state.consultations, rememberEncounter]);
 
   const selectConsultation = useCallback((id: string) => {
-    if (state.loading) return;
+    if (state.loading || state.activeConsultation?.id === id) return;
     const encounter = state.consultations.find(
       (item) => item.id === id && item.patient === state.activePatient?.id
     ) ?? null;
     rememberEncounter(encounter);
     setState((s) => selectEncounter({ ...s, error: null }, s.activePatient, encounter));
-  }, [state.loading, state.activePatient, state.consultations, rememberEncounter]);
+  }, [state.loading, state.activeConsultation?.id, state.activePatient, state.consultations, rememberEncounter]);
 
   const startConsultation = useCallback(async (reason: string): Promise<boolean> => {
     if (!state.activePatient || !reason.trim() || saving.current) return false;

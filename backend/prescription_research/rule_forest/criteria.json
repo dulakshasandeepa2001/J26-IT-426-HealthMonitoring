@@ -1,0 +1,28 @@
+{
+  "version": "selected-rule-imitation-rf-2026-10-20-v1",
+  "label_method": "rule_derived",
+  "clinical_review_status": "not_reviewed",
+  "task": "Separate experimental classifiers imitate selected existing rule outcomes; not clinical safety, optimal prescribing or dose generation",
+  "clinical_validation": false,
+  "tasks": ["allergy", "duplicate_ingredient", "interaction", "dose", "purpose_applicability"],
+  "random_state": 20261020,
+  "rf_candidates": [
+    {"id": "depth4_leaf2", "max_depth": 4, "min_samples_leaf": 2},
+    {"id": "depth8_leaf2", "max_depth": 8, "min_samples_leaf": 2},
+    {"id": "depth12_leaf2", "max_depth": 12, "min_samples_leaf": 2}
+  ],
+  "n_estimators": 160,
+  "selection": "macro F1 on novel unique validation inputs; stable declared order on ties; no test selection or validation refit",
+  "source_engine": "backend/prescription_drafts/engine.py",
+  "source_profiles": "backend/prescription_drafts/data/safety_profiles.json",
+  "source_mapping": "backend/prescription_research/expansion/policies.json",
+  "coverage": "Four existing exact reference products; paracetamol's existing additional measles/mumps research mappings reused. Other products remain unsupported.",
+  "allergy": "Reuse selected ingredient/cross-hypersensitivity checks. No match means only no selected match, never allergy clearance; excipients and comprehensive cross-reactivity are absent.",
+  "interaction": "Reuse current-medicine and oseltamivir LAIV cautions. Known current medicine pairs require review; unresolved pairs cannot validate. Paracetamol/warfarin remains a review caution, not an invented contraindication. No comprehensive interaction database.",
+  "dose": "Reuse reference_regimen and validate_dose with explicit fictional proposals. Learn matches_selected_rule/mismatch/cannot_validate; never learn or generate an unverified numeric dose. No regimen when prerequisites/product scope are missing.",
+  "purpose_applicability": "Mapped symptom purpose: any explicitly present target is provisionally relevant, all absent not_relevant, otherwise cannot_validate. Mapped antivirals require fictional assessed standard outpatient context, an explicit supported guideline/risk pathway and selected onset window. WHO non-severe oseltamivir is guideline_against; unknown/severe WHO contexts are unsupported, not extrapolated.",
+  "best_medicine": "No optimal-medicine or preference ground truth is created. Preserve purpose/clinical role; show a tied shortlist only after deterministic checks. Each implemented condition-role group has one product, so meaningful within-group ranking cannot be measured.",
+  "source_200": "Audit separately without promoting unverified reports, inventing missing facts, assigning an exact product to a generic candidate or adding a proposed dose. Do not train on this audit.",
+  "operational_safety": "Offline synthetic fixtures only. Production checks, history, reviews and models unchanged. ML cannot clear a block, unknown, missing review or unsupported product.",
+  "feature_policy": "Task-specific allowlists of raw fictional inputs only. Exclude outcome labels, checks, reasons, references, teacher scores, IDs, families, splits, proposal-generation mode, reviews and post-decision fields. Fit preprocessing on unique training inputs only."
+}

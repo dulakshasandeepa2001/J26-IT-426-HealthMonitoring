@@ -1,0 +1,658 @@
+[
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [],
+    "id": "train__standard",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "allergy_match"
+    ],
+    "id": "train__matching_allergy",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "allergy_unknown"
+    ],
+    "id": "train__unknown_allergy",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "allergy_unresolved"
+    ],
+    "id": "train__unresolved_allergy",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "allergy_other"
+    ],
+    "id": "train__other_allergy",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "duplicate"
+    ],
+    "id": "train__duplicate",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "medicine_unknown"
+    ],
+    "id": "train__unknown_medicine",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "medicine_unresolved"
+    ],
+    "id": "train__unresolved_medicine",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "medicine_other"
+    ],
+    "id": "train__other_current",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "warfarin"
+    ],
+    "id": "train__warfarin",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "laiv_review"
+    ],
+    "id": "train__vaccine",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "laiv_unknown"
+    ],
+    "id": "train__vaccine_unknown",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_low"
+    ],
+    "id": "train__low_dose",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_high"
+    ],
+    "id": "train__high_dose",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_route"
+    ],
+    "id": "train__route",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_volume"
+    ],
+    "id": "train__volume",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_frequency"
+    ],
+    "id": "train__frequency",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_duration"
+    ],
+    "id": "train__course",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_schedule"
+    ],
+    "id": "train__schedule",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "dose_missing"
+    ],
+    "id": "train__missing_proposal",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "pediatric_small"
+    ],
+    "id": "train__pediatric",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "pediatric_large"
+    ],
+    "id": "train__larger_child",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "age_unknown"
+    ],
+    "id": "train__unknown_age",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "pediatric_weight_unknown"
+    ],
+    "id": "train__unknown_weight",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "renal_unknown"
+    ],
+    "id": "train__renal",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "hepatic_review"
+    ],
+    "id": "train__hepatic",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "targets_absent"
+    ],
+    "id": "train__absent_targets",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "targets_unknown"
+    ],
+    "id": "train__unknown_targets",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "duration_unknown"
+    ],
+    "id": "train__unknown_duration",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "late_onset"
+    ],
+    "id": "train__late",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "who"
+    ],
+    "id": "train__who",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "red_flag"
+    ],
+    "id": "train__red_flag",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "population_unknown"
+    ],
+    "id": "train__population",
+    "split": "train"
+  },
+  {
+    "ages": [
+      13,
+      25,
+      52
+    ],
+    "changes": [
+      "risk_unknown"
+    ],
+    "id": "train__rash_risk",
+    "split": "train"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "allergy_match",
+      "renal_unknown"
+    ],
+    "id": "validation__allergy_renal",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "duplicate",
+      "dose_missing"
+    ],
+    "id": "validation__duplicate_missing",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "allergy_unknown",
+      "dose_route"
+    ],
+    "id": "validation__unknown_route",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "dose_low",
+      "late_onset"
+    ],
+    "id": "validation__low_late",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "who",
+      "allergy_match"
+    ],
+    "id": "validation__who_allergy",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "targets_absent",
+      "medicine_other"
+    ],
+    "id": "validation__absent_current",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "laiv_review",
+      "pediatric_large"
+    ],
+    "id": "validation__vaccine_pediatric",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      19,
+      42
+    ],
+    "changes": [
+      "hepatic_review",
+      "medicine_unknown"
+    ],
+    "id": "validation__hepatic_unknown_meds",
+    "split": "validation"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "allergy_unknown",
+      "dose_volume"
+    ],
+    "id": "test__allergy_volume",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "dose_grams"
+    ],
+    "id": "test__equivalent_grams",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "warfarin",
+      "hepatic_review"
+    ],
+    "id": "test__warfarin_hepatic",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "medicine_unknown",
+      "late_onset"
+    ],
+    "id": "test__unknown_late",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "allergy_alias",
+      "duplicate"
+    ],
+    "id": "test__alias_duplicate",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "targets_unknown",
+      "renal_unknown"
+    ],
+    "id": "test__unknown_targets_renal",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "dose_route",
+      "laiv_unknown"
+    ],
+    "id": "test__route_vaccine",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "who",
+      "dose_missing"
+    ],
+    "id": "test__who_missing",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "allergy_mixed",
+      "medicine_unresolved"
+    ],
+    "id": "test__mixed_history",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "risk_unknown",
+      "red_flag"
+    ],
+    "id": "test__risk_redflag",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "onset_unknown"
+    ],
+    "id": "test__unknown_onset",
+    "split": "test"
+  },
+  {
+    "ages": [
+      12,
+      18,
+      65
+    ],
+    "changes": [
+      "population_unknown",
+      "dose_duration"
+    ],
+    "id": "test__population_course",
+    "split": "test"
+  }
+]

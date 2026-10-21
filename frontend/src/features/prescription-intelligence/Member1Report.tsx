@@ -10,6 +10,8 @@ export function Member1Report({ details }: { details: Member1Details }) {
   const v21 = details.adapter_version === "member1-v2.1.0";
   const supported = v21 ? HANDOFF_CONDITIONS.includes(primary.condition_code.toLowerCase() as HandoffCondition) : pilotCodes.includes(primary.condition_code.toLowerCase());
   const facts = details.reported_assessments;
+  const obsoleteWarning = "Analysis handoff is supported; medicine rules and the trained prescription model for this condition are not enabled.";
+  const issues = details.mapping_issues.filter((issue) => !(v21 && issue.field === "payload.primary_diagnosis.condition_code" && issue.reason === obsoleteWarning));
   return <div className="space-y-4 text-xs leading-relaxed">
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
       <h3 className="font-bold text-slate-800">Consultation voice-analysis details</h3>
@@ -62,7 +64,8 @@ export function Member1Report({ details }: { details: Member1Details }) {
       <div><p className="font-semibold">Patient-reported current medicines from voice</p>{notes.patient_current_medications.length ? <ul className="mt-1 list-inside list-disc">{notes.patient_current_medications.map((item, index) => <li key={index} className="break-words">{item}</li>)}</ul> : <p className="mt-1">Not supplied in this output; current-medicine status remains unverified.</p>}</div>
       <div><p className="font-semibold">Mentioned vital signs — unverified</p>{Object.keys(notes.vital_signs_mentioned).length ? <dl className="mt-1 space-y-1">{Object.entries(notes.vital_signs_mentioned).map(([key, value]) => <div key={key} className="flex flex-wrap gap-2"><dt className="capitalize">{key.replaceAll("_", " ")}:</dt><dd className="break-words">{value}</dd></div>)}</dl> : <p className="mt-1">No vital signs supplied.</p>}</div>
     </div>
-    {details.mapping_issues.length > 0 && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900"><h3 className="font-bold">Input clarification required</h3><ul className="mt-2 list-inside list-disc">{details.mapping_issues.map((issue, index) => <li key={index} className="mt-1">{issue.reason}</li>)}</ul></div>}
+    {issues.length !== details.mapping_issues.length && <p className="text-slate-500">This historical import contains an older coverage warning. Current screening accepts all six conditions; medicine availability and ML support are checked separately. The original analysis is retained.</p>}
+    {issues.length > 0 && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900"><h3 className="font-bold">Input clarification required</h3><ul className="mt-2 list-inside list-disc">{issues.map((issue, index) => <li key={index} className="mt-1">{issue.reason}</li>)}</ul></div>}
     <details className="rounded-xl border border-slate-200 p-3"><summary className="cursor-pointer font-semibold text-slate-600">Reported treatment categories — unreviewed</summary><p className="mt-2 text-slate-500">These are source suggestions. Treatment selection requires reviewed knowledge, safety checks and a doctor decision.</p><ul className="mt-2 list-inside list-disc text-slate-600">{body.suggested_treatment_categories.map((item, index) => <li key={index} className="break-words">{item}</li>)}</ul></details>
     <details className="rounded-xl border border-slate-200 p-3"><summary className="cursor-pointer font-semibold text-slate-600">View structured clinical details</summary><pre className="mt-3 max-h-60 overflow-auto whitespace-pre-wrap break-words text-[11px] text-slate-600">{JSON.stringify(body, null, 2)}</pre></details>
   </div>;

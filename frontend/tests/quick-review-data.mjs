@@ -41,7 +41,7 @@ const scope = { medicine_id: 'ibuprofen-200mg-tablet', condition: 'mumps', conte
 let required = quickRequirements('mumps', [pilot], [scope], 36);
 assert.equal(required.activeCandidates, 1); assert.equal(required.fields.has('hepatic_assessment'), true);
 assert.equal(required.fields.has('nsaid_assessment'), false, 'Unreviewed ibuprofen does not add questions');
-assert.equal(required.fields.has('renal_assessment'), false, 'Paracetamol does not introduce an unrelated renal question');
+assert.equal(required.fields.has('renal_assessment'), true, 'The encoded paracetamol reference requires a standard renal assessment');
 required = quickRequirements('mumps', [pilot], [{ ...scope, safety_review: { is_current: true } }], 36);
 assert.equal(required.activeCandidates, 2); assert.equal(required.fields.has('nsaid_assessment'), true);
 required = quickRequirements('viral_gastroenteritis', [], [{ ...scope, condition: 'viral_gastroenteritis', content: { product: null }, safety_review: { is_current: true } }], 36);

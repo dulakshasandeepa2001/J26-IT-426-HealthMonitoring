@@ -4,8 +4,9 @@ from types import SimpleNamespace
 from decimal import Decimal
 from prescription_drafts.engine import allergy_identity, aggregate, reference_regimen, run_screening
 from prescription_context.history_identity import resolved_allergies, resolve_medicines
+from .screening_trace import explain_findings
 
-ENGINE_VERSION = 'six-condition-patient-screening-2026-10-17-v2'
+ENGINE_VERSION = 'six-condition-patient-screening-2026-10-19-v3'
 BLOCKING = {'blocked', 'cannot_validate'}
 
 
@@ -65,7 +66,7 @@ def common_checks(snapshot, policy, adult_only):
     return checks
 
 
-def identity_checks(snapshot, product, matches, vocabulary, contraindicated):
+def identity_checks(snapshot, product, matches, vocabulary, contraindicated, *, assess_excipients=True):
     context = snapshot['context']
     identities = [allergy_identity(name, vocabulary) for name in context['allergies']]
     checks = []
@@ -79,7 +80,7 @@ def identity_checks(snapshot, product, matches, vocabulary, contraindicated):
     duplicate = current & {i['name'] for i in product['ingredients']}
     checks.append(finding('duplicate_ingredient', 'blocked' if duplicate else 'cannot_validate' if incomplete else 'passed', 'A duplicate blocks a new candidate; an unresolved current medicine cannot be treated as absent.'))
     checks.append(finding('interaction', 'cannot_validate' if incomplete or matches else 'passed', 'Current medicines require a separate comprehensive pair review; no interaction database is claimed.'))
-    if snapshot['clinical']['excipient_assessment'] != 'acceptable':
+    if assess_excipients and snapshot['clinical']['excipient_assessment'] != 'acceptable':
         checks.append(finding('excipients', 'cannot_validate', 'Exact product/excipient suitability must be independently assessed.'))
     return checks
 
@@ -105,11 +106,30 @@ def screen_candidate(snapshot, candidate, profiles, products, matches):
     adult = snapshot['diagnosis']['condition'] not in ('influenza', 'chickenpox')
     checks = common_checks(snapshot, policy, adult)
     checks.extend(candidate['gate_findings'])
+    sources = deepcopy(candidate['sources'])
+    if kind == 'oseltamivir':
+        from .additional_candidates import source
+        sources.extend(source(identity) for identity in ('who-flu-2024', 'cdc-flu-2026')
+            if not any(isinstance(item, dict) and item.get('id') == identity for item in sources))
     reference = None
     if kind == 'unresolved_ors':
         checks.append(finding('product_identity', 'blocked', 'Exact ORS label/composition/dilution remains unresolved; no regimen is generated.'))
     elif not product or kind == 'catalogue_only':
         checks.append(finding('product_rule_coverage', 'cannot_validate', 'Exact product or executable policy is incomplete; no fallback medicine/dose is substituted.'))
+    elif kind == 'oseltamivir' and facts['influenza_guideline'] != 'CDC_2026':
+        # No CDC onset, vaccine or treatment-regimen rule is applied to a WHO
+        # selection. Patient/history blocks remain independent of this choice.
+        rule = candidate['reference_profile']
+        vocabulary = {name for profile in profiles.values() for name in profile['allergy_names']}
+        checks.extend(identity_checks(snapshot, product, matches, vocabulary, rule['allergy_names'], assess_excipients=False))
+        non_severe = (facts['care_setting'] == 'outpatient' and facts['condition_severity'] in ('mild', 'moderate')
+            and snapshot['source_observations']['severity'] != 'severe')
+        if facts['influenza_guideline'] == 'WHO_2024' and non_severe:
+            checks.append(finding('guideline', 'blocked', 'WHO 2024 recommends against oseltamivir for non-severe seasonal influenza. The selected WHO guideline is retained; no CDC regimen is substituted.', ['who-flu-2024']))
+        elif facts['influenza_guideline'] == 'WHO_2024':
+            checks.append(finding('guideline_coverage', 'cannot_validate', 'WHO 2024 is selected, but no executable WHO pathway for this unknown/severe/hospital context is implemented. The non-severe recommendation is not extrapolated and CDC rules are not substituted.', ['who-flu-2024']))
+        else:
+            checks.append(finding('guideline', 'cannot_validate', 'No influenza guideline is selected. Explicitly review the intended guideline; no antiviral treatment pathway has been applied.'))
     elif kind in ('paracetamol', 'oseltamivir', 'acyclovir', 'calamine'):
         rule = candidate['reference_profile']
         reference, reason = reference_regimen(rule, age, facts, product['route'])
@@ -117,17 +137,16 @@ def screen_candidate(snapshot, candidate, profiles, products, matches):
         used_profiles = {k: SimpleNamespace(content=v, content_hash='reference') for k, v in profiles.items()}
         used_profiles[medicine.pk] = SimpleNamespace(content=rule, content_hash=candidate['rules_hash'])
         old = run_screening([medicine], used_profiles, snapshot, {medicine.pk: reference}, matches)['candidates'][0]
-        checks.extend(old['checks'])
+        # A missing reference is explained once by its actual prerequisite,
+        # rather than presenting an unrelated manual-proposal instruction.
+        checks.extend(row for row in old['checks'] if reference is not None or row['category'] != 'dose')
         structured = structured_allergy_check(snapshot, rule['allergy_names'])
         if structured is not None:
             checks = [structured if row['category'] == 'allergy' else row for row in checks]
         if reason:
             checks.append(finding('dose', 'cannot_validate', reason))
         if kind == 'oseltamivir':
-            if facts['influenza_guideline'] != 'CDC_2026':
-                checks.append(finding('guideline', 'cannot_validate', 'Select/review the CDC 2026 outpatient pathway explicitly. WHO 2024 differs for non-severe influenza; ML cannot resolve that difference.'))
-            else:
-                checks.append(finding('guideline', 'warning', 'Source-specific CDC outpatient pathway; WHO 2024 recommends against oseltamivir for non-severe influenza.'))
+            checks.append(finding('guideline', 'warning', 'Explicit CDC outpatient pathway applied. This does not represent the different WHO 2024 non-severe recommendation.', ['cdc-flu-2026']))
     elif kind in ('ophthalmic_lubricant', 'hypromellose', 'ibuprofen'):
         vocabulary = {name for rule in profiles.values() for name in rule['allergy_names']} | {'ibuprofen', 'aspirin', 'nsaid', 'nsaids', 'hypromellose', 'carboxymethylcellulose', 'carboxymethylcellulose sodium'}
         contraindicated = {'ibuprofen', 'aspirin', 'nsaid', 'nsaids'} if kind == 'ibuprofen' else {i['name'] for i in product['ingredients']}
@@ -157,9 +176,22 @@ def screen_candidate(snapshot, candidate, profiles, products, matches):
         if facts['dehydration_assessment'] not in ('none', 'mild') or facts['oral_fluid_tolerance'] != 'tolerated':
             checks.append(finding('hydration', 'blocked' if facts['dehydration_assessment'] in ('moderate', 'severe') or facts['oral_fluid_tolerance'] == 'not_tolerated' else 'cannot_validate', 'Hydration severity/oral tolerance is unknown or outside this pathway.'))
     checks.append(finding('coverage', 'warning', 'Selected source-based prototype checks only; no comprehensive safety clearance, local product equivalence or clinical validation is claimed.'))
+    duplicate = sorted({ingredient for row in matches for match in row['matches'] for ingredient in match['ingredients']}
+        & {item['name'] for item in (product or {}).get('ingredients', [])})
+    for check in checks:
+        if check['category'] == 'duplicate_ingredient' and duplicate:
+            recorded = [row['input'] for row in matches if any(set(match['ingredients']) & set(duplicate) for match in row['matches'])]
+            check['message'] = ('Duplicate normalized ingredient(s): ' + ', '.join(duplicate) + '. Recorded current medicine(s): '
+                + '; '.join(recorded) + '. Continuation/replacement requires a separate clinician decision; the history is retained.')
+    explain_findings(checks, snapshot, candidate, matches)
     obstacles = [row for row in checks if row['status'] in BLOCKING or row['status'] == 'warning' and row['category'] not in ('coverage', 'topical_precaution', 'guideline')]
+    for check in checks:
+        # Some warnings require independent review and already withhold a
+        # candidate. Expose that fact instead of implying they are nonblocking.
+        check['blocks_availability'] = check in obstacles
     return {'scope_id': candidate['scope_id'], 'medicine_id': policy['candidate_id'], 'generic_name': candidate['name'],
         'purpose': policy['purpose'], 'clinical_role': policy['clinical_role'], 'status': 'unavailable' if obstacles or reference is None else 'candidate_for_clinician_review',
         'screening_status': aggregate(checks), 'checks': checks, 'regimen': None if obstacles else reference,
-        'product': product, 'sources': candidate['sources'], 'content_hash': candidate['content_hash'], 'rules_hash': candidate['rules_hash'],
+        'product': product, 'sources': sources, 'content_hash': candidate['content_hash'], 'rules_hash': candidate['rules_hash'],
+        'review_trace': candidate['review_trace'],
         'approved': False, 'published': False, 'prescription_eligible': False}

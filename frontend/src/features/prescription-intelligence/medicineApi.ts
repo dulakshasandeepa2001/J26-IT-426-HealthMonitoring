@@ -50,19 +50,26 @@ export function checkMedicineNames(names: string[]): Promise<{ results: Medicine
 
 export interface ScopeReview {
   status: MedicineReviewStatus; is_current: boolean; reason: string | null;
+  review_scope?: "content" | "executable" | "reference_only"; reference_review_is_current?: boolean;
   reviewer_name: string | null; reviewed_at: string | null; notes: string;
 }
 export interface ConditionScope {
   id: string; medicine_id: string; condition: string; content_hash: string; rules_hash: string; updated_at: string;
+  safety_review_mode?: "executable" | "reference_only";
   content: { condition: string; display_name?: string; product: (Omit<MedicineEntry["content"], "standard_concept"> & { standard_concept: StandardMedicineConcept | null; reference_product_identifier?: string }) | null; identity_status: string; purpose: string; knowledge_version: string;
     unresolved_product?: { gap: string; source_ids: string[]; source_urls: string[]; strength: null; rxcui: null; regimen: null } };
   rules: { policy: { scope: string; concern_fields: string[]; target_symptoms: string[]; handler: string }; reference_profile: unknown; scope: string; implementation_source: string; implementation_bindings: Record<string, string>; history_identity_policy?: IdentityPolicy };
   content_review: ScopeReview; safety_review: ScopeReview; live_screening_enabled: false;
 }
 export function fetchConditionKnowledge(): Promise<ConditionScope[]> { return apiRequest("/api/prescription/condition-knowledge/"); }
-export function reviewConditionScope(scope: ConditionScope, kind: "content" | "safety", decision: MedicineReviewStatus, notes: string, evidence: boolean): Promise<ConditionScope> {
+export function refreshConditionScopeVersion(scope: ConditionScope): Promise<ConditionScope> {
+  return apiRequest(`/api/prescription/condition-knowledge/${encodeURIComponent(scope.id)}/refresh-version/`, {
+    method: "POST", body: JSON.stringify({ expected_content_hash: scope.content_hash, expected_rules_hash: scope.rules_hash, expected_updated_at: scope.updated_at }),
+  });
+}
+export function reviewConditionScope(scope: ConditionScope, kind: "content" | "safety", decision: MedicineReviewStatus, notes: string, evidence: boolean, referenceOnly = false): Promise<ConditionScope> {
   return apiRequest(`/api/prescription/condition-knowledge/${encodeURIComponent(scope.id)}/review/${kind}/`, {
-    method: "POST", body: JSON.stringify({ decision, notes, evidence_checked: evidence,
+    method: "POST", body: JSON.stringify({ decision, notes, evidence_checked: evidence, ...(referenceOnly ? { review_scope: "reference_only" } : {}),
       expected_content_hash: kind === "content" ? scope.content_hash : scope.rules_hash, expected_updated_at: scope.updated_at }),
   });
 }

@@ -127,8 +127,10 @@ class ConsultationViewSet(DoctorAccess, mixins.CreateModelMixin, viewsets.ReadOn
                 }, status=409)
             before = context_snapshot(context) if context else None
             old_identity = context.provenance.get('history_identity') if context else None
+            old_plan = context.provenance.get('medicine_plan') if context else None
             if before is not None:
                 before['history_identity'] = old_identity
+                before['medicine_plan'] = old_plan
             if context is None:
                 context = PrescriptionContextPatientcontext(patient=patient)
             if patient.birthday is not None:
@@ -154,9 +156,29 @@ class ConsultationViewSet(DoctorAccess, mixins.CreateModelMixin, viewsets.ReadOn
                     'consultation_id': str(consultation.pk)}
             else:
                 context.provenance.pop('history_identity', None)
+            # Management proposals are visit-specific notes, not interaction
+            # clearance, a prescription, or a change to active history. Never
+            # carry a previous visit's plan forward as a current decision.
+            plans = data.get('medicine_plans')
+            same_history = before and all(before[field] == data[field] for field in
+                ('allergies', 'current_medicines', 'allergy_status', 'medicine_status'))
+            if (plans is None and old_plan and same_history
+                    and old_plan.get('consultation_id') == str(consultation.pk)
+                    and (old_identity or {}).get('details') == context.provenance.get('history_identity', {}).get('details')):
+                plans = old_plan.get('details')
+            if plans is not None:
+                context.provenance['medicine_plan'] = {
+                    'version': 'current-medicine-proposals-v1', 'details': plans,
+                    'consultation_id': str(consultation.pk), 'reviewed_by': request.user.pk,
+                    'reviewed_at': context.provenance['last_reviewed_at'],
+                    'status': 'proposed_only', 'changes_active_history': False,
+                }
+            else:
+                context.provenance.pop('medicine_plan', None)
             context.save()
             after = context_snapshot(context)
             after['history_identity'] = context.provenance.get('history_identity')
+            after['medicine_plan'] = context.provenance.get('medicine_plan')
             PrescriptionContextContextrevision.objects.create(
                 consultation=consultation, doctor=request.user, context=context,
                 snapshot={'before': before, 'after': after, 'reviewed': True},

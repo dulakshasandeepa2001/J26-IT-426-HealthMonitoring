@@ -1,5 +1,13 @@
 # Step 5: medicine catalogue, evidence and clinician content reviews
 
+[Step 17](STEP17.md) reuses saved safety reviews across login/refresh, adds
+explicit reference-only safety acknowledgements without executable approval,
+and provides a safe selected-scope version refresh when an import is outdated.
+
+[Step 16](STEP16.md) investigates zero-candidate screening, records the genuine
+stale review/product-coverage gaps, fixes duration entry and WHO pathway handling,
+and adds traceable inputs, effective review versions and shared assessment reasons.
+
 [Step 15](STEP15.md) fixes the Preview timeout budget, avoids a redundant session
 lookup, and documents local database connection reuse and availability handling.
 
@@ -213,4 +221,35 @@ proposals, recorded doctor edit/approve/reject decisions and an approved-only A6
 research-demo print view.
 [Step 14](STEP14.md) adds compact doctor-confirmed history names and actionable
 screening corrections, preserving clinical facts and deterministic blocks.
+
+[Step 18](STEP18.md) records the separate offline Random Forest experiment on
+the supplied 200 fictional cases, including real evaluation, provenance and
+the limits of the available symptom-match labels.
+
+[Step 19](STEP19.md) adds separately labelled fictional rule-imitation models
+for selected safety checks, proposed-dose comparison and purpose applicability,
+preserving deterministic controls and reporting actual errors and coverage gaps.
+
+[Step 20](STEP20.md) connects both saved RF bundles to the explicitly enabled
+synthetic doctor-review workflow and moves clinical inputs into Patient
+information with one explicit confirm-and-screen action.
+
+[Step 21](STEP21.md) fixes omitted history identity confirmations, retains
+same-visit clinical entries after history updates, and records separate
+current-medicine management proposals without changing active history or safety
+availability.
+
+[Step 22](STEP22.md) adds explicitly reviewed selected oseltamivir–acetaminophen
+interaction evidence for exact synthetic adult influenza contexts, with frozen-RF
+abstention and independent doctor approval, and fixes redundant encounter selection.
+
+[Step 23](STEP23.md) clarifies doctor-review edit and decision requirements,
+opens the A6 prescription automatically after confirmed approval, and displays
+an unsigned stamp using the recorded doctor profile details.
+
+[Step 24](STEP24.md) adds explicit bulk selection of available medicines,
+keeps combination review mandatory, and removes redundant review round trips.
+
+[Step 25](STEP25.md) corrects the six-condition JSON coverage warning and adds
+a separately reviewed exact-ORS synthetic adult pathway with explicit RF abstention.
 

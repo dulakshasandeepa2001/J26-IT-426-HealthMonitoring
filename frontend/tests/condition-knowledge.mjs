@@ -53,7 +53,7 @@ await context.route(/^http:\/\/(?:localhost|127\.0\.0\.1):8000\//, async (route)
   if (review) {
     assert.equal(request.method(), 'POST'); assert.equal(request.headers()['x-csrftoken'], 'knowledge-test-csrf');
     const body = request.postDataJSON(); writes.push({ id: review[1], kind: review[2], body });
-    assert.deepEqual(Object.keys(body).sort(), ['decision', 'evidence_checked', 'expected_content_hash', 'expected_updated_at', 'notes']);
+    assert.deepEqual(Object.keys(body).sort(), ['decision', 'evidence_checked', 'expected_content_hash', 'expected_updated_at', 'notes', ...(body.review_scope ? ['review_scope'] : [])]);
     const scope = scopes.find((row) => row.id === review[1]);
     assert.equal(body.expected_content_hash, review[2] === 'content' ? scope.content_hash : scope.rules_hash);
     assert.equal(body.expected_updated_at, scope.updated_at);
@@ -160,12 +160,14 @@ try {
   assert.equal(await eyeListBadge().count(), 0, 'Outdated review is not shown as current');
   await page.getByLabel('Condition filter', { exact: true }).selectOption('viral_gastroenteritis');
   const orsSafety = reviewPanel('Safety rule review', 'Viral gastroenteritis');
-  assert.equal(await orsSafety.getByRole('combobox').inputValue(), 'pending');
-  assert.equal(await orsSafety.getByRole('combobox').locator('option[value="reviewed"]').count(), 0);
+  assert.equal(await orsSafety.getByRole('combobox').inputValue(), 'reviewed');
+  assert.equal(await orsSafety.getByRole('combobox').locator('option[value="reviewed"]').count(), 1);
+  await orsSafety.getByRole('combobox').selectOption('pending');
   await orsSafety.getByRole('textbox').fill('Exact commercial ORS identity still needs resolution.');
   await orsSafety.getByRole('button', { name: 'Save safety rule review', exact: true }).click();
   await visible(page.getByRole('status').filter({ hasText: 'Review saved for Viral gastroenteritis' }));
   assert.equal(writes.at(-1).body.decision, 'pending');
+  assert.equal(writes.at(-1).body.review_scope, 'reference_only');
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     assert.equal(await page.locator('main').evaluate((node) => node.scrollWidth > node.clientWidth + 1), false);

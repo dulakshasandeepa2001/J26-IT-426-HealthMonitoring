@@ -1,0 +1,26 @@
+[
+  {
+    "candidate_key": "calamine_zinc_oxide",
+    "condition": "chickenpox",
+    "expected": 1,
+    "predicted": 0,
+    "purpose": "itch_relief",
+    "reason": "experimental_forest_symptom_match_only; no_safety_or_dose_clearance",
+    "row_id": "SYN-0038::calamine_zinc_oxide",
+    "scenario_id": "SYN-0038",
+    "status": "predicted",
+    "template_family": "chickenpox__context_01"
+  },
+  {
+    "candidate_key": "ors",
+    "condition": "viral_gastroenteritis",
+    "expected": 0,
+    "predicted": 1,
+    "purpose": "rehydration_support",
+    "reason": "experimental_forest_symptom_match_only; no_safety_or_dose_clearance",
+    "row_id": "SYN-0180::ors",
+    "scenario_id": "SYN-0180",
+    "status": "predicted",
+    "template_family": "viral_gastroenteritis__context_03"
+  }
+]

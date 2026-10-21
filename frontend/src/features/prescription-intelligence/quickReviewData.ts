@@ -60,13 +60,16 @@ export function quickRequirements(condition: HandoffCondition, profiles: SafetyP
     policy.targets.forEach((name) => targets.add(name));
     if (!["influenza", "chickenpox"].includes(condition)) conditionConcerns[condition].forEach((name) => concerns.add(name));
     policy.concerns.forEach((name) => concerns.add(name));
-    if (policy.handler === "paracetamol") fields.add("hepatic_assessment");
+    // The actual oral reference_regimen requires both, including when no
+    // antiviral/NSAID is reviewed and able to introduce the renal question.
+    if (policy.handler === "paracetamol") { fields.add("hepatic_assessment"); fields.add("renal_assessment"); }
     if (["oseltamivir", "acyclovir"].includes(policy.handler)) { fields.add("renal_assessment"); fields.add("onset_hours"); }
     if (policy.handler === "oseltamivir") { fields.add("laiv_timing"); fields.add("influenza_guideline"); }
     if (policy.handler === "acyclovir") fields.add("varicella_risk");
     if (policy.handler === "calamine") fields.add("topical_assessment");
     if (["ophthalmic_lubricant", "hypromellose"].includes(policy.handler)) { fields.add("ophthalmic_integrity"); fields.add("excipient_assessment"); }
     if (policy.handler === "ibuprofen") for (const name of ["renal_assessment", "hepatic_assessment", "nsaid_assessment", "gi_bleeding_assessment", "cardiovascular_assessment", "excipient_assessment"] as const) fields.add(name);
+    if (policy.handler === "exact_reference_ors") for (const name of ["renal_assessment", "hepatic_assessment", "excipient_assessment", "dehydration_assessment", "oral_fluid_tolerance", "ors_product_assessment", "ors_metabolic_assessment", "ors_dietary_assessment", "ors_obstruction_assessment"] as const) fields.add(name);
     if (["paracetamol", "oseltamivir", "acyclovir"].includes(policy.handler) && (age == null || age < 18)) fields.add("weight_kg");
   }
   return { fields, concerns, targets, activeCandidates: policies.length, coverageKnown };

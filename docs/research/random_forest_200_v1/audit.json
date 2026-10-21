@@ -1,0 +1,108 @@
+{
+  "candidate_rows": 636,
+  "case_count": 200,
+  "conditions": {
+    "chickenpox": 34,
+    "influenza": 34,
+    "measles": 33,
+    "mumps": 33,
+    "viral_conjunctivitis": 33,
+    "viral_gastroenteritis": 33
+  },
+  "csv_xlsx_overlapping_case_fields_agree": true,
+  "input_selection": "CSV supplies all 52 context fields; XLSX supplies 636 candidate-purpose toy labels. These are the same 200 cases, not 400.",
+  "inspection_case_count": 12,
+  "inspection_row_ids": [
+    "SYN-0001::paracetamol",
+    "SYN-0001::oseltamivir",
+    "SYN-0001::baloxavir_marboxil",
+    "SYN-0001::peramivir",
+    "SYN-0001::zanamivir",
+    "SYN-0002::paracetamol",
+    "SYN-0002::oseltamivir",
+    "SYN-0002::baloxavir_marboxil",
+    "SYN-0002::peramivir",
+    "SYN-0002::zanamivir",
+    "SYN-0035::paracetamol",
+    "SYN-0035::acyclovir",
+    "SYN-0035::calamine_zinc_oxide",
+    "SYN-0035::valacyclovir",
+    "SYN-0036::paracetamol",
+    "SYN-0036::acyclovir",
+    "SYN-0036::calamine_zinc_oxide",
+    "SYN-0036::valacyclovir",
+    "SYN-0069::paracetamol",
+    "SYN-0069::vitamin_a",
+    "SYN-0070::paracetamol",
+    "SYN-0070::vitamin_a",
+    "SYN-0102::paracetamol",
+    "SYN-0102::ibuprofen",
+    "SYN-0103::paracetamol",
+    "SYN-0103::ibuprofen",
+    "SYN-0135::hypromellose",
+    "SYN-0135::carboxymethylcellulose_sodium",
+    "SYN-0136::hypromellose",
+    "SYN-0136::carboxymethylcellulose_sodium",
+    "SYN-0168::ors",
+    "SYN-0168::bismuth_subsalicylate",
+    "SYN-0168::loperamide",
+    "SYN-0168::zinc",
+    "SYN-0169::ors",
+    "SYN-0169::bismuth_subsalicylate",
+    "SYN-0169::loperamide",
+    "SYN-0169::zinc"
+  ],
+  "label_balance": {
+    "0": 88,
+    "1": 172,
+    "unlabelled": 376
+  },
+  "labelled_rows": 260,
+  "provenance": {
+    "all_verified_input_flags_remain_false": true,
+    "clinical_review_status": "not_reviewed",
+    "independent_clinical_validation": false,
+    "label_method": "rule_derived",
+    "producer_readme_available": false
+  },
+  "sources": {
+    "MediTrack_Synthetic_200.xlsx": {
+      "bytes": 58873,
+      "sha256": "08e587f88b737f40ad311f139b8e15df169c21567964f0a5050b69444e6ad25b"
+    },
+    "patient_scenarios_200.csv": {
+      "bytes": 117093,
+      "sha256": "3dbaba97ec14768365167a1e92929acf4d7dfa937acac91ca422c3b39c6f85ef"
+    }
+  },
+  "split_counts": {
+    "test": {
+      "candidate_rows": 163,
+      "cases": 51,
+      "families": 12,
+      "labelled_rows": 66
+    },
+    "train": {
+      "candidate_rows": 395,
+      "cases": 124,
+      "families": 30,
+      "labelled_rows": 161
+    },
+    "validation": {
+      "candidate_rows": 78,
+      "cases": 25,
+      "families": 6,
+      "labelled_rows": 33
+    }
+  },
+  "target_availability": {
+    "clinical_relevance_labels": 0,
+    "clinical_safety_labels": 0,
+    "dose_labels": 0,
+    "independent_clinician_reviews": 0
+  },
+  "template_families": 48,
+  "template_family_leakage": false,
+  "unlabelled_rows": 376,
+  "version": "synthetic-200-symptom-match-random-forest-2026-10-20-v1"
+}

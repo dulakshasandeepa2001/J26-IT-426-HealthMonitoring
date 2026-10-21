@@ -1,9 +1,9 @@
-"""Inference on explicit synthetic demo snapshots; never fitting or dataset writes."""
+"""Inference on explicit synthetic snapshots; saved RF models, no fitting/writes."""
 from prescription_research.expansion import comparison, learners, knowledge
 from prescription_research import dataset as io
 
 
-def infer(draft):
+def legacy_infer(draft):
     report = comparison.verify_run()
     model = io.read_json(comparison.DEFAULT_OUTPUT / 'selected_model.json')
     batch = io.read_json(comparison.rv.DEFAULT_OUTPUT / 'batch.json')
@@ -50,3 +50,8 @@ def infer(draft):
             'Only doctor-verified positive symptoms enter the model; other presences remain unknown.',
             'Untrained products abstain. Deterministic safety checks remain outside ML.',
             'No patient data is written to research artifacts and no training runs during requests.']}
+
+
+def infer(draft):
+    from .rf_inference import infer as infer_rf
+    return infer_rf(draft)

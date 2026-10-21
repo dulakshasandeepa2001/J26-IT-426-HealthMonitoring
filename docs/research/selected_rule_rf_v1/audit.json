@@ -1,0 +1,108 @@
+{
+  "class_balance": {
+    "allergy": {
+      "test": {
+        "blocked": 42,
+        "cannot_validate": 21,
+        "no_selected_issue": 189
+      },
+      "train": {
+        "blocked": 21,
+        "cannot_validate": 42,
+        "no_selected_issue": 651
+      },
+      "validation": {
+        "blocked": 28,
+        "cannot_validate": 14,
+        "no_selected_issue": 70
+      }
+    },
+    "dose": {
+      "test": {
+        "cannot_validate": 78,
+        "matches_selected_rule": 113,
+        "mismatch": 61
+      },
+      "train": {
+        "cannot_validate": 219,
+        "matches_selected_rule": 368,
+        "mismatch": 127
+      },
+      "validation": {
+        "cannot_validate": 52,
+        "matches_selected_rule": 32,
+        "mismatch": 28
+      }
+    },
+    "duplicate_ingredient": {
+      "test": {
+        "blocked": 21,
+        "cannot_validate": 63,
+        "no_selected_issue": 168
+      },
+      "train": {
+        "blocked": 21,
+        "cannot_validate": 63,
+        "no_selected_issue": 630
+      },
+      "validation": {
+        "blocked": 14,
+        "cannot_validate": 14,
+        "no_selected_issue": 84
+      }
+    },
+    "interaction": {
+      "test": {
+        "cannot_validate": 66,
+        "no_selected_issue": 165,
+        "review_required": 21
+      },
+      "train": {
+        "cannot_validate": 66,
+        "no_selected_issue": 603,
+        "review_required": 45
+      },
+      "validation": {
+        "cannot_validate": 14,
+        "no_selected_issue": 68,
+        "review_required": 30
+      }
+    },
+    "purpose_applicability": {
+      "test": {
+        "cannot_validate": 69,
+        "guideline_against": 3,
+        "provisional_relevance": 180
+      },
+      "train": {
+        "cannot_validate": 66,
+        "guideline_against": 3,
+        "not_relevant": 15,
+        "provisional_relevance": 630
+      },
+      "validation": {
+        "cannot_validate": 4,
+        "guideline_against": 2,
+        "not_relevant": 10,
+        "provisional_relevance": 96
+      }
+    }
+  },
+  "families": 54,
+  "family_leakage": false,
+  "rows": 1078,
+  "splits": {
+    "test": {
+      "families": 12,
+      "rows": 252
+    },
+    "train": {
+      "families": 34,
+      "rows": 714
+    },
+    "validation": {
+      "families": 8,
+      "rows": 112
+    }
+  }
+}

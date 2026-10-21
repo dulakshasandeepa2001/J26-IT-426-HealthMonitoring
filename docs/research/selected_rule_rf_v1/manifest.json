@@ -1,0 +1,43 @@
+{
+  "environment": {
+    "cloudpickle": "3.1.2",
+    "joblib": "1.6.0",
+    "narwhals": "2.27.1",
+    "numpy": "2.5.4",
+    "python": "3.13.3",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.7.0"
+  },
+  "outputs": {
+    "audit.json": "606df231320eaa1af1fb9eb697d29b7838d0d152400cab97aa3e5abb23b84585",
+    "criteria.json": "fabd3be4de210df4e1b4d1c082473693d2f2d8759a8bdae8c4c9e1de7bcfe819",
+    "dataset.jsonl": "beaef6b2e45e32f7079c8cf49fb10d4f61ce7754ba0da4f97daf55a2ed554671",
+    "evaluation.json": "e74ab8cbe066403bcabfa009789d0a62f6dc987ed091db6551e1e0565f47247b",
+    "evaluation.md": "ac79cd251e5673cfba054655d7e3998c999a08b24b54f42bc97f1b4445a4fd2a",
+    "evidence.json": "05c503c3d2141f64ace8498de4b318684b9a65683f96e12c7161d35e3a945d87",
+    "inspection_batch.json": "56473ab997d99525c62324f4fbcfd149448f1bcfe68f7c450a60cce32a2f0078",
+    "inspection_rows.csv": "848e4a0f3d51d2f4e3f77351cc2d361f0709cf0790d027bfc95533875d6e82b4",
+    "models.joblib": "0f3416ec337f37d3be038aba168ee4d91645da92483d0c6a19ae0f83da1246c6",
+    "source_200_audit.json": "12aed87dc3f3f7582f3b3cb6ad8187703e7c8ae3259d7caf68eae6574674e983",
+    "source_200_labels.jsonl": "ca9560b547061ec76dd4b0c17412c919993b81d61fa9e4988aed3e1864d58d55",
+    "source_bindings.json": "ec06f73c23d197e9041e4263c167439c966b60a90f408e0d43988c509cebd966",
+    "templates.json": "668fd6036694158079e2f954261da47e343363b399114f2d6148e4f006c54b31",
+    "test_errors.json": "96084811ba410fd678151088d364366e5f9a665a00be83339e11eeb29e582387"
+  },
+  "source_bindings": {
+    "backend/medicine_knowledge/data/pilot_catalogue.json": "bdd39e9bdcc3330874555213a7d9a6f4c605f4a919d12ba8433c0f491bfb8804",
+    "backend/prescription_drafts/data/safety_profiles.json": "8a5dcc0b7e62d4eb12f11ef04be3cb4599832a6cce3e0a4bf48c9e8fd476057f",
+    "backend/prescription_drafts/engine.py": "2b338797fb63b37b3247422f0c546dda1a508099335c271e92bc8e69d9810407",
+    "backend/prescription_research/dataset.py": "51c5c75bdd10ebfd5990abd790adb1686fc4a4f04aed8e1e2e3fa1ae6d5f88b6",
+    "backend/prescription_research/expansion/changes.json": "dabbf63b92470067612c4c7095f1b0648a2a32ce2197d080b42d8a17c4c56b84",
+    "backend/prescription_research/expansion/knowledge.py": "c36264be492fa5cb7d32c32178830ac4bb9a4630942521d0b174111cc6073e2c",
+    "backend/prescription_research/expansion/policies.json": "5e0ebe3f9623530bf2aaf254d9f2fea81bdc0ac540b37f3b5356f7aff32c6bd9",
+    "backend/prescription_research/random_forest_200/data.py": "3c3dbf81da566a5b7ac41b54dbee273b45c28afff5801b3a582611db51cbb2ac",
+    "backend/prescription_research/rule_forest/__init__.py": "93611f3320e79bc6fd25d82c0d2ef74bad287328f22338acda2f517c03766cec",
+    "backend/prescription_research/rule_forest/criteria.json": "69c1543740728c86990743e3beadd2e3eae6d3d40f0bcc2f3e61ad595532f4ee",
+    "backend/prescription_research/rule_forest/dataset.py": "9437d36abbabc142153044eed35207d650736d640dc6bdb9dc83fa0edd05cc15",
+    "backend/prescription_research/rule_forest/experiment.py": "4d7cb0080ce2ecf1c9f7ce1fa9205dc3d8ea1a8cb5394a068e424bf8f546ad8e"
+  },
+  "version": "selected-rule-imitation-rf-2026-10-20-v1"
+}

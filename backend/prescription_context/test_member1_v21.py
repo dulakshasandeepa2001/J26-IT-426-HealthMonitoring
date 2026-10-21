@@ -229,4 +229,21 @@ class Member1V21Tests(TestCase):
     def test_pending_handoff_does_not_claim_treatment_or_model_coverage(self):
         for condition in HANDOFF_CONDITIONS[2:]:
             result = adapt_member1_v21(self.wire(condition))
-            self.assertTrue(any('not enabled' in issue['reason'] for issue in result['member1']['mapping_issues']))
+            self.assertFalse(any('not enabled' in issue['reason'] for issue in result['member1']['mapping_issues']))
+            self.assertEqual(result['condition_candidates'][0]['code'], condition)
+            self.assertEqual(result['review_status'], 'unconfirmed')
+
+    def test_retry_of_legacy_warning_preserves_the_original_analysis(self):
+        first = self.load('mumps')
+        self.assertEqual(first.status_code, 201, first.data)
+        row = Analysis.objects.get(consultation=self.demo)
+        obsolete = {'field': 'payload.primary_diagnosis.condition_code', 'reason': 'Analysis handoff is supported; medicine rules and the trained prescription model for this condition are not enabled.'}
+        row.payload['member1']['mapping_issues'].append(obsolete)
+        row.save()
+        original = copy.deepcopy(row.payload)
+        self.assertEqual(self.load('mumps').status_code, 200)
+        row.refresh_from_db()
+        self.assertEqual(row.payload, original, 'Historical provenance must not be rewritten by a retry')
+        changed = self.wire('mumps', self.demo)
+        changed['payload']['reported_assessments']['hydration_concern'] = True
+        self.assertEqual(self.deliver(changed).status_code, 409, 'Ignoring one obsolete warning cannot permit changed source facts')
