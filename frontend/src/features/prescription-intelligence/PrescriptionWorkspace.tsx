@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
+import { AlertTriangle, Check, ClipboardCheck, Loader2, Mic, RefreshCw, Stethoscope } from "lucide-react";
 import { usePrescription } from "./usePrescription";
 import { EncounterSelector } from "./EncounterSelector";
 import { PatientContextForm, type PatientHistoryEditorHandle } from "./PatientContextForm";
@@ -134,10 +134,6 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
 
       <SixConditionDraftFlow key={screeningKey} rx={rx} onReviewHistory={reviewHistory} clinicalHost={clinicalHost} />
 
-      <Section title="Evidence and medicine identity" icon={BookOpen}>
-        <p className="text-xs leading-relaxed text-slate-500">Saved drafts retain the patient inputs, original analysis, reviewed catalogue and safety profiles used for screening. Check current medicine identities in the patient form.</p>
-        <Link href="/doctor/medicine-knowledge" className="mt-3 inline-block text-xs font-semibold text-purple-700 underline">Open Medicine Knowledge and safety rule review</Link>
-      </Section>
     </PageFrame>
   );
 }

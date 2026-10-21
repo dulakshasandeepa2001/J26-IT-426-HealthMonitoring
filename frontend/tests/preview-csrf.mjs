@@ -44,6 +44,19 @@ try {
   await assert.rejects(apiRequest('/api/prescription/consultations/fictional/patient-context/', post), /Database unavailable/);
   assert.deepEqual(calls.map((c) => c.path), ['/session/', '/api/prescription/consultations/fictional/patient-context/'], 'Writes retain fresh-token behavior and are not automatically replayed');
 
+  const decision = '/api/prescription/medicine-proposals/fictional/decisions/';
+  const keyedWrite = { method: 'POST', body: JSON.stringify({ request_key: 'fictional-idempotency-key' }) };
+  calls = []; replies = [{ body: { saved: true } }];
+  await apiRequest(decision, keyedWrite, 'reuse');
+  assert.deepEqual(calls.map((c) => c.path), [decision], 'Explicit request-key writes avoid a redundant session lookup');
+  calls = []; replies = [{ status: 403, body: { detail: 'CSRF Failed: token rotated.' } }, { body: { csrfToken: 'new-write-token' } }, { body: { saved: true } }];
+  await apiRequest(decision, keyedWrite, 'reuse');
+  assert.deepEqual(calls.map((c) => c.path), [decision, '/session/', decision]);
+  assert.equal(calls[0].options.body, calls[2].options.body, 'CSRF rotation preserves the request key and entire original body');
+  calls = []; replies = [{ status: 503, body: { detail: 'Database unavailable.' } }];
+  await assert.rejects(apiRequest(decision, keyedWrite, 'reuse'), /Database unavailable/);
+  assert.equal(calls.length, 1, 'An ambiguous write failure never replays automatically');
+
   calls = []; replies = [{ status: 403, body: { detail: 'CSRF Failed: token rotated.' } }, { body: { csrfToken: 'still-invalid' } }, { status: 403, body: { detail: 'CSRF Failed: still invalid.' } }];
   await assert.rejects(apiRequest(preview, post, 'reuse'), (error) => error instanceof ApiError && error.status === 403);
   assert.equal(calls.length, 3, 'A rotated token is refreshed at most once');

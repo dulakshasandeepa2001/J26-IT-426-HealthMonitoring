@@ -45,7 +45,7 @@ export interface ScreeningCandidate {
     trace?: { backend_rule: string; inputs: Record<string, unknown> } }[];
   review_trace?: Record<string, unknown>;
   regimen: ScreeningRegimen | null;
-  product: { strength: string; form: string; route: string; standard_concept: { rxcui: string; name: string } | null; reference_product_identifier?: string } | null;
+  product: { strength: string; form: string; route: string; ingredients: { name: string }[]; standard_concept: { rxcui: string; name: string } | null; reference_product_identifier?: string } | null;
   sources: (EvidenceSource | string)[];
 }
 export interface ScreeningResult {

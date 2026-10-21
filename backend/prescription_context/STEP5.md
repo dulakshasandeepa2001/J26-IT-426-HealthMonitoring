@@ -247,3 +247,6 @@ abstention and independent doctor approval, and fixes redundant encounter select
 opens the A6 prescription automatically after confirmed approval, and displays
 an unsigned stamp using the recorded doctor profile details.
 
+[Step 24](STEP24.md) adds explicit bulk selection of available medicines,
+keeps combination review mandatory, and removes redundant review round trips.
+

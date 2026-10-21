@@ -407,8 +407,9 @@ try {
   await visible(oseltamivirSuggestion.getByText('selected pair extension not in frozen training scope', { exact: true }));
   await pairedMl.getByRole('button', { name: 'Prepare doctor-review draft', exact: true }).click();
   const pairedDoctor = page.getByRole('region', { name: 'Doctor-review prescription draft', exact: true });
-  await pairedDoctor.getByRole('button', { name: 'Edit medicines', exact: true }).click();
-  await pairedDoctor.getByLabel('Select Oseltamivir', { exact: true }).check();
+  await pairedDoctor.getByRole('button', { name: 'Select all compatible medicines', exact: true }).click();
+  assert.equal(await pairedDoctor.getByLabel('Select Oseltamivir', { exact: true }).isChecked(), true, 'An explicit bulk choice can include the screened candidate despite ML abstention');
+  assert.equal(await pairedDoctor.getByRole('checkbox', { name: /^Select / }).count(), 1, 'Duplicate current paracetamol remains unavailable');
   await pairedDoctor.getByLabel('Doctor decision reason', { exact: true }).fill('Independent fictional doctor selection after source-based pair screening and RF limitations review.');
   await pairedDoctor.getByLabel('I reviewed the selected medicines, fixed screened regimens, exclusions and model limitations for this visit.', { exact: true }).check();
   await pairedDoctor.getByRole('button', { name: 'Approve selected medicines', exact: true }).click();

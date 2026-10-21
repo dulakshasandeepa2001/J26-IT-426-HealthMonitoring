@@ -230,3 +230,50 @@ class DoctorReviewTests(TestCase):
         with patch('prescription_review.rf_inference.toy_data.digest', side_effect=altered):
             with self.assertRaisesRegex(ValueError, 'integrity'):
                 model_identity()
+
+    def test_write_response_reuses_only_its_own_locked_validation_and_replay_rechecks(self):
+        from . import services
+        with patch('prescription_review.views.services.current_state', wraps=services.current_state) as state:
+            _, proposal, request = self.proposal()
+            self.assertEqual(state.call_count, 0, 'A new proposal already validated its source inputs and model')
+        with patch('prescription_review.views.services.current_state', wraps=services.current_state) as state:
+            approved, decision_request = self.decision(proposal)
+            self.assertEqual(approved.status_code, 201, approved.data)
+            self.assertEqual(state.call_count, 1, 'Approval must validate once, without repeating it for serialization')
+        with patch('prescription_review.views.services.current_state', wraps=services.current_state) as state:
+            replay = self.client.post(*decision_request, format='json')
+            self.assertEqual(replay.status_code, 200)
+            self.assertEqual(state.call_count, 1, 'Idempotent replay independently checks current freshness')
+        context = Context.objects.get(patient=self.patient)
+        context.save()
+        replay = self.client.post(*decision_request, format='json')
+        self.assertEqual(replay.status_code, 200)
+        self.assertFalse(replay.data['proposal']['current_state']['is_current'])
+        self.assertEqual(DoctorDecision.objects.count(), 1, 'Replay neither duplicates nor re-approves after source changes')
+        proposals = self.client.get(request[0])
+        self.assertFalse(proposals.data[0]['current_state']['is_current'])
+
+    def test_all_available_distinct_purpose_medicines_can_be_explicitly_approved_together(self):
+        _, proposal, _ = self.proposal()
+        ids = ['oseltamivir-75mg-capsule', 'paracetamol-500mg-tablet']
+        response, _ = self.decision(proposal, ids=ids, combination_reviewed=True)
+        self.assertEqual(response.status_code, 201, response.data)
+        slip = self.client.get(f"/api/prescription/prescription-slips/{response.data['decision']['id']}/")
+        self.assertEqual(slip.status_code, 200, slip.data)
+        self.assertEqual([row['medicine_id'] for row in slip.data['medicines']], ids)
+
+    def test_workspace_loads_only_latest_proposal_for_its_own_draft(self):
+        _, proposal, request = self.proposal()
+        second = self.client.post(request[0], dict(request[1], request_key=str(uuid4())), format='json')
+        self.assertEqual(second.status_code, 201, second.data)
+        path = request[0] + '?draft_id=' + proposal['draft_id']
+        from . import services
+        with patch('prescription_review.views.services.current_state', wraps=services.current_state) as state:
+            rows = self.client.get(path)
+            self.assertEqual(state.call_count, 1)
+        self.assertEqual([row['id'] for row in rows.data], [second.data['id']])
+        self.assertEqual(len(self.client.get(request[0]).data), 2, 'Full audit history remains available')
+        self.assertEqual(self.client.get(request[0] + '?draft_id=' + str(uuid4())).data, [])
+        self.assertEqual(self.client.get(request[0] + '?draft_id=invalid').status_code, 400)
+        other = APIClient(); other.force_login(self.fixture.other)
+        self.assertEqual(other.get(path).status_code, 404)

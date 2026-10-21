@@ -7,6 +7,7 @@ import { ClipboardCheck, FlaskConical } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { Section, buttonStyle, controlStyle } from "./PageFrame";
 import { ClinicalRegimen } from "./ClinicalScreeningResult";
+import { compatibleSelection } from "./medicineSelection";
 import type { ScreeningDraft } from "./clinicalScreeningApi";
 import { createMedicineProposal, loadProposals, recordDecision, type MedicineProposal, type DoctorDecision } from "./reviewApi";
 
@@ -39,7 +40,7 @@ export function DoctorReviewFlow({ draft, pendingEdits, onDenied }: { draft: Scr
     const current = ++sequence.current;
     const timer = setTimeout(() => {
       setBusy(true); setError(""); setErrorStage("ml");
-      void loadProposals(draft.consultation_id).then((rows) => {
+      void loadProposals(draft.consultation_id, draft.id).then((rows) => {
         if (current === sequence.current) loadRow(rows.find((row) => row.draft_id === draft.id) ?? null);
       }).catch((failure: unknown) => { if (current === sequence.current) fail(failure); })
         .finally(() => { if (current === sequence.current) setBusy(false); });
@@ -62,7 +63,7 @@ export function DoctorReviewFlow({ draft, pendingEdits, onDenied }: { draft: Scr
     ...(!reviewed ? ["Confirm that you reviewed the selected medicines and screening limitations."] : []),
   ];
   const selectionRequirements = [
-    ...(!ids.length ? ["Select at least one medicine to approve. You can still save an empty selection or reject the proposal."] : []),
+    ...(!ids.length ? ["Tick a medicine below or use Select all compatible medicines before approval. You can still save an empty selection or reject the proposal."] : []),
     ...(ids.length > 1 && !combined ? ["Confirm the independent interaction review for this combination before saving edits or approving."] : []),
   ];
   async function generate() {
@@ -152,6 +153,14 @@ export function DoctorReviewFlow({ draft, pendingEdits, onDenied }: { draft: Scr
         {!usable && <p className="text-amber-900">This review draft is unavailable for decisions because its inputs changed or it is historical. Complete the current screening and regenerate suggestions.</p>}
         <p className="font-bold">Medicines for doctor review</p>
         <fieldset disabled={busy || !!final || !usable} className="space-y-3">
+          <button type="button" className={buttonStyle} disabled={!available.length} onClick={() => {
+            const selection = compatibleSelection(available, ids);
+            setIds(selection.ids); setReviewed(false); setCombined(false); retry.current = null;
+            setNotice(selection.needsIndividualChoice
+              ? "Selected the unambiguous medicines. Choose remaining alternatives individually; medicines sharing an ingredient were not selected together."
+              : `Selected ${selection.ids.length} screened medicine${selection.ids.length === 1 ? "" : "s"}. Review the selection and any combination before approval.`);
+          }}>Select all compatible medicines</button>
+          <p>This selects available medicines with distinct purposes and ingredients. It does not clear interactions. Choose between alternatives individually.</p>
           {editing && <div id="medicine-selection-editor" role="region" aria-label="Edit screened medicine selection" className="space-y-2 rounded-xl border border-purple-200 bg-purple-50 p-3">
             <p className="font-bold">Editing medicine selection — {ids.length} selected</p>
             <p>Use the medicine checkboxes below to include or remove screened candidates.</p>
@@ -161,14 +170,14 @@ export function DoctorReviewFlow({ draft, pendingEdits, onDenied }: { draft: Scr
           {available.map((candidate) => {
             const prediction = proposal.result.ml.predictions.find((row) => row.medicine_id === candidate.medicine_id);
             return <article key={candidate.scope_id} className="space-y-2 rounded-xl border border-slate-200 p-3">
-              <label className="flex items-start gap-2 font-bold"><input type="checkbox" aria-label={`Select ${candidate.generic_name}`} checked={ids.includes(candidate.medicine_id)} disabled={!editing} onChange={(event) => select(candidate.medicine_id, event.target.checked)} />{candidate.generic_name} · {candidate.product?.strength}</label>
+              <label className="flex items-start gap-2 font-bold"><input type="checkbox" aria-label={`Select ${candidate.generic_name}`} checked={ids.includes(candidate.medicine_id)} onChange={(event) => select(candidate.medicine_id, event.target.checked)} />{candidate.generic_name} · {candidate.product?.strength}</label>
               <p>Purpose: {candidate.clinical_role.replaceAll("_", " ")}. ML: {prediction?.label ?? "abstained"} · {prediction?.reason.replaceAll("_", " ")}</p>
               <ClinicalRegimen regimen={candidate.regimen!} />
             </article>;
           })}
           <p>Choose one alternative per purpose/role. Edit medicines changes the selection; dose changes outside the encoded rules require a new reviewed pathway.</p>
           <button type="button" className={buttonStyle} aria-expanded={editing} aria-controls="medicine-selection-editor" onClick={() => { setEditing((old) => !old); setReviewed(false); setNotice(""); }}>{editing ? "Done choosing medicines" : "Edit medicines"}</button>
-          {!editing && !final && <p className="text-slate-600">{ids.length} medicine{ids.length === 1 ? "" : "s"} selected. Use Edit medicines to change this selection.</p>}
+          {!editing && !final && <p className="text-slate-600">{ids.length} medicine{ids.length === 1 ? "" : "s"} selected. Tick the medicine checkboxes to change this selection.</p>}
           <label className="block space-y-1">Doctor decision reason<textarea aria-label="Doctor decision reason" aria-describedby="doctor-reason-help" className={controlStyle} rows={2} minLength={10} maxLength={2000} value={reason} onChange={(event) => { setReason(event.target.value); setReviewed(false); setNotice(""); retry.current = null; }} /></label>
           <p id="doctor-reason-help" className={reasonLength < 10 ? "text-amber-900" : "text-slate-600"}>At least 10 characters required. {reasonLength}/2000 characters. Explain your actual decision and any changes.</p>
           {ids.length > 1 && <label className="flex items-start gap-2"><input type="checkbox" checked={combined} onChange={(event) => { setCombined(event.target.checked); setReviewed(false); }} />I independently reviewed the selected combination, including interactions.</label>}

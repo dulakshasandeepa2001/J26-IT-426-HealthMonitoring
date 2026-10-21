@@ -33,16 +33,16 @@ function checked(row: MedicineProposal, visit: string, draft?: string) {
     || row.result.ml.predictions.some((prediction) => prediction.ml_can_override_rules !== false))) throw new Error("Invalid RF safety boundary. Refresh the saved draft.");
   return row;
 }
-export async function loadProposals(visit: string) {
-  const rows: MedicineProposal[] = await apiRequest(`/api/prescription/consultations/${visit}/medicine-proposals/`);
-  return rows.map((row) => checked(row, visit));
+export async function loadProposals(visit: string, draft: string) {
+  const rows: MedicineProposal[] = await apiRequest(`/api/prescription/consultations/${visit}/medicine-proposals/?draft_id=${encodeURIComponent(draft)}`);
+  return rows.map((row) => checked(row, visit, draft));
 }
 export async function createMedicineProposal(visit: string, draft: string, key: string) {
-  const row: MedicineProposal = await apiRequest(`/api/prescription/consultations/${visit}/medicine-proposals/`, { method: "POST", body: JSON.stringify({ draft_id: draft, request_key: key, synthetic_demo: true }) });
+  const row: MedicineProposal = await apiRequest(`/api/prescription/consultations/${visit}/medicine-proposals/`, { method: "POST", body: JSON.stringify({ draft_id: draft, request_key: key, synthetic_demo: true }) }, "reuse");
   return checked(row, visit, draft);
 }
 export async function recordDecision(proposal: MedicineProposal, data: { action: DoctorDecision["action"]; selected_ids: string[]; reason: string; reviewed: boolean; combination_reviewed: boolean; request_key: string }) {
-  const response: { proposal: MedicineProposal; decision: DoctorDecision } = await apiRequest(`/api/prescription/medicine-proposals/${proposal.id}/decisions/`, { method: "POST", body: JSON.stringify({ ...data, expected_revision: proposal.decisions[0]?.revision ?? 0, expected_proposal_hash: proposal.proposal_hash }) });
+  const response: { proposal: MedicineProposal; decision: DoctorDecision } = await apiRequest(`/api/prescription/medicine-proposals/${proposal.id}/decisions/`, { method: "POST", body: JSON.stringify({ ...data, expected_revision: proposal.decisions[0]?.revision ?? 0, expected_proposal_hash: proposal.proposal_hash }) }, "reuse");
   checked(response.proposal, proposal.consultation_id, proposal.draft_id);
   if (response.proposal.id !== proposal.id || response.proposal.decisions[0]?.id !== response.decision.id
     || response.decision.action !== data.action || JSON.stringify(response.decision.selected_ids) !== JSON.stringify(data.selected_ids)) throw new Error("Decision response does not match this proposal and selection.");
