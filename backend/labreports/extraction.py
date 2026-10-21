@@ -31,27 +31,67 @@ def get_sample_clinical_report(report_title: str = "") -> str:
     """
     title_lower = (report_title or "").lower()
 
-    if "dengue" in title_lower:
+    if "dengue" in title_lower or "thrombocytopenia" in title_lower or "platelet" in title_lower:
         return """
 LANKA HOSPITALS LABORATORY - CLINICAL REPORT
-Patient: Dulaksha       Date: 2026-10-18
+Patient: Patient Test       Date: 2026-10-21
 Test Name: DENGUE VIRUS NS1 ANTIGEN & HEMATOLOGY PANEL
 ---------------------------------------------------------------
 TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
 ---------------------------------------------------------------
 Dengue NS1 Antigen       Positive               Negative
-Platelet Count           112         10^3/uL    150 - 450
-Total WBC Count          3.4         10^3/uL    4.0 - 11.0
-Haemoglobin (Hb)         12.6        g/dL       12.0 - 16.5
-Packed Cell Volume (PCV) 39.5        %          36.0 - 48.0
+Platelet Count           42          10^3/uL    150 - 450
+Total WBC Count          3.2         10^3/uL    4.0 - 11.0
+Haemoglobin (Hb)         14.8        g/dL       12.0 - 16.5
+Neutrophils              45          %          40 - 75
+Lymphocytes              45          %          20 - 45
+Packed Cell Volume (PCV) 47.5        %          36.0 - 48.0
 ---------------------------------------------------------------
 Verified by: Dr. C. Vithanage (Consultant Pathologist)
+        """.strip()
+
+    elif "anemia" in title_lower or "iron" in title_lower or "deficiency" in title_lower:
+        return """
+ASIRI CENTRAL HOSPITAL LAB - CLINICAL HEMATOLOGY REPORT
+Patient: Patient Test       Date: 2026-10-21
+Test Name: FULL BLOOD COUNT (FBC) - IRON DEFICIENCY ANEMIA
+---------------------------------------------------------------
+TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
+---------------------------------------------------------------
+Haemoglobin (Hb)         6.5         g/dL       12.0 - 17.5
+Packed Cell Volume (PCV) 21.0        %          36.0 - 50.0
+Total WBC Count          6.2         10^3/uL    4.0 - 11.0
+Platelet Count           380         10^3/uL    150 - 450
+Neutrophils              56          %          40 - 75
+Lymphocytes              36          %          20 - 45
+Red Blood Cells (RBC)    3.2         10^6/uL    4.0 - 5.5
+---------------------------------------------------------------
+Verified by: Dr. N. Senanayake (Consultant Pathologist)
+        """.strip()
+
+    elif "infection" in title_lower or "leukocytosis" in title_lower or "bacterial" in title_lower:
+        return """
+DURDANS HOSPITAL LABORATORY - INFECTION SCREENING PANEL
+Patient: Patient Test       Date: 2026-10-21
+Test Name: FULL BLOOD COUNT (FBC) - ACUTE BACTERIAL INFECTION
+---------------------------------------------------------------
+TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
+---------------------------------------------------------------
+Total WBC Count          19.5        10^3/uL    4.0 - 11.0
+Neutrophils              82          %          40 - 75
+Lymphocytes              12          %          20 - 45
+Platelet Count           310         10^3/uL    150 - 450
+Haemoglobin (Hb)         13.2        g/dL       12.0 - 17.5
+Packed Cell Volume (PCV) 40.0        %          36.0 - 50.0
+C-Reactive Protein (CRP) 24.5        mg/L       < 5.0
+---------------------------------------------------------------
+Verified by: Dr. K. Wickramasinghe (Consultant Microbiologist)
         """.strip()
 
     elif "lipid" in title_lower or "cholesterol" in title_lower:
         return """
 ASIRI HEALTH HOSPITAL LAB - LIPID PROFILE REPORT
-Patient: Dulaksha       Date: 2026-10-18
+Patient: Patient Test       Date: 2026-10-21
 Test Name: LIPID PROFILE & SERUM GLUCOSE
 ---------------------------------------------------------------
 TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
@@ -65,39 +105,41 @@ LDL Cholesterol          148         mg/dL      60 - 130
 Verified by: Dr. N. Senanayake (Consultant Biochemist)
         """.strip()
 
-    elif "influenza" in title_lower or "flu" in title_lower or "viral" in title_lower:
+    elif "normal" in title_lower or "healthy" in title_lower or "routine" in title_lower:
         return """
-NATIONAL HEALTH LABORATORY - VIRAL RESPIRATORY PANEL
-Patient: Dulaksha       Date: 2026-10-18
-Test Name: INFLUENZA A/B PCR & ACUTE INFLAMMATORY MARKERS
+NAWALOKA HOSPITAL - ROUTINE HEALTH CHECK LABORATORY
+Patient: Patient Test       Date: 2026-10-21
+Test Name: FULL BLOOD COUNT (FBC) - HEALTHY NORMAL BASELINE
 ---------------------------------------------------------------
 TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
 ---------------------------------------------------------------
-Influenza A PCR          Positive               Negative
-C-Reactive Protein (CRP) 18.5        mg/L       < 5.0
-Total WBC Count          13.4        10^3/uL    4.0 - 11.0
-Haemoglobin (Hb)         12.1        g/dL       12.0 - 16.5
-Platelet Count           195         10^3/uL    150 - 450
+Haemoglobin (Hb)         14.5        g/dL       12.0 - 17.5
+Total WBC Count          6.8         10^3/uL    4.0 - 11.0
+Platelet Count           260         10^3/uL    150 - 450
+Neutrophils              58          %          40 - 75
+Lymphocytes              34          %          20 - 45
+Packed Cell Volume (PCV) 42.0        %          36.0 - 50.0
+C-Reactive Protein (CRP) 1.2         mg/L       < 5.0
 ---------------------------------------------------------------
-Verified by: Dr. M. Jayasinghe (Virologist)
+Verified by: Dr. S. Alwis (Consultant Pathologist)
         """.strip()
 
     else:
         # Default Full Blood Count (FBC / CBC)
         return """
 LANKA HOSPITALS LABORATORY - CLINICAL REPORT
-Patient: Dulaksha       Date: 2026-10-18
+Patient: Patient Test       Date: 2026-10-21
 Test Name: FULL BLOOD COUNT (FBC / CBC)
 ---------------------------------------------------------------
 TEST PARAMETER           RESULT      UNITS      REFERENCE INTERVAL
 ---------------------------------------------------------------
-Haemoglobin (Hb)         11.2        g/dL       12.0 - 17.5
-Total WBC Count          12.8        10^3/uL    4.0 - 11.0
-Platelet Count           135         10^3/uL    150 - 450
-Neutrophils              78          %          40 - 75
-Lymphocytes              18          %          20 - 45
-Packed Cell Volume (PCV) 34.5        %          36.0 - 50.0
-C-Reactive Protein (CRP) 14.2        mg/L       < 5.0
+Haemoglobin (Hb)         14.2        g/dL       12.0 - 17.5
+Total WBC Count          7.1         10^3/uL    4.0 - 11.0
+Platelet Count           245         10^3/uL    150 - 450
+Neutrophils              55          %          40 - 75
+Lymphocytes              35          %          20 - 45
+Packed Cell Volume (PCV) 41.5        %          36.0 - 50.0
+C-Reactive Protein (CRP) 2.4         mg/L       < 5.0
 ---------------------------------------------------------------
 Verified by: Dr. C. Vithanage (Consultant Pathologist)
         """.strip()

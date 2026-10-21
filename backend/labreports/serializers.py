@@ -56,6 +56,7 @@ class LabReportSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source='patient.username', read_only=True)
     reviewed_by_name = serializers.CharField(source='reviewed_by.username', read_only=True)
     file_url = serializers.SerializerMethodField()
+    file_name = serializers.SerializerMethodField()
 
     class Meta:
         model = LabReport
@@ -69,6 +70,7 @@ class LabReportSerializer(serializers.ModelSerializer):
             'test_date',
             'report_file',
             'file_url',
+            'file_name',
             'file_type',
             'image_quality_status',
             'ocr_raw_text',
@@ -93,7 +95,16 @@ class LabReportSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.report_file.url)
-            return obj.report_file.url
+            url = obj.report_file.url
+            if url.startswith('/'):
+                return f"http://127.0.0.1:8000{url}"
+            return url
+        return None
+
+    def get_file_name(self, obj):
+        if obj.report_file:
+            import os
+            return os.path.basename(obj.report_file.name)
         return None
 
 

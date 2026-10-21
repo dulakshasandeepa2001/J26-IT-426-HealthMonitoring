@@ -9,6 +9,7 @@ class User(AbstractUser):
     ROLE_CHOICES = (
         ('doctor', 'Doctor'),
         ('patient', 'Patient'),
+        ('lab', 'Laboratory'),
     )
 
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -19,6 +20,9 @@ class User(AbstractUser):
     university = models.CharField(max_length=100, blank=True, null=True)
     working_hospital = models.CharField(max_length=150, blank=True, null=True)
     doctorID = models.CharField(max_length=50, blank=True, null=True)
+    lab_name = models.CharField(max_length=150, blank=True, null=True)
+    lab_address = models.CharField(max_length=255, blank=True, null=True)
+    license_id = models.CharField(max_length=100, blank=True, null=True)
     is_approved = models.BooleanField(default=False)
 
     def __str__(self):

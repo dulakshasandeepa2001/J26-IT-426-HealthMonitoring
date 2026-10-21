@@ -332,7 +332,20 @@ export default function DoctorLabReviewPage() {
       setActionLoading(true);
       setStatusMessage(null);
 
+      let reviewerId: number | undefined = undefined;
+      let reviewerName: string | undefined = undefined;
+      try {
+        const storedUser = localStorage.getItem("meditrack_user");
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          reviewerId = u.id;
+          reviewerName = u.username;
+        }
+      } catch (e) {}
+
       const payload = {
+        reviewer_id: reviewerId,
+        reviewer_name: reviewerName,
         approval_status: decision,
         physician_notes: physicianNotes,
         dispatch_to_patient: decision === "approved",
@@ -501,40 +514,41 @@ export default function DoctorLabReviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Top Navigation */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-30 px-6 py-3.5 flex items-center justify-between shadow-xs">
+        <div className="flex items-center gap-3">
           <Link
             href="/doctor/dashboard"
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+              <span className="px-2 py-0.5 text-[10px] font-black tracking-wider uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                 Component 4
               </span>
-              <h1 className="text-xl font-bold text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-400" />
-                Physician Lab Report & Verification Portal
+              <h1 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <span>Physician Lab Report & Verification Portal</span>
               </h1>
             </div>
-            <p className="text-xs text-slate-400">
-              OCR Layout Extraction • LOINC Normalization • Physician-in-the-Loop Review Gate (FR11)
+            <p className="text-xs text-slate-500 font-medium">
+              OCR Layout Extraction &bull; LOINC Normalization &bull; Physician-in-the-Loop Review Gate (FR11)
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={fetchModelMetrics}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/30 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition shadow-xs"
             title="View 100% Real Kaggle hospital dataset evaluation metrics, accuracy, and confusion matrix"
           >
-            <Brain className="w-4 h-4 text-emerald-400" />
-            AI Model (100% Real Kaggle Data) & Metrics
+            <Brain className="w-4 h-4 text-emerald-600" />
+            <span className="hidden xl:inline">AI Model (Kaggle Data) & Metrics</span>
+            <span className="xl:hidden">Model Metrics</span>
           </button>
 
           <button
@@ -542,35 +556,35 @@ export default function DoctorLabReviewPage() {
               setShowSimulatorModal(true);
               if (!simDiagnosis) handleRunSimulator();
             }}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 border border-purple-500/30 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition shadow-xs"
             title="Test hypothetical CBC parameters in real-time"
           >
-            <Sliders className="w-4 h-4 text-purple-400" />
-            🧪 AI Simulator
+            <Sliders className="w-4 h-4 text-purple-600" />
+            <span>AI Simulator</span>
           </button>
 
           <Link
             href="/disease-intelligence"
-            className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 border border-indigo-500/30 transition"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200 transition shadow-xs"
           >
-            <Activity className="w-4 h-4 text-indigo-400" />
-            Disease Intelligence Dashboard
+            <Activity className="w-4 h-4 text-indigo-600" />
+            <span className="hidden md:inline">Disease Intelligence</span>
           </Link>
 
           <button
             onClick={() => setShowRequestModal(true)}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition shadow-xs"
           >
-            <Plus className="w-4 h-4 text-emerald-400" />
-            Order Lab Requisition
+            <Plus className="w-4 h-4 text-emerald-600" />
+            <span className="hidden md:inline">Order Requisition</span>
           </button>
 
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
           >
             <Upload className="w-4 h-4" />
-            Upload Scanned Report
+            <span>Upload Report</span>
           </button>
         </div>
       </header>
@@ -578,28 +592,28 @@ export default function DoctorLabReviewPage() {
       {/* Main Workspace: 2-Column Side-by-Side Review */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Report List */}
-        <aside className="w-80 border-r border-slate-800 bg-slate-900/40 flex flex-col">
-          <div className="p-4 border-b border-slate-800 space-y-3">
+        <aside className="w-80 border-r border-slate-200 bg-white flex flex-col">
+          <div className="p-4 border-b border-slate-100 space-y-3">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search patient or test..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-800/80 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition"
               />
             </div>
 
-            <div className="flex gap-1">
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
               {["all", "draft", "approved", "rejected"].map((st) => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`flex-1 py-1 text-[11px] font-medium rounded capitalize transition ${
+                  className={`flex-1 py-1 text-[11px] font-bold rounded-lg capitalize transition cursor-pointer ${
                     statusFilter === st
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-800/60 text-slate-400 hover:bg-slate-800"
+                      ? "bg-white text-indigo-700 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {st}
@@ -608,14 +622,14 @@ export default function DoctorLabReviewPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {loading ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
-                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-400" />
+              <div className="p-8 text-center text-slate-400 text-xs">
+                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-600" />
                 Loading reports...
               </div>
             ) : filteredReports.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
+              <div className="p-8 text-center text-slate-400 text-xs font-medium">
                 No reports found matching filters.
               </div>
             ) : (
@@ -627,8 +641,8 @@ export default function DoctorLabReviewPage() {
                     onClick={() => handleSelectReport(r)}
                     className={`w-full text-left p-3.5 transition cursor-pointer flex flex-col gap-1.5 ${
                       isSelected
-                        ? "bg-indigo-950/40 border-l-4 border-indigo-500"
-                        : "hover:bg-slate-800/40"
+                        ? "bg-indigo-50/70 border-l-4 border-indigo-600 text-slate-900 shadow-xs"
+                        : "hover:bg-slate-50 text-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -688,25 +702,25 @@ export default function DoctorLabReviewPage() {
         {selectedReport ? (
           <main className="flex-1 flex overflow-hidden">
             {/* Left Sub-panel: Scanned Document & Quality Status */}
-            <div className="w-1/2 border-r border-slate-800 flex flex-col bg-slate-900/20">
-              <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+            <div className="w-1/2 border-r border-slate-200 flex flex-col bg-slate-50/50">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-200">
+                  <Eye className="w-4 h-4 text-indigo-600" />
+                  <span className="text-xs font-bold text-slate-900">
                     Source Document / Scanned Evidence
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-[11px] px-2 py-0.5 rounded font-medium ${
+                    className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
                       selectedReport.image_quality_status === "pass"
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-amber-50 text-amber-800 border border-amber-200"
                     }`}
                   >
                     Quality: {selectedReport.image_quality_status.toUpperCase()}
                   </span>
-                  <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono font-semibold border border-slate-200">
                     Score: {Math.round(selectedReport.overall_confidence * 100)}%
                   </span>
                 </div>
@@ -722,86 +736,36 @@ export default function DoctorLabReviewPage() {
                       selectedReport.file_url?.toLowerCase().includes(".pdf");
 
                     return isPdf ? (
-                      <div className="border border-slate-800 rounded-2xl p-6 bg-slate-900/60 shadow-lg flex flex-col items-center justify-center text-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shadow-inner">
+                      <div className="border border-slate-200 rounded-2xl p-6 bg-white shadow-xs flex flex-col items-center justify-center text-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shadow-xs">
                           <FileText className="w-7 h-7" />
                         </div>
-
-                        <div className="space-y-1 max-w-sm">
-                          <h4 className="text-sm font-bold text-white flex items-center justify-center gap-2">
-                            {selectedReport.report_title}
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30 uppercase">
-                              PDF Report
-                            </span>
-                          </h4>
-                          <p className="text-xs text-slate-400">
-                            {selectedReport.lab_name} &bull; {selectedReport.test_date}
-                          </p>
-                          <p className="text-[11px] text-slate-500 pt-1">
-                            Uploaded medical PDF document ready for review.
-                          </p>
+                        <div>
+                          <div className="text-xs font-bold text-slate-900">PDF Laboratory Document</div>
+                          <div className="text-[11px] text-slate-500 font-medium">Scanned Diagnostic Archive</div>
                         </div>
-
-                        <div className="flex items-center gap-3 pt-2">
-                          <a
-                            href={selectedReport.file_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition hover:scale-105 active:scale-95"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Open in New Tab
-                          </a>
-                          <a
-                            href={selectedReport.file_url}
-                            download
-                            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95"
-                          >
-                            <Download className="w-4 h-4 text-slate-400" />
-                            Download
-                          </a>
-                        </div>
+                        <a
+                          href={selectedReport.file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2 text-xs font-bold rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition shadow-xs"
+                        >
+                          Open PDF in New Tab
+                        </a>
                       </div>
                     ) : (
-                      <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900 flex flex-col shadow-lg">
-                        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-800/90 border-b border-slate-700/80 text-xs">
-                          <span className="flex items-center gap-1.5 text-emerald-300 font-semibold text-[11px]">
-                            <Eye className="w-4 h-4 text-emerald-400" />
-                            Scanned Image Document
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={selectedReport.file_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Open in New Tab
-                            </a>
-                            <a
-                              href={selectedReport.file_url}
-                              download
-                              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded bg-slate-700 hover:bg-slate-600 text-slate-200 transition"
-                            >
-                              <Download className="w-3 h-3" />
-                              Download
-                            </a>
-                          </div>
-                        </div>
-                        <div className="p-3 bg-slate-950 flex items-center justify-center">
-                          <img
-                            src={selectedReport.file_url}
-                            alt="Lab Report"
-                            className="w-full object-contain max-h-[460px] rounded"
-                          />
-                        </div>
+                      <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+                        <img
+                          src={selectedReport.file_url}
+                          alt="Scanned Lab Report"
+                          className="w-full object-contain max-h-[500px]"
+                        />
                       </div>
                     );
                   })()
                 ) : (
-                  <div className="border border-dashed border-slate-800 rounded-xl p-8 text-center text-slate-500 text-xs">
-                    <FileText className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+                  <div className="border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs bg-white">
+                    <FileText className="w-10 h-10 mx-auto mb-2 text-slate-300" />
                     No physical scan file uploaded for this report.
                   </div>
                 )}
@@ -899,39 +863,39 @@ export default function DoctorLabReviewPage() {
                   </div>
 
                   {aiLoading ? (
-                    <div className="py-6 flex flex-col items-center justify-center text-slate-400 text-xs gap-2">
-                      <RefreshCw className="w-5 h-5 animate-spin text-indigo-400" />
+                    <div className="py-6 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
+                      <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
                       <span>Computing ensemble diagnostic prediction...</span>
                     </div>
                   ) : aiDiagnosis ? (
                     <div className="pt-3 space-y-3">
                       {/* Prediction Result Banner */}
-                      <div className="flex items-center justify-between bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                      <div className="flex items-center justify-between bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100">
                         <div>
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold block tracking-wider">
+                          <span className="text-[10px] text-slate-500 uppercase font-bold block tracking-wider">
                             Predicted Condition
                           </span>
-                          <span className="text-sm font-bold text-white flex items-center gap-2 mt-0.5">
+                          <span className="text-base font-black text-slate-900 flex items-center gap-2 mt-0.5">
                             {aiDiagnosis.predicted_condition}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <span className="text-[10px] text-slate-400 uppercase font-semibold block">Confidence</span>
-                            <span className="text-xs font-mono font-bold text-emerald-400">
+                            <span className="text-[10px] text-slate-500 uppercase font-bold block">Confidence</span>
+                            <span className="text-xs font-mono font-black text-emerald-700">
                               {aiDiagnosis.confidence_percentage}
                             </span>
                           </div>
                           <span
-                            className={`text-xs px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider ${
+                            className={`text-xs px-3 py-1 rounded-xl font-black uppercase tracking-wider ${
                               aiDiagnosis.risk_level === "CRITICAL"
-                                ? "bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse"
+                                ? "bg-rose-100 text-rose-800 border border-rose-300 animate-pulse"
                                 : aiDiagnosis.risk_level === "HIGH"
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                                ? "bg-amber-100 text-amber-800 border border-amber-300"
                                 : aiDiagnosis.risk_level === "MODERATE"
-                                ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/40"
-                                : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                                : "bg-emerald-100 text-emerald-800 border border-emerald-300"
                             }`}
                           >
                             {aiDiagnosis.risk_level} RISK
@@ -941,17 +905,17 @@ export default function DoctorLabReviewPage() {
 
                       {/* Key Biomarkers */}
                       {aiDiagnosis.key_biomarkers && aiDiagnosis.key_biomarkers.length > 0 && (
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                             Key Clinical Biomarkers Detected:
                           </span>
                           <div className="flex flex-wrap gap-1.5">
                             {aiDiagnosis.key_biomarkers.map((b: string, i: number) => (
                               <span
                                 key={i}
-                                className="text-[11px] px-2.5 py-1 rounded-md bg-slate-800/90 text-slate-200 border border-slate-700/80 flex items-center gap-1"
+                                className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 flex items-center gap-1"
                               >
-                                • {b}
+                                &bull; {b}
                               </span>
                             ))}
                           </div>
@@ -960,21 +924,21 @@ export default function DoctorLabReviewPage() {
 
                       {/* Clinical Protocol & Autofill button */}
                       {aiDiagnosis.clinical_recommendations && aiDiagnosis.clinical_recommendations.length > 0 && (
-                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-2">
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
-                              <Stethoscope className="w-3.5 h-3.5 text-indigo-400" />
-                              Recommended Clinical Next Steps (WHO Guidelines)
+                            <span className="text-[11px] font-black text-indigo-900 flex items-center gap-1.5">
+                              <Stethoscope className="w-4 h-4 text-indigo-600" />
+                              <span>Recommended Clinical Next Steps (WHO Guidelines)</span>
                             </span>
                             <button
                               type="button"
                               onClick={() => handleAutoFillNotes(aiDiagnosis.clinical_recommendations, aiDiagnosis.predicted_condition)}
-                              className="text-[10px] px-2 py-0.5 rounded bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 font-semibold transition"
+                              className="text-[10px] px-2.5 py-1 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold transition cursor-pointer"
                             >
                               + Apply to Doctor Notes
                             </button>
                           </div>
-                          <ul className="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
+                          <ul className="text-[11px] text-slate-700 space-y-1 list-disc list-inside font-medium leading-relaxed">
                             {aiDiagnosis.clinical_recommendations.map((rec: string, i: number) => (
                               <li key={i}>{rec}</li>
                             ))}
@@ -983,7 +947,7 @@ export default function DoctorLabReviewPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="py-4 text-center text-xs text-slate-500">
+                    <div className="py-4 text-center text-xs text-slate-400 font-medium">
                       Click Re-Evaluate to compute AI diagnostic prediction on this lab report.
                     </div>
                   )}
@@ -994,57 +958,57 @@ export default function DoctorLabReviewPage() {
                   <span>{editedObservations.length} Observations</span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {editedObservations.map((obs, idx) => (
                     <div
                       key={obs.observation_id || idx}
-                      className="p-3 rounded-xl border border-slate-800 bg-slate-900/50 flex flex-col gap-2 hover:border-slate-700 transition"
+                      className="p-3.5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col gap-2 hover:border-slate-300 transition"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-xs font-bold text-white flex items-center gap-2">
-                            {obs.test_original_name}
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-800 text-slate-400 rounded">
+                          <div className="text-xs font-black text-slate-900 flex items-center gap-2">
+                            <span>{obs.test_original_name}</span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 text-slate-600 font-bold rounded-lg border border-slate-200">
                               LOINC {obs.test_standard_code}
                             </span>
                           </div>
-                          <div className="text-[10px] text-slate-400">{obs.standard_name}</div>
+                          <div className="text-[10px] text-slate-500 font-medium">{obs.standard_name}</div>
                         </div>
                         {getFlagBadge(obs.abnormal_flag)}
                       </div>
 
                       {/* Result & Reference Range Row */}
-                      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/60 items-center">
+                      <div className="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 items-center">
                         <div>
-                          <label className="text-[10px] text-slate-500 font-semibold block">Result Value</label>
+                          <label className="text-[10px] text-slate-500 font-bold block mb-1">Result Value</label>
                           <input
                             type="text"
                             value={obs.result_value}
                             onChange={(e) => handleObservationChange(idx, "result_value", e.target.value)}
-                            className="w-full text-xs font-semibold px-2 py-1 rounded bg-slate-800 border border-slate-700 text-emerald-400 focus:outline-none focus:border-indigo-500"
+                            className="w-full text-xs font-bold px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-emerald-700 focus:bg-white focus:outline-none focus:border-indigo-500"
                           />
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-semibold block">Unit</label>
+                          <label className="text-[10px] text-slate-500 font-bold block mb-1">Unit</label>
                           <input
                             type="text"
                             value={obs.unit || ""}
                             onChange={(e) => handleObservationChange(idx, "unit", e.target.value)}
-                            className="w-full text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 focus:outline-none focus:border-indigo-500"
+                            className="w-full text-xs font-medium px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500"
                           />
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-semibold block">Ref Interval</label>
-                          <span className="text-xs text-slate-300 block py-1 font-mono">
+                          <label className="text-[10px] text-slate-500 font-bold block mb-1">Ref Interval</label>
+                          <span className="text-xs text-slate-700 block py-1 font-mono font-semibold">
                             {obs.reference_range_raw || "Standard"}
                           </span>
                         </div>
                       </div>
 
                       {obs.is_manually_edited && (
-                        <div className="text-[10px] text-amber-400 flex items-center gap-1">
+                        <div className="text-[10px] text-amber-600 font-semibold flex items-center gap-1 pt-1">
                           <Edit3 className="w-3 h-3" /> Value modified by physician
                         </div>
                       )}
@@ -1054,25 +1018,25 @@ export default function DoctorLabReviewPage() {
 
                 {/* Physician Clinical Advice */}
                 <div className="pt-2">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
-                    <Stethoscope className="w-4 h-4 text-indigo-400" />
-                    Physician Clinical Advice & Notes
+                  <label className="text-xs font-black text-slate-800 flex items-center gap-1.5 mb-1.5">
+                    <Stethoscope className="w-4 h-4 text-indigo-600" />
+                    <span>Physician Clinical Advice & Notes</span>
                   </label>
                   <textarea
                     rows={3}
                     value={physicianNotes}
                     onChange={(e) => setPhysicianNotes(e.target.value)}
                     placeholder="Enter clinical interpretation, follow-up instructions, or medication advice for the patient..."
-                    className="w-full text-xs p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 leading-relaxed"
+                    className="w-full text-xs p-3.5 rounded-2xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 leading-relaxed shadow-xs"
                   />
                 </div>
               </div>
 
               {/* Action Buttons Bar */}
-              <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
-                <div className="text-xs text-slate-500">
+              <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between">
+                <div className="text-xs text-slate-500 font-medium">
                   Status:{" "}
-                  <span className="text-slate-300 font-bold uppercase">
+                  <span className="text-slate-900 font-black uppercase">
                     {selectedReport.approval_status}
                   </span>
                 </div>
@@ -1081,50 +1045,52 @@ export default function DoctorLabReviewPage() {
                   <button
                     disabled={actionLoading || deletingId === selectedReport.report_id}
                     onClick={() => confirmDeleteReport(selectedReport)}
-                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 border border-rose-800/60 transition flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-3.5 py-2 text-xs font-bold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                     title="Permanently delete this report and extracted data"
                   >
                     {deletingId === selectedReport.report_id ? (
-                      <RefreshCw className="w-4 h-4 animate-spin text-rose-400" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-500" />
                     ) : (
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     )}
-                    Delete Report
+                    <span>Delete</span>
                   </button>
 
                   <button
                     disabled={actionLoading}
                     onClick={() => handleReviewAction("rejected")}
-                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-3.5 py-2 text-xs font-bold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                   >
-                    <XCircle className="w-4 h-4" />
-                    Reject Report
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Reject</span>
                   </button>
 
                   <button
                     disabled={actionLoading}
                     onClick={() => handleReviewAction("edited")}
-                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-3.5 py-2 text-xs font-bold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                   >
-                    <Edit3 className="w-4 h-4 text-amber-400" />
-                    Save Edits Only
+                    <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Save Edits</span>
                   </button>
 
                   <button
                     disabled={actionLoading}
                     onClick={() => handleReviewAction("approved")}
-                    className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-black rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    Approve & Dispatch to Patient
+                    <span>Approve & Dispatch</span>
                   </button>
                 </div>
               </div>
             </div>
           </main>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
-            Select a lab report from the sidebar to begin review.
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-sm bg-slate-50 gap-2">
+            <FileText className="w-10 h-10 text-slate-300" />
+            <span className="font-bold text-slate-600">No report selected</span>
+            <span className="text-xs text-slate-400">Select a lab report from the sidebar to begin physician review.</span>
           </div>
         )}
       </div>

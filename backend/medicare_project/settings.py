@@ -88,7 +88,8 @@ DATABASES = {
         'USER': env_config('SUPABASE_DB_USER', default='postgres.wixgbvdcwteghicynwvz'),
         'PASSWORD': env_config('SUPABASE_DB_PASSWORD', default='Ddugiborn@2001'),
         'HOST': env_config('SUPABASE_DB_HOST', default='aws-1-ap-southeast-2.pooler.supabase.com'),
-        'PORT': env_config('SUPABASE_DB_PORT', default='5432'),
+        'PORT': env_config('SUPABASE_DB_PORT', default='6543'),
+        'CONN_MAX_AGE': 0,
         'OPTIONS': {
             'sslmode': 'require',
         },
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # INTERNATIONALIZATION
 # -----------------------------------------
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Colombo'
 USE_I18N = True
 USE_TZ = True
 

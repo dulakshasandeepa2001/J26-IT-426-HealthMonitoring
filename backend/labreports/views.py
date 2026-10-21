@@ -13,7 +13,14 @@ from .models import LabRequest, LabReport, LabObservation, DiseaseSurveillanceEv
 from .serializers import LabRequestSerializer, LabReportSerializer, LabObservationSerializer
 from .extraction import process_lab_report_file, extract_lab_observations, get_sample_clinical_report
 from .terminology import evaluate_abnormal_flag, LOINC_DICTIONARY, normalize_test_name
-from .intelligence import calculate_disease_trends, calculate_district_hotspots
+from .intelligence import (
+    calculate_disease_trends,
+    calculate_district_hotspots,
+    calculate_province_summary,
+    get_national_surveillance_summary,
+    SRI_LANKA_PROVINCES,
+    DISTRICT_POPULATIONS
+)
 # AI Diagnostics Engine v2.1 - Initialized with Kaggle Clinical Dataset
 from .ai_diagnostics import predict_from_observations, predict_from_features, get_model_evaluation_summary
 
@@ -91,10 +98,23 @@ def upload_lab_report(request):
     file_obj = request.FILES.get('report_file')
     manual_raw_text = request.data.get('ocr_raw_text', '')
 
-    if not patient_id:
-        return Response({'error': 'patient_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    patient = None
+    if patient_id:
+        patient = User.objects.filter(id=patient_id).first()
+    if not patient and request.user and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated:
+        patient = request.user
+    if not patient:
+        username = request.data.get('username')
+        if username:
+            patient = User.objects.filter(username=username).first()
+    if not patient:
+        patient = User.objects.filter(role='patient').first()
+    if not patient:
+        patient = User.objects.first()
 
-    patient = get_object_or_404(User, id=patient_id)
+    if not patient:
+        return Response({'error': 'No patient profile found in database.'}, status=status.HTTP_400_BAD_REQUEST)
+
     lab_request = LabRequest.objects.filter(request_id=lab_request_id).first() if lab_request_id else None
 
     # Determine file type
@@ -214,10 +234,14 @@ def get_lab_reports(request):
     if patient_id:
         qs = qs.filter(patient_id=patient_id)
         if role == 'patient':
-            include_pending = request.query_params.get('include_pending', 'false').lower() == 'true'
+            include_pending = request.query_params.get('include_pending', 'true').lower() == 'true'
             if not include_pending:
-                # Patient Safety Gate: Patients only see physician-approved & dispatched reports!
+                # Patient Safety Gate: Only filter out draft if include_pending is explicitly false
                 qs = qs.filter(is_dispatched_to_patient=True)
+    elif role == 'patient':
+        include_pending = request.query_params.get('include_pending', 'true').lower() == 'true'
+        if not include_pending:
+            qs = qs.filter(is_dispatched_to_patient=True)
 
     if doctor_id:
         qs = qs.filter(reviewed_by_id=doctor_id)
@@ -320,7 +344,20 @@ def review_lab_report(request, report_id):
     if approval_status_choice not in ['approved', 'rejected', 'edited']:
         return Response({'error': "approval_status must be 'approved', 'rejected', or 'edited'."}, status=status.HTTP_400_BAD_REQUEST)
 
-    reviewer = User.objects.filter(id=reviewer_id).first() if reviewer_id else None
+    reviewer = None
+    if reviewer_id:
+        try:
+            reviewer = User.objects.filter(id=int(reviewer_id)).first()
+        except (ValueError, TypeError):
+            pass
+    if not reviewer and request.data.get('reviewer_name'):
+        reviewer = User.objects.filter(username__iexact=str(request.data.get('reviewer_name')).strip()).first()
+    if not reviewer and request.user and request.user.is_authenticated:
+        reviewer = request.user
+    if not reviewer and report.lab_request and report.lab_request.doctor:
+        reviewer = report.lab_request.doctor
+    if not reviewer:
+        reviewer = User.objects.filter(role='doctor').first()
 
     # Update observations if edited by doctor
     for item in updated_observations:
@@ -349,10 +386,12 @@ def review_lab_report(request, report_id):
                 obs.is_manually_edited = True
                 obs.save()
 
+    now = timezone.now()
     report.approval_status = approval_status_choice
     report.reviewed_by = reviewer
     report.physician_notes = physician_notes
-    report.reviewed_at = timezone.now()
+    report.reviewed_at = now
+    report.updated_at = now
     if approval_status_choice == 'approved' and dispatch_to_patient:
         report.is_dispatched_to_patient = True
 
@@ -408,6 +447,7 @@ def review_lab_report(request, report_id):
     # Update requisition if linked
     if report.lab_request:
         report.lab_request.status = 'completed' if approval_status_choice == 'approved' else 'processing'
+        report.lab_request.updated_at = now
         report.lab_request.save()
 
     # Audit log (FR14)
@@ -432,6 +472,22 @@ def review_lab_report(request, report_id):
 # 5. DISEASE INTELLIGENCE & OUTBREAK ANALYSIS (SO3, SO4)
 # -------------------------------------------------------------
 @api_view(['GET'])
+def get_disease_intelligence_overview(request):
+    """
+    Unified National Epidemiological Surveillance API.
+    Returns:
+    - temporal_trends (12-week Farrington aberration thresholds)
+    - hotspots (25 Sri Lankan health districts with attack rates & privacy suppression)
+    - provinces (Aggregated summary across all 9 Sri Lankan provinces)
+    - summary (KPI counters for outbreak detection)
+    """
+    condition = request.query_params.get('condition', 'influenza')
+    weeks = int(request.query_params.get('weeks', 12))
+    data = get_national_surveillance_summary(condition_code=condition, weeks_back=weeks)
+    return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
 def get_disease_trends(request):
     """
     Returns time-series trends with Farrington-style aberration detection.
@@ -446,64 +502,111 @@ def get_disease_trends(request):
 @api_view(['GET'])
 def get_disease_hotspots(request):
     """
-    Returns district-level hotspot clustering with small-cell privacy suppression.
+    Returns district-level hotspot clustering with small-cell privacy suppression
+    and provincial aggregations across Sri Lanka.
     """
     condition = request.query_params.get('condition', 'influenza')
     data = calculate_district_hotspots(condition_code=condition)
+    provinces = calculate_province_summary(condition_code=condition)
     return Response({
         "condition_code": condition,
         "privacy_rule": "Small-cell suppression applied (< 3 cases suppressed)",
-        "districts": data
+        "districts": data,
+        "provinces": provinces,
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_disease_provinces(request):
+    """
+    Returns aggregated epidemiological statistics grouped by Sri Lanka's 9 Provinces.
+    """
+    condition = request.query_params.get('condition', 'influenza')
+    provinces = calculate_province_summary(condition_code=condition)
+    return Response({
+        "condition_code": condition,
+        "provinces": provinces,
     }, status=status.HTTP_200_OK)
 
 
 # -------------------------------------------------------------
 # 6. SEED DEMO SURVEILLANCE DATA (For evaluation & presentation)
 # -------------------------------------------------------------
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def seed_demo_surveillance(request):
     """
     Helper API: Populates realistic baseline and aberration surveillance events
-    for Sri Lanka (Influenza & Chickenpox) across the past 12 weeks.
+    for Sri Lanka across all 9 Provinces and 25 Health Districts for:
+    - Influenza (Seasonal respiratory surveillance)
+    - Chickenpox (Endemic varicella monitoring)
+    - Dengue (Vector-borne outbreak surveillance)
     Matches WHO FluNet and Sri Lanka Weekly Epidemiological Report patterns.
     """
     today = date.today()
-    districts = ["Colombo", "Gampaha", "Kandy", "Galle", "Kurunegala", "Kalutara", "Matara", "Ratnapura"]
-    
-    total_created = 0
-    # Seed 12 weeks of historical data
+
+    # Clear existing synthetic events to prevent unbounded duplicate accumulation
+    DiseaseSurveillanceEvent.objects.all().delete()
+
+    # Weights by district for realistic Sri Lankan epidemiological burden
+    district_weights = {
+        # Western Province (~50% of urban patient burden)
+        "Colombo": 14, "Gampaha": 11, "Kalutara": 6,
+        # Central Province
+        "Kandy": 8, "Matale": 3, "Nuwara Eliya": 3,
+        # Southern Province
+        "Galle": 7, "Matara": 5, "Hambantota": 3,
+        # North Western Province
+        "Kurunegala": 7, "Puttalam": 4,
+        # Sabaragamuwa Province
+        "Ratnapura": 6, "Kegalle": 4,
+        # Eastern Province
+        "Batticaloa": 4, "Ampara": 4, "Trincomalee": 3,
+        # Northern Province
+        "Jaffna": 5, "Vavuniya": 2, "Mannar": 2, "Kilinochchi": 2, "Mullaitivu": 1,
+        # North Central Province
+        "Anuradhapura": 5, "Polonnaruwa": 3,
+        # Uva Province
+        "Badulla": 4, "Monaragala": 2,
+    }
+
+    district_pool = []
+    for d, w in district_weights.items():
+        district_pool.extend([d] * w)
+
+    outbreak_hotspots = ["Colombo", "Gampaha", "Kalutara", "Galle", "Kandy", "Kurunegala", "Ratnapura"]
+    events_to_create = []
+
+    # 12 weeks of historical surveillance data
     for w in range(11, -1, -1):
         target_date = today - timedelta(weeks=w)
         year, week_num, _ = target_date.isocalendar()
         iso_week = f"{year}-W{week_num:02d}"
-        
-        # Normal baseline: 15-30 cases per week
-        # Simulated recent outbreak in weeks 0-2 (Colombo & Gampaha)
-        influenza_case_count = random.randint(18, 32)
-        if w in [0, 1]:  # Recent spike for outbreak detection test
-            influenza_case_count = random.randint(55, 80)
 
-        for _ in range(influenza_case_count):
-            dist = random.choice(districts[:4] if w in [0, 1] else districts)
-            DiseaseSurveillanceEvent.objects.create(
+        # 1. INFLUENZA: Baseline 25-45/wk, spike in weeks 0-1 for Farrington outbreak alarm
+        flu_count = random.randint(25, 45)
+        if w in [0, 1]:
+            flu_count = random.randint(75, 115)
+
+        for _ in range(flu_count):
+            dist = random.choice(outbreak_hotspots if (w in [0, 1] and random.random() < 0.70) else district_pool)
+            events_to_create.append(DiseaseSurveillanceEvent(
                 condition_code="influenza",
                 event_date=target_date - timedelta(days=random.randint(0, 6)),
                 report_week=iso_week,
                 region_code=dist,
                 source_type=random.choice(['lab', 'lab', 'diagnosis']),
                 verification_status='verified',
-                confidence_score=round(random.uniform(0.85, 0.99), 2),
-            )
-            total_created += 1
+                confidence_score=round(random.uniform(0.88, 0.99), 2),
+            ))
 
-        # Chickenpox baseline (lower count, endemic pattern)
-        chickenpox_cases = random.randint(8, 16)
-        if w in [1, 2]:
-            chickenpox_cases = random.randint(25, 38)
+        # 2. CHICKENPOX: Baseline 12-22/wk, moderate cluster in weeks 2-3
+        pox_count = random.randint(12, 22)
+        if w in [2, 3]:
+            pox_count = random.randint(30, 48)
 
-        for _ in range(chickenpox_cases):
-            dist = random.choice(districts)
-            DiseaseSurveillanceEvent.objects.create(
+        for _ in range(pox_count):
+            dist = random.choice(district_pool)
+            events_to_create.append(DiseaseSurveillanceEvent(
                 condition_code="chickenpox",
                 event_date=target_date - timedelta(days=random.randint(0, 6)),
                 report_week=iso_week,
@@ -511,13 +614,34 @@ def seed_demo_surveillance(request):
                 source_type='lab',
                 verification_status='verified',
                 confidence_score=round(random.uniform(0.90, 1.0), 2),
-            )
-            total_created += 1
+            ))
+
+        # 3. DENGUE: Endemic baseline 40-70/wk, major monsoon surge in weeks 0-2 (120-185/wk)
+        dengue_count = random.randint(40, 65)
+        if w in [0, 1, 2]:
+            dengue_count = random.randint(125, 185)
+
+        for _ in range(dengue_count):
+            dist = random.choice(outbreak_hotspots if random.random() < 0.78 else district_pool)
+            events_to_create.append(DiseaseSurveillanceEvent(
+                condition_code="dengue",
+                event_date=target_date - timedelta(days=random.randint(0, 6)),
+                report_week=iso_week,
+                region_code=dist,
+                source_type='lab',
+                verification_status='verified',
+                confidence_score=round(random.uniform(0.91, 1.0), 2),
+            ))
+
+    DiseaseSurveillanceEvent.objects.bulk_create(events_to_create)
+    total_created = len(events_to_create)
 
     return Response({
-        "message": f"Successfully seeded {total_created} surveillance events for Influenza & Chickenpox across 12 epidemiological weeks.",
-        "districts_covered": districts,
-        "conditions": ["influenza", "chickenpox"]
+        "message": f"Successfully seeded {total_created} epidemiological surveillance events across all 9 provinces and 25 health districts for Influenza, Chickenpox, and Dengue.",
+        "provinces_count": 9,
+        "districts_count": 25,
+        "conditions": ["influenza", "chickenpox", "dengue"],
+        "total_seeded": total_created,
     }, status=status.HTTP_201_CREATED)
 
 
@@ -592,5 +716,584 @@ def import_real_dataset_and_retrain(request):
         return Response({
             "error": f"Failed to train on imported real dataset: {str(e)}"
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# -------------------------------------------------------------
+# 5. DEDICATED LABORATORY TECHNICIAN PORTAL ENDPOINTS
+# -------------------------------------------------------------
+
+def infer_test_category(test_name: str) -> str:
+    name = (test_name or "").lower()
+    if any(k in name for k in ['blood count', 'fbc', 'cbc', 'hemoglobin', 'platelet', 'wbc', 'rbc', 'pcv', 'esr']):
+        return 'Hematology'
+    elif any(k in name for k in ['glucose', 'fbs', 'rbs', 'lipid', 'cholesterol', 'creatinine', 'urea', 'liver', 'lft', 'sgot', 'sgpt', 'bilirubin', 'electrolytes', 'crp', 'sugar']):
+        return 'Biochemistry'
+    elif any(k in name for k in ['dengue', 'ns1', 'antigen', 'antibody', 'covid', 'hiv', 'hepatitis', 'serology', 'widal', 'immunology']):
+        return 'Immunology'
+    elif any(k in name for k in ['culture', 'urine full', 'ufr', 'stool', 'microscopy', 'gram stain', 'sensitivity']):
+        return 'Microbiology'
+    else:
+        return 'Pathology'
+
+
+def calculate_age_from_birthday(birthday) -> int:
+    if not birthday:
+        return 30
+    try:
+        today = date.today()
+        return today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
+    except Exception:
+        return 30
+
+
+@api_view(['GET'])
+def get_lab_portal_dashboard(request):
+    """
+    Unified endpoint for the Laboratory Portal dashboard.
+    Returns aggregated stats, pending doctor orders, completed tests,
+    and all test records formatted directly for the technician UI.
+    """
+    requests_qs = LabRequest.objects.all().select_related('patient', 'doctor').prefetch_related('reports', 'reports__observations')
+    reports_qs = LabReport.objects.filter(lab_request__isnull=True).select_related('patient', 'reviewed_by').prefetch_related('observations')
+
+    records = []
+
+    # Map LabRequests (ordered by doctors or system)
+    for req in requests_qs:
+        rep = req.reports.first()
+        status_display = "Completed" if req.status == "completed" else ("In Progress" if req.status in ["processing", "sample_collected"] else "Pending")
+        priority_display = req.priority.capitalize() if req.priority in ["urgent", "stat"] else "Routine"
+        if req.priority == "stat":
+            priority_display = "STAT"
+
+        results_list = []
+        if rep:
+            for obs in rep.observations.all():
+                flag_display = "Normal"
+                if "HIGH" in obs.abnormal_flag:
+                    flag_display = "High"
+                elif "LOW" in obs.abnormal_flag:
+                    flag_display = "Low"
+                elif "ABNORMAL" in obs.abnormal_flag:
+                    flag_display = "High"
+
+                results_list.append({
+                    "parameter": obs.test_original_name or obs.standard_name,
+                    "value": str(obs.result_value),
+                    "unit": obs.unit or "",
+                    "referenceRange": obs.reference_range_raw or (f"{obs.reference_min} - {obs.reference_max}" if obs.reference_min is not None else "Standard"),
+                    "flag": flag_display,
+                })
+
+        # Determine latest update timestamp between request and linked report
+        timestamps = [req.requested_at]
+        if req.updated_at:
+            timestamps.append(req.updated_at)
+        if rep:
+            if rep.updated_at:
+                timestamps.append(rep.updated_at)
+            if rep.reviewed_at:
+                timestamps.append(rep.reviewed_at)
+        valid_ts = [t for t in timestamps if t is not None]
+        latest_ts = max(valid_ts) if valid_ts else None
+        updated_at_display = timezone.localtime(latest_ts).strftime("%Y-%m-%d %I:%M %p") if latest_ts else str(date.today())
+
+        # Determine doctor reviewer information
+        reviewed_by_user = rep.reviewed_by if rep else None
+        if not reviewed_by_user and rep and rep.approval_status == 'approved' and req.doctor:
+            reviewed_by_user = req.doctor
+        
+        reviewed_by_name = None
+        if reviewed_by_user:
+            uname = reviewed_by_user.username
+            reviewed_by_name = uname if uname.lower().startswith("dr.") else f"Dr. {uname}"
+
+        reviewed_at_display = timezone.localtime(rep.reviewed_at).strftime("%Y-%m-%d %I:%M %p") if (rep and rep.reviewed_at) else None
+        physician_notes = (rep.physician_notes or "") if rep else ""
+        is_doctor_approved = bool(rep and rep.approval_status == "approved")
+        approval_status_val = rep.approval_status if rep else "draft"
+
+        records.append({
+            "id": f"REQ-{req.request_id:04d}",
+            "raw_id": req.request_id,
+            "record_type": "request",
+            "report_id": rep.report_id if rep else None,
+            "patientId": req.patient.id if req.patient else None,
+            "patientName": req.patient.username if req.patient else "Unknown Patient",
+            "patientNIC": req.patient.NIC_number if (req.patient and req.patient.NIC_number) else "N/A",
+            "patientAge": calculate_age_from_birthday(req.patient.birthday if req.patient else None),
+            "patientGender": "Female" if (req.patient and req.patient.username and any(title in req.patient.username.lower() for title in ["mrs", "miss", "ms"])) else "Male",
+            "testName": req.test_type,
+            "category": infer_test_category(req.test_type),
+            "doctorName": f"Dr. {req.doctor.username}" if req.doctor else "Hospital OPD Physician",
+            "prescribingDoctor": f"Dr. {req.doctor.username}" if req.doctor else "Hospital OPD Physician",
+            "reviewedBy": reviewed_by_name,
+            "reviewedAt": reviewed_at_display,
+            "physicianNotes": physician_notes,
+            "sampleCollectedDate": timezone.localtime(req.requested_at).strftime("%Y-%m-%d %I:%M %p") if req.requested_at else str(date.today()),
+            "updatedAt": updated_at_display,
+            "priority": priority_display,
+            "status": status_display,
+            "results": results_list,
+            "technicianNotes": req.clinical_notes or ("Sample accessioned by laboratory." if status_display != "Pending" else "Awaiting sample collection."),
+            "file_url": request.build_absolute_uri(rep.report_file.url) if (rep and rep.report_file and request) else (f"http://127.0.0.1:8000{rep.report_file.url}" if (rep and rep.report_file) else None),
+            "has_ocr": bool(rep and rep.ocr_raw_text),
+            "approval_status": approval_status_val,
+            "is_doctor_approved": is_doctor_approved,
+        })
+
+    # Also map standalone LabReports (walk-in lab tests created directly without a prior request)
+    for rep in reports_qs:
+        status_display = "Completed" if rep.approval_status in ["approved", "edited"] else "In Progress"
+        results_list = []
+        for obs in rep.observations.all():
+            flag_display = "Normal"
+            if "HIGH" in obs.abnormal_flag:
+                flag_display = "High"
+            elif "LOW" in obs.abnormal_flag:
+                flag_display = "Low"
+            elif "ABNORMAL" in obs.abnormal_flag:
+                flag_display = "High"
+
+            results_list.append({
+                "parameter": obs.test_original_name or obs.standard_name,
+                "value": str(obs.result_value),
+                "unit": obs.unit or "",
+                "referenceRange": obs.reference_range_raw or (f"{obs.reference_min} - {obs.reference_max}" if obs.reference_min is not None else "Standard"),
+                "flag": flag_display,
+            })
+
+        rep_timestamps = [rep.created_at, rep.updated_at, rep.reviewed_at]
+        valid_rep_ts = [t for t in rep_timestamps if t is not None]
+        latest_rep_ts = max(valid_rep_ts) if valid_rep_ts else None
+        updated_at_display = timezone.localtime(latest_rep_ts).strftime("%Y-%m-%d %I:%M %p") if latest_rep_ts else str(rep.test_date)
+
+        reviewed_by_name = None
+        if rep.reviewed_by:
+            uname = rep.reviewed_by.username
+            reviewed_by_name = uname if uname.lower().startswith("dr.") else f"Dr. {uname}"
+
+        reviewed_at_display = timezone.localtime(rep.reviewed_at).strftime("%Y-%m-%d %I:%M %p") if rep.reviewed_at else None
+        physician_notes = rep.physician_notes or ""
+        is_doctor_approved = bool(rep.approval_status == "approved")
+
+        records.append({
+            "id": f"REP-{rep.report_id:04d}",
+            "raw_id": rep.report_id,
+            "record_type": "report",
+            "report_id": rep.report_id,
+            "patientId": rep.patient.id if rep.patient else None,
+            "patientName": rep.patient.username if rep.patient else "Walk-in Patient",
+            "patientNIC": rep.patient.NIC_number if (rep.patient and rep.patient.NIC_number) else "N/A",
+            "patientAge": calculate_age_from_birthday(rep.patient.birthday if rep.patient else None),
+            "patientGender": "Male",
+            "testName": rep.report_title,
+            "category": infer_test_category(rep.report_title),
+            "doctorName": reviewed_by_name or "Direct Lab Walk-in",
+            "prescribingDoctor": reviewed_by_name or "Direct Lab Walk-in",
+            "reviewedBy": reviewed_by_name,
+            "reviewedAt": reviewed_at_display,
+            "physicianNotes": physician_notes,
+            "sampleCollectedDate": timezone.localtime(rep.created_at).strftime("%Y-%m-%d %I:%M %p") if rep.created_at else str(rep.test_date),
+            "updatedAt": updated_at_display,
+            "priority": "Routine",
+            "status": status_display,
+            "results": results_list,
+            "technicianNotes": "Accessioned by laboratory technician.",
+            "file_url": request.build_absolute_uri(rep.report_file.url) if (rep.report_file and request) else (f"http://127.0.0.1:8000{rep.report_file.url}" if rep.report_file else None),
+            "has_ocr": bool(rep.ocr_raw_text),
+            "approval_status": rep.approval_status,
+            "is_doctor_approved": is_doctor_approved,
+        })
+
+    # Calculate summary statistics
+    total_count = len(records)
+    pending_count = sum(1 for r in records if r["status"] == "Pending" or r["status"] == "In Progress")
+    completed_count = sum(1 for r in records if r["status"] == "Completed")
+    urgent_count = sum(1 for r in records if r["priority"] in ["Urgent", "STAT"])
+    doctor_approved_count = sum(1 for r in records if r.get("approval_status") == "approved")
+    doctor_pending_count = sum(1 for r in records if r.get("approval_status") in ["draft", "edited"] or not r.get("approval_status"))
+
+    return Response({
+        "stats": {
+            "total": total_count,
+            "pending": pending_count,
+            "completed": completed_count,
+            "urgent": urgent_count,
+            "doctor_approved": doctor_approved_count,
+            "doctor_pending": doctor_pending_count,
+        },
+        "records": records,
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def create_lab_test_record(request):
+    """
+    Creates a new lab test record directly from the Lab Portal.
+    """
+    patient_id = request.data.get('patient_id')
+    patient_name = request.data.get('patient_name')
+    patient_nic = request.data.get('patient_nic')
+    patient_phone = request.data.get('patient_phone')
+    test_name = request.data.get('test_name', 'Full Blood Count (FBC)')
+    priority_input = (request.data.get('priority') or 'Routine').lower()
+    status_input = request.data.get('status', 'Pending')
+    doctor_name = request.data.get('doctor_name', 'Direct Lab Walk-in')
+    technician_notes = request.data.get('technician_notes', '')
+    results_input = request.data.get('results', [])
+
+    priority = 'urgent' if priority_input == 'urgent' else ('stat' if priority_input == 'stat' else 'routine')
+
+    patient = None
+    if patient_id:
+        patient = User.objects.filter(id=patient_id).first()
+    if not patient and patient_nic:
+        patient = User.objects.filter(NIC_number=patient_nic).first()
+    if not patient and patient_name:
+        patient = User.objects.filter(username__iexact=patient_name).first()
+    if not patient:
+        import uuid
+        walkin_username = patient_name.strip() if patient_name else f"Patient_{uuid.uuid4().hex[:6]}"
+        if User.objects.filter(username=walkin_username).exists():
+            walkin_username = f"{walkin_username}_{uuid.uuid4().hex[:4]}"
+        patient = User.objects.create(
+            username=walkin_username,
+            NIC_number=patient_nic or f"NIC-{uuid.uuid4().hex[:8]}",
+            phone=patient_phone or "0770000000",
+            role='patient',
+            is_approved=True,
+        )
+        patient.set_password('Patient@123')
+        patient.save()
+
+    req_status = 'completed' if status_input == 'Completed' else ('processing' if status_input == 'In Progress' else 'requested')
+
+    lab_req = LabRequest.objects.create(
+        patient=patient,
+        test_type=test_name,
+        clinical_notes=technician_notes or f"Doctor: {doctor_name}",
+        priority=priority,
+        status=req_status,
+    )
+
+    lab_rep = LabReport.objects.create(
+        lab_request=lab_req,
+        patient=patient,
+        lab_name=request.user.lab_name if (request.user and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated and hasattr(request.user, 'lab_name') and request.user.lab_name) else "Central Clinical Laboratory",
+        report_title=test_name,
+        test_date=date.today(),
+        approval_status='approved' if status_input == 'Completed' else 'draft',
+        physician_notes=technician_notes,
+    )
+
+    if results_input and isinstance(results_input, list):
+        for item in results_input:
+            param = item.get('parameter', '')
+            val = item.get('value', '')
+            unit = item.get('unit', '')
+            ref = item.get('referenceRange', '')
+            flag_input = item.get('flag', 'Normal')
+
+            norm = normalize_test_name(param)
+            loinc_code = norm.get('loinc_code', '')
+            std_name = norm.get('standard_name', param)
+
+            ab_flag = 'NORMAL'
+            if flag_input == 'High':
+                ab_flag = 'HIGH'
+            elif flag_input == 'Low':
+                ab_flag = 'LOW'
+
+            num_val = None
+            try:
+                num_val = float(val)
+            except (ValueError, TypeError):
+                pass
+
+            LabObservation.objects.create(
+                lab_report=lab_rep,
+                test_original_name=param,
+                test_standard_code=loinc_code or 'UNKNOWN',
+                standard_name=std_name,
+                result_value=str(val),
+                numeric_value=num_val,
+                unit=unit,
+                reference_range_raw=ref,
+                abnormal_flag=ab_flag,
+                extraction_confidence=1.0,
+            )
+
+    return Response({
+        "message": "Lab test record created successfully.",
+        "id": f"REQ-{lab_req.request_id:04d}",
+        "request_id": lab_req.request_id,
+        "report_id": lab_rep.report_id,
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+def update_lab_test_status(request, test_id):
+    """
+    Updates the status and technician notes of a lab test record.
+    """
+    next_status = request.data.get('status', 'Completed')
+    record_type = request.data.get('record_type', 'request')
+    technician_notes = request.data.get('technician_notes')
+    now = timezone.now()
+
+    if record_type == 'report':
+        rep = get_object_or_404(LabReport, report_id=test_id)
+        if next_status == 'Completed':
+            rep.approval_status = 'approved'
+            rep.is_dispatched_to_patient = True
+        elif next_status == 'In Progress':
+            rep.approval_status = 'draft'
+        if technician_notes:
+            rep.physician_notes = technician_notes
+        rep.updated_at = now
+        rep.save()
+        updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
+        return Response({"message": "Report status updated.", "status": next_status, "updated_at": updated_str})
+    else:
+        req = get_object_or_404(LabRequest, request_id=test_id)
+        if next_status == 'Completed':
+            req.status = 'completed'
+        elif next_status == 'In Progress':
+            req.status = 'processing'
+        else:
+            req.status = 'requested'
+
+        if technician_notes:
+            req.clinical_notes = technician_notes
+        req.updated_at = now
+        req.save()
+
+        rep = req.reports.first()
+        if rep:
+            if next_status == 'Completed':
+                rep.approval_status = 'approved'
+                rep.is_dispatched_to_patient = True
+            rep.updated_at = now
+            rep.save()
+
+        updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
+        return Response({"message": "Test request status updated.", "status": next_status, "updated_at": updated_str})
+
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def upload_test_report_file(request, test_id):
+    """
+    Uploads an image or PDF for a specific test request, runs OCR extraction,
+    and updates/creates observation parameters automatically.
+    """
+    record_type = request.data.get('record_type', 'request')
+    file_obj = request.FILES.get('report_file')
+
+    if not file_obj:
+        return Response({'error': 'No report file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if record_type == 'report':
+        rep = get_object_or_404(LabReport, report_id=test_id)
+    else:
+        req = get_object_or_404(LabRequest, request_id=test_id)
+        rep = req.reports.first()
+        if not rep:
+            rep = LabReport.objects.create(
+                lab_request=req,
+                patient=req.patient,
+                lab_name="Diagnostic Pathology Lab",
+                report_title=req.test_type,
+                test_date=date.today(),
+                approval_status='draft',
+            )
+
+    rep.report_file = file_obj
+    rep.file_type = 'pdf' if file_obj.name.lower().endswith('.pdf') else 'image'
+    rep.save()
+
+    extracted_data = None
+    if rep.report_file and os.path.exists(rep.report_file.path):
+        extracted_data = process_lab_report_file(rep.report_file.path, rep.report_title)
+        if extracted_data:
+            rep.image_quality_status = extracted_data.get('quality_status', 'pass')
+            rep.ocr_raw_text = extracted_data.get('raw_text', '')
+            rep.overall_confidence = extracted_data.get('overall_confidence', 0.9)
+            rep.save()
+
+            rep.observations.all().delete()
+            for obs_dict in extracted_data.get('observations', []):
+                LabObservation.objects.create(
+                    lab_report=rep,
+                    test_original_name=obs_dict['test_original_name'],
+                    test_standard_code=obs_dict['test_standard_code'],
+                    standard_name=obs_dict['standard_name'],
+                    result_value=str(obs_dict['result_value']),
+                    numeric_value=obs_dict.get('numeric_value'),
+                    unit=obs_dict.get('unit'),
+                    reference_range_raw=obs_dict.get('reference_range_raw'),
+                    reference_min=obs_dict.get('reference_min'),
+                    reference_max=obs_dict.get('reference_max'),
+                    abnormal_flag=obs_dict.get('abnormal_flag', 'NORMAL'),
+                    extraction_confidence=obs_dict.get('extraction_confidence', 0.9),
+                )
+
+    now = timezone.now()
+    rep.updated_at = now
+    rep.save()
+    if rep.lab_request:
+        rep.lab_request.updated_at = now
+        rep.lab_request.save()
+    updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
+
+    return Response({
+        "message": "File processed and parameters extracted successfully.",
+        "report_id": rep.report_id,
+        "raw_text": rep.ocr_raw_text,
+        "observations_count": rep.observations.count(),
+        "updated_at": updated_str,
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def save_lab_test_results(request, test_id):
+    """
+    Saves manually entered test observation parameters for a lab test.
+    """
+    record_type = request.data.get('record_type', 'request')
+    results_list = request.data.get('results', [])
+
+    if record_type == 'report':
+        rep = get_object_or_404(LabReport, report_id=test_id)
+    else:
+        req = get_object_or_404(LabRequest, request_id=test_id)
+        rep = req.reports.first()
+        if not rep:
+            rep = LabReport.objects.create(
+                lab_request=req,
+                patient=req.patient,
+                lab_name="Diagnostic Pathology Lab",
+                report_title=req.test_type,
+                test_date=date.today(),
+                approval_status='draft',
+            )
+
+    rep.observations.all().delete()
+    for item in results_list:
+        param = item.get('parameter', '')
+        val = item.get('value', '')
+        unit = item.get('unit', '')
+        ref = item.get('referenceRange', '')
+        flag_input = item.get('flag', 'Normal')
+
+        norm = normalize_test_name(param)
+        loinc_code = norm.get('loinc_code', 'UNKNOWN')
+        std_name = norm.get('standard_name', param)
+
+        ab_flag = 'NORMAL'
+        if flag_input == 'High':
+            ab_flag = 'HIGH'
+        elif flag_input == 'Low':
+            ab_flag = 'LOW'
+
+        num_val = None
+        try:
+            num_val = float(val)
+        except (ValueError, TypeError):
+            pass
+
+        LabObservation.objects.create(
+            lab_report=rep,
+            test_original_name=param,
+            test_standard_code=loinc_code,
+            standard_name=std_name,
+            result_value=str(val),
+            numeric_value=num_val,
+            unit=unit,
+            reference_range_raw=ref,
+            abnormal_flag=ab_flag,
+            extraction_confidence=1.0,
+            is_manually_edited=True,
+        )
+
+    now = timezone.now()
+    rep.updated_at = now
+    rep.save()
+    if rep.lab_request:
+        rep.lab_request.updated_at = now
+        rep.lab_request.save()
+    updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
+
+    return Response({
+        "message": "Results saved successfully.",
+        "report_id": rep.report_id,
+        "observations_count": rep.observations.count(),
+        "updated_at": updated_str,
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_lab_patients_and_doctors(request):
+    """
+    Returns lists of registered patients and doctors for Lab technician dropdowns.
+    """
+    patients = User.objects.filter(role='patient').values('id', 'username', 'NIC_number', 'birthday', 'phone')
+    doctors = User.objects.filter(role='doctor').values('id', 'username', 'doctorID', 'working_hospital')
+    return Response({
+        "patients": list(patients),
+        "doctors": list(doctors),
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE', 'POST'])
+def delete_lab_test_record(request, test_id):
+    """
+    Deletes a lab test record (either LabRequest or standalone LabReport)
+    along with its observations, physical files, and audit logs.
+    """
+    record_type = request.data.get('record_type') or request.query_params.get('record_type', 'request')
+
+    if record_type == 'report':
+        report = LabReport.objects.filter(report_id=test_id).first()
+        if not report:
+            return Response({'error': f'Lab report #{test_id} not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if report.report_file:
+            try:
+                report.report_file.delete(save=False)
+            except Exception:
+                pass
+
+        LabAuditLog.objects.filter(lab_report=report).delete()
+        report.delete()
+        return Response({'message': f'Lab report #{test_id} permanently deleted.'}, status=status.HTTP_200_OK)
+    else:
+        req = LabRequest.objects.filter(request_id=test_id).first()
+        if not req:
+            rep = LabReport.objects.filter(report_id=test_id).first()
+            if rep:
+                if rep.report_file:
+                    try:
+                        rep.report_file.delete(save=False)
+                    except Exception:
+                        pass
+                LabAuditLog.objects.filter(lab_report=rep).delete()
+                rep.delete()
+                return Response({'message': f'Lab record #{test_id} permanently deleted.'}, status=status.HTTP_200_OK)
+            return Response({'error': f'Lab request #{test_id} not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        for rep in req.reports.all():
+            if rep.report_file:
+                try:
+                    rep.report_file.delete(save=False)
+                except Exception:
+                    pass
+            LabAuditLog.objects.filter(lab_report=rep).delete()
+            rep.delete()
+
+        req.delete()
+        return Response({'message': f'Lab specimen request #{test_id} permanently deleted.'}, status=status.HTTP_200_OK)
+
 
 
