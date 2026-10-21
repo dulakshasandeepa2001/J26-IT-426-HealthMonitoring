@@ -9,6 +9,7 @@ from accounts.views import (
 from taskcreate.views import create_task, health_check, get_tasks, delete_task
 
 urlpatterns = [
+    path('api/exposure/', include('exposure.urls')),
     path('admin/', admin.site.urls),
     path("create-user/", create_user),
     path("get-users/", get_users),

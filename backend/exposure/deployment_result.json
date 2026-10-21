@@ -1,0 +1,23 @@
+{
+  "migration": "exposure.0001_initial",
+  "status": "committed",
+  "verified_at_utc": "2026-10-21T10:36:12.756566+00:00",
+  "tables_created": [
+    "exposure_diagnosismetadata",
+    "exposure_exposureanalysis",
+    "exposure_locationsample",
+    "exposure_proximityencounter",
+    "exposure_riskzoneversion",
+    "exposure_riskzonevisit",
+    "exposure_trackingconsent"
+  ],
+  "original_tables_verified": 76,
+  "original_rows_preserved": true,
+  "encrypted_backup": "supabase-before-exposure-0001-20261021-103123Z.dump.dpapi",
+  "cleanup_executed": false,
+  "scheduler_installed": false,
+  "access_control_migration": "exposure.0002_restrict_direct_access",
+  "rls_enabled_on_all_new_tables": true,
+  "anonymous_and_client_grants_revoked": true,
+  "backend_orm_access_verified": true
+}

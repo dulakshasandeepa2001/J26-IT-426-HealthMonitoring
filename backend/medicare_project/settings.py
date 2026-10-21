@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'prescription_review',
     'medicine_knowledge',
     'prescription_drafts',
+    'exposure',
 ]
 
 # Custom User Model
