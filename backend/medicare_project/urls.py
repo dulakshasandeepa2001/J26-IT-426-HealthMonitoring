@@ -8,6 +8,7 @@ from django.conf.urls.static import static
 from accounts.views import (
     create_user, get_users, get_doctor, login_user,
     get_pending_doctors, approve_doctor, reject_doctor,
+    get_doctor_availability, set_doctor_availability,
 )
 from taskcreate.views import create_task, health_check, get_tasks, delete_task
 
@@ -25,6 +26,12 @@ urlpatterns = [
     path("approve-doctor/<int:pk>/", approve_doctor),
     path("reject-doctor/<int:pk>/", reject_doctor),
     
+    # Doctor Live Availability
+    path("api/doctor/get-availability/", get_doctor_availability),
+    path("api/doctor/get-availability", get_doctor_availability),
+    path("api/doctor/set-availability/", set_doctor_availability),
+    path("api/doctor/set-availability", set_doctor_availability),
+
     # Lab Reports & Disease Intelligence (Component 4)
     path("api/", include('labreports.urls')),
 ]

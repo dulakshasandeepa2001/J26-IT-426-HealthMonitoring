@@ -2,7 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import JsonResponse
 import json
-from accounts.models import PendingDoctor, User, Doctor
+from accounts.models import PendingDoctor, User, Doctor, DoctorLiveAvailability
+from datetime import datetime, date, time
+
 
 
 @api_view(['POST'])
@@ -245,4 +247,115 @@ def reject_doctor(request, pk):
 def health_check(request):
     """Simple health check endpoint."""
     return Response({'status': 'Server is running', 'message': 'Medicare API is healthy!'})
+
+
+@api_view(['GET'])
+def get_doctor_availability(request):
+    """
+    Get live availability status for a doctor.
+    Supports ?doctor_id=DOC-0001 or authenticated doctor.
+    """
+    doc_id = request.GET.get('doctor_id')
+    if not doc_id and request.user and request.user.is_authenticated:
+        doc_id = request.user.doctorID or request.user.username
+
+    if not doc_id:
+        doc_id = 'DOC-0001'
+
+    avail = DoctorLiveAvailability.objects.filter(doctor_id__iexact=doc_id.strip()).first()
+    
+    # If not found by doctor_id, try finding by doctor_name or user username
+    if not avail:
+        avail = DoctorLiveAvailability.objects.filter(doctor_name__icontains=doc_id.strip()).first()
+
+    if not avail:
+        # Check doctor name in Doctor or User
+        doc_name = f"Dr. {doc_id}"
+        u = User.objects.filter(doctorID__iexact=doc_id.strip()).first() or User.objects.filter(username__iexact=doc_id.strip()).first()
+        if u:
+            doc_name = f"Dr. {u.username}"
+        d = Doctor.objects.filter(doctor_id__iexact=doc_id.strip()).first()
+        if d:
+            doc_name = d.doctors_name
+
+        return JsonResponse({
+            'doctor_id': doc_id,
+            'doctor_name': doc_name,
+            'is_available': False,
+            'available_until': None,
+            'available_date': str(date.today()),
+        })
+
+    return JsonResponse({
+        'doctor_id': avail.doctor_id,
+        'doctor_name': avail.doctor_name or f"Dr. {avail.doctor_id}",
+        'is_available': bool(avail.is_available),
+        'available_until': avail.available_until.strftime("%H:%M") if avail.available_until else None,
+        'available_date': str(avail.available_date) if avail.available_date else str(date.today()),
+        'updated_at': avail.updated_at.isoformat() if avail.updated_at else None,
+    })
+
+
+@api_view(['POST'])
+def set_doctor_availability(request):
+    """
+    Update or create live availability for a doctor.
+    Payload: { doctor_id, doctor_name, is_available, available_until }
+    """
+    try:
+        data = request.data if hasattr(request, 'data') and request.data else json.loads(request.body.decode('utf-8'))
+        doc_id = str(data.get('doctor_id', '')).strip()
+        doc_name = str(data.get('doctor_name', '')).strip()
+        is_avail = bool(data.get('is_available', False))
+        until_val = data.get('available_until')
+
+        if not doc_id and request.user and request.user.is_authenticated:
+            doc_id = request.user.doctorID or request.user.username
+
+        if not doc_id:
+            doc_id = 'DOC-0001'
+
+        parsed_time = None
+        if is_avail and until_val:
+            if isinstance(until_val, str):
+                for fmt in ("%H:%M", "%H:%M:%S", "%I:%M %p", "%I:%M%p"):
+                    try:
+                        parsed_time = datetime.strptime(until_val.strip(), fmt).time()
+                        break
+                    except ValueError:
+                        pass
+            elif isinstance(until_val, time):
+                parsed_time = until_val
+
+        # If doc_name wasn't supplied, check User or Doctor table
+        if not doc_name:
+            u = User.objects.filter(doctorID__iexact=doc_id).first() or User.objects.filter(username__iexact=doc_id).first()
+            if u:
+                doc_name = f"Dr. {u.username}"
+            else:
+                d = Doctor.objects.filter(doctor_id__iexact=doc_id).first()
+                doc_name = d.doctors_name if d else f"Dr. {doc_id}"
+
+        avail_obj, _ = DoctorLiveAvailability.objects.update_or_create(
+            doctor_id=doc_id,
+            defaults={
+                'doctor_name': doc_name,
+                'is_available': is_avail,
+                'available_until': parsed_time if is_avail else None,
+                'available_date': date.today(),
+            }
+        )
+
+        return JsonResponse({
+            'success': True,
+            'doctor_id': avail_obj.doctor_id,
+            'doctor_name': avail_obj.doctor_name,
+            'is_available': bool(avail_obj.is_available),
+            'available_until': avail_obj.available_until.strftime("%H:%M") if avail_obj.available_until else None,
+            'available_date': str(avail_obj.available_date) if avail_obj.available_date else str(date.today()),
+            'updated_at': avail_obj.updated_at.isoformat() if avail_obj.updated_at else None,
+        })
+    except Exception as e:
+        return JsonResponse({'error': f"Failed to set availability: {str(e)}"}, status=400)
+
 

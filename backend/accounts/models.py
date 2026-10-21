@@ -70,3 +70,20 @@ class PendingDoctor(models.Model):
     class Meta:
         db_table = 'pending_doctors'
 
+
+class DoctorLiveAvailability(models.Model):
+    doctor_id = models.CharField(max_length=50, unique=True)
+    doctor_name = models.CharField(max_length=150, blank=True, null=True)
+    is_available = models.BooleanField(default=False)
+    available_until = models.TimeField(blank=True, null=True)
+    available_date = models.DateField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.doctor_id} ({self.doctor_name}) - Available: {self.is_available}"
+
+    class Meta:
+        db_table = 'doctor_live_availability'
+        managed = False
+
+

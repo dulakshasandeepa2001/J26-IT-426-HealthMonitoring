@@ -351,7 +351,7 @@ export default function DoctorDashboard() {
         }
       }
     } catch (e) {
-      console.error("Failed to load doctor availability:", e);
+      console.warn("Failed to load doctor availability:", e);
     }
   };
 

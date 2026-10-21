@@ -37,6 +37,7 @@ class LabRequest(models.Model):
     )
     test_type = models.CharField(max_length=150, help_text="e.g., Full Blood Count (CBC), Influenza PCR, Dengue Antigen")
     clinical_notes = models.TextField(blank=True, null=True, help_text="Symptoms, clinical suspicion, or indication")
+    lab_feedback = models.TextField(blank=True, null=True, help_text="Laboratory technologist feedback/remarks for patient")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='routine')
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='requested')
     requested_at = models.DateTimeField(auto_now_add=True)
@@ -106,6 +107,10 @@ class LabReport(models.Model):
     )
     physician_notes = models.TextField(blank=True, null=True, help_text="Physician clinical interpretation & advice")
     reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    # Laboratory Feedback & Technologist Verification
+    lab_feedback = models.TextField(blank=True, null=True, help_text="Laboratory technologist feedback/remarks for patient")
+    lab_completed_at = models.DateTimeField(null=True, blank=True)
 
     # Downstream release gates
     is_dispatched_to_patient = models.BooleanField(default=False)

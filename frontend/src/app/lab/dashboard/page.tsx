@@ -89,6 +89,8 @@ interface TestRecord {
   has_ocr?: boolean;
   approval_status?: string;
   is_doctor_approved?: boolean;
+  labFeedback?: string;
+  labCompletedAt?: string | null;
 }
 
 export default function LabDashboard() {
@@ -114,6 +116,7 @@ export default function LabDashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
+  const [labFeedbackInput, setLabFeedbackInput] = useState("");
 
   // Delete modal state
   const [deleteModalRecord, setDeleteModalRecord] = useState<TestRecord | null>(null);
@@ -287,15 +290,22 @@ export default function LabDashboard() {
     }
   };
 
-  // Change specimen status
-  const handleStatusChange = async (record: TestRecord, newStatusVal: TestRecord["status"]) => {
+  // Change specimen status & dispatch laboratory feedback
+  const handleStatusChange = async (
+    record: TestRecord,
+    newStatusVal: TestRecord["status"],
+    customFeedback?: string
+  ) => {
     try {
       const endpoint = `/api/lab/tests/${record.raw_id}/status/`;
+      const feedbackToSend = customFeedback !== undefined ? customFeedback : (record.labFeedback || record.technicianNotes || "");
       const res = await apiRequest(endpoint, {
         method: "POST",
         body: JSON.stringify({
           status: newStatusVal,
           record_type: record.record_type,
+          lab_feedback: feedbackToSend,
+          technician_notes: feedbackToSend,
         }),
       });
 
@@ -308,15 +318,37 @@ export default function LabDashboard() {
         hour12: true,
       });
 
+      const updatedCompletedAt = res?.lab_completed_at || (newStatusVal === "Completed" ? updatedTimeStr : null);
+
       setTestRecords((prev) =>
-        prev.map((r) => (r.id === record.id ? { ...r, status: newStatusVal, updatedAt: updatedTimeStr } : r))
+        prev.map((r) =>
+          r.id === record.id
+            ? {
+                ...r,
+                status: newStatusVal,
+                updatedAt: updatedTimeStr,
+                labFeedback: feedbackToSend,
+                labCompletedAt: updatedCompletedAt,
+              }
+            : r
+        )
       );
       if (selectedRecord?.id === record.id) {
-        setSelectedRecord({ ...selectedRecord, status: newStatusVal, updatedAt: updatedTimeStr });
+        setSelectedRecord({
+          ...selectedRecord,
+          status: newStatusVal,
+          updatedAt: updatedTimeStr,
+          labFeedback: feedbackToSend,
+          labCompletedAt: updatedCompletedAt,
+        });
       }
 
-      setStatusMessage(`Specimen ${record.id} status updated to ${newStatusVal} (${updatedTimeStr})`);
-      setTimeout(() => setStatusMessage(null), 2500);
+      setStatusMessage(
+        newStatusVal === "Completed"
+          ? `✓ Specimen ${record.id} completed & Laboratory feedback dispatched to patient portal!`
+          : `Specimen ${record.id} status updated to ${newStatusVal} (${updatedTimeStr})`
+      );
+      setTimeout(() => setStatusMessage(null), 3000);
     } catch (err: any) {
       alert("Failed to update status: " + err.message);
     }
@@ -1044,6 +1076,7 @@ export default function LabDashboard() {
                           <button
                             onClick={() => {
                               setSelectedRecord(record);
+                              setLabFeedbackInput(record.labFeedback || record.technicianNotes || "");
                               setShowViewModal(true);
                             }}
                             className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-teal-50 hover:border-teal-200 text-teal-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
@@ -1626,13 +1659,78 @@ export default function LabDashboard() {
               </div>
             </form>
 
-            {/* Remarks Section */}
-            {selectedRecord.technicianNotes && (
-              <div className="p-3.5 bg-slate-50 rounded-xl text-xs border border-slate-100">
-                <span className="font-bold text-slate-700">Technician Remarks: </span>
-                <span className="text-slate-600">{selectedRecord.technicianNotes}</span>
+            {/* Laboratory Technologist Feedback & Dispatch to Patient (Interactive & Print Ready) */}
+            <div className="p-5 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-3 print:bg-white print:border-slate-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-teal-600 text-white shadow-2xs">
+                    <FlaskConical className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                      Laboratory Feedback & Verification for Patient
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      Enter findings or technologist advice. Completing this test dispatches feedback directly to the Patient Portal.
+                    </p>
+                  </div>
+                </div>
+
+                {selectedRecord.labCompletedAt && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Completed: {selectedRecord.labCompletedAt}</span>
+                  </span>
+                )}
               </div>
-            )}
+
+              {/* Textarea for Technologist Feedback (Screen) */}
+              <div className="space-y-1.5 print:hidden">
+                <textarea
+                  rows={3}
+                  value={labFeedbackInput}
+                  onChange={(e) => setLabFeedbackInput(e.target.value)}
+                  placeholder="Enter laboratory technologist remarks (e.g. Specimen verified. All biomarkers conform to clinical reference ranges. Advised follow-up in 14 days.)..."
+                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Printable Display of Feedback */}
+              <div className="hidden print:block p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium">
+                <span className="font-bold text-slate-900">Technologist Clinical Remarks: </span>
+                {labFeedbackInput || selectedRecord.labFeedback || selectedRecord.technicianNotes || "Specimen examined and authenticated by laboratory."}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 print:hidden">
+                <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">Patient:</span> {selectedRecord.patientName} ({selectedRecord.patientNIC})
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange(selectedRecord, selectedRecord.status, labFeedbackInput)}
+                    className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-2xs cursor-pointer"
+                  >
+                    Save Remarks Only
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange(selectedRecord, "Completed", labFeedbackInput)}
+                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition shadow-md shadow-teal-600/20 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>
+                      {selectedRecord.status === "Completed"
+                        ? "Update & Re-Send Feedback to Patient"
+                        : "✓ Complete Test & Send Feedback to Patient"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Footer Sign-off */}
             <div className="pt-8 border-t border-slate-200 flex justify-between items-end text-xs text-slate-500">

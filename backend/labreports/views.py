@@ -444,11 +444,29 @@ def review_lab_report(request, report_id):
 
     report.save()
 
-    # Update requisition if linked
+    # Route to laboratory queue upon physician approval without patient needing to take manual steps
     if report.lab_request:
-        report.lab_request.status = 'completed' if approval_status_choice == 'approved' else 'processing'
+        if approval_status_choice == 'approved':
+            report.lab_request.status = 'processing'
+            if physician_notes:
+                report.lab_request.clinical_notes = physician_notes
+        elif approval_status_choice == 'rejected':
+            report.lab_request.status = 'cancelled'
         report.lab_request.updated_at = now
         report.lab_request.save()
+    else:
+        if approval_status_choice == 'approved':
+            # Create a LabRequest so it automatically flows directly into the lab portal queue
+            new_req = LabRequest.objects.create(
+                patient=report.patient,
+                doctor=reviewer,
+                test_type=report.report_title or "Laboratory Diagnostic Investigation",
+                priority='routine',
+                status='processing',
+                clinical_notes=physician_notes or "Physician approved report for laboratory diagnostic verification.",
+            )
+            report.lab_request = new_req
+            report.save()
 
     # Audit log (FR14)
     LabAuditLog.objects.create(
@@ -840,6 +858,8 @@ def get_lab_portal_dashboard(request):
             "has_ocr": bool(rep and rep.ocr_raw_text),
             "approval_status": approval_status_val,
             "is_doctor_approved": is_doctor_approved,
+            "labFeedback": (rep.lab_feedback if (rep and rep.lab_feedback) else req.lab_feedback) or "",
+            "labCompletedAt": timezone.localtime(rep.lab_completed_at).strftime("%Y-%m-%d %I:%M %p") if (rep and rep.lab_completed_at) else None,
         })
 
     # Also map standalone LabReports (walk-in lab tests created directly without a prior request)
@@ -904,6 +924,8 @@ def get_lab_portal_dashboard(request):
             "has_ocr": bool(rep.ocr_raw_text),
             "approval_status": rep.approval_status,
             "is_doctor_approved": is_doctor_approved,
+            "labFeedback": rep.lab_feedback or "",
+            "labCompletedAt": timezone.localtime(rep.lab_completed_at).strftime("%Y-%m-%d %I:%M %p") if rep.lab_completed_at else None,
         })
 
     # Calculate summary statistics
@@ -1035,11 +1057,13 @@ def create_lab_test_record(request):
 @api_view(['POST'])
 def update_lab_test_status(request, test_id):
     """
-    Updates the status and technician notes of a lab test record.
+    Updates the status, lab feedback, and technician notes of a lab test record.
+    Synchronizes across both LabRequest and linked LabReport.
     """
     next_status = request.data.get('status', 'Completed')
     record_type = request.data.get('record_type', 'request')
     technician_notes = request.data.get('technician_notes')
+    lab_feedback = request.data.get('lab_feedback') or request.data.get('feedback') or technician_notes
     now = timezone.now()
 
     if record_type == 'report':
@@ -1047,14 +1071,35 @@ def update_lab_test_status(request, test_id):
         if next_status == 'Completed':
             rep.approval_status = 'approved'
             rep.is_dispatched_to_patient = True
+            rep.lab_completed_at = now
         elif next_status == 'In Progress':
-            rep.approval_status = 'draft'
-        if technician_notes:
-            rep.physician_notes = technician_notes
+            rep.lab_completed_at = None
+
+        if lab_feedback:
+            rep.lab_feedback = lab_feedback
         rep.updated_at = now
         rep.save()
+
+        # If linked to a request, synchronize it too
+        if rep.lab_request:
+            req = rep.lab_request
+            if next_status == 'Completed':
+                req.status = 'completed'
+            elif next_status == 'In Progress':
+                req.status = 'processing'
+            if lab_feedback:
+                req.lab_feedback = lab_feedback
+            req.updated_at = now
+            req.save()
+
         updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
-        return Response({"message": "Report status updated.", "status": next_status, "updated_at": updated_str})
+        return Response({
+            "message": "Report status and laboratory feedback updated.",
+            "status": next_status,
+            "lab_feedback": rep.lab_feedback,
+            "lab_completed_at": timezone.localtime(rep.lab_completed_at).strftime("%Y-%m-%d %I:%M %p") if rep.lab_completed_at else None,
+            "updated_at": updated_str,
+        })
     else:
         req = get_object_or_404(LabRequest, request_id=test_id)
         if next_status == 'Completed':
@@ -1064,6 +1109,8 @@ def update_lab_test_status(request, test_id):
         else:
             req.status = 'requested'
 
+        if lab_feedback:
+            req.lab_feedback = lab_feedback
         if technician_notes:
             req.clinical_notes = technician_notes
         req.updated_at = now
@@ -1074,11 +1121,22 @@ def update_lab_test_status(request, test_id):
             if next_status == 'Completed':
                 rep.approval_status = 'approved'
                 rep.is_dispatched_to_patient = True
+                rep.lab_completed_at = now
+            elif next_status == 'In Progress':
+                rep.lab_completed_at = None
+            if lab_feedback:
+                rep.lab_feedback = lab_feedback
             rep.updated_at = now
             rep.save()
 
         updated_str = timezone.localtime(now).strftime("%Y-%m-%d %I:%M %p")
-        return Response({"message": "Test request status updated.", "status": next_status, "updated_at": updated_str})
+        return Response({
+            "message": "Test request status and laboratory feedback updated.",
+            "status": next_status,
+            "lab_feedback": req.lab_feedback,
+            "lab_completed_at": timezone.localtime(rep.lab_completed_at).strftime("%Y-%m-%d %I:%M %p") if (rep and rep.lab_completed_at) else None,
+            "updated_at": updated_str,
+        })
 
 
 @api_view(['POST'])

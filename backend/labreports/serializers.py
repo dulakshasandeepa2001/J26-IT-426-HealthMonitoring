@@ -43,6 +43,7 @@ class LabRequestSerializer(serializers.ModelSerializer):
             'doctor_name',
             'test_type',
             'clinical_notes',
+            'lab_feedback',
             'priority',
             'status',
             'requested_at',
@@ -55,6 +56,7 @@ class LabReportSerializer(serializers.ModelSerializer):
     audit_logs = LabAuditLogSerializer(many=True, read_only=True)
     patient_name = serializers.CharField(source='patient.username', read_only=True)
     reviewed_by_name = serializers.CharField(source='reviewed_by.username', read_only=True)
+    lab_status = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
     file_name = serializers.SerializerMethodField()
 
@@ -81,6 +83,9 @@ class LabReportSerializer(serializers.ModelSerializer):
             'reviewed_by_name',
             'physician_notes',
             'reviewed_at',
+            'lab_feedback',
+            'lab_completed_at',
+            'lab_status',
             'is_dispatched_to_patient',
             'contributed_to_surveillance',
             'model_rule_version',
@@ -89,6 +94,13 @@ class LabReportSerializer(serializers.ModelSerializer):
             'observations',
             'audit_logs',
         ]
+
+    def get_lab_status(self, obj):
+        if obj.lab_request:
+            return obj.lab_request.status
+        if obj.lab_completed_at:
+            return 'completed'
+        return 'processing' if obj.approval_status == 'approved' else 'requested'
 
     def get_file_url(self, obj):
         if obj.report_file:

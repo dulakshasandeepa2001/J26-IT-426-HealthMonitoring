@@ -64,6 +64,9 @@ interface LabReport {
   physician_notes: string | null;
   reviewed_at: string | null;
   is_dispatched_to_patient?: boolean;
+  lab_feedback?: string | null;
+  lab_completed_at?: string | null;
+  lab_status?: string | null;
   observations: LabObservation[];
 }
 
@@ -536,7 +539,27 @@ export default function PatientLabReportsPage() {
                         </span>
                       </div>
 
-                      {r.reviewed_by_name ? (
+                      {r.lab_feedback || r.lab_completed_at ? (
+                        <div className="text-[11px] text-teal-800 font-semibold border-t border-slate-100 pt-2 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <FlaskConical className="w-3.5 h-3.5 text-teal-600" />
+                            <span>Lab Feedback Ready</span>
+                          </span>
+                          <span className="text-[10px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded-md font-bold">
+                            Completed
+                          </span>
+                        </div>
+                      ) : r.approval_status === "approved" || r.is_dispatched_to_patient ? (
+                        <div className="text-[11px] text-blue-800 font-semibold border-t border-slate-100 pt-2 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                            <span>Queued in Laboratory</span>
+                          </span>
+                          <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-bold">
+                            Doctor Approved
+                          </span>
+                        </div>
+                      ) : r.reviewed_by_name ? (
                         <div className="text-[11px] text-indigo-700 font-semibold border-t border-slate-100 pt-2 flex items-center gap-1.5">
                           <Stethoscope className="w-3.5 h-3.5 text-indigo-600" />
                           <span>Reviewed by Dr. {r.reviewed_by_name}</span>
@@ -544,7 +567,7 @@ export default function PatientLabReportsPage() {
                       ) : (
                         <div className="text-[11px] text-amber-700 font-medium border-t border-slate-100 pt-2 flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Parameters Extracted &bull; Awaiting Physician Gate</span>
+                          <span>Awaiting Physician Review</span>
                         </div>
                       )}
                     </div>
@@ -562,7 +585,7 @@ export default function PatientLabReportsPage() {
                 {/* Header Information */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between pb-5 border-b border-slate-100 gap-4">
                   <div>
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-xl font-black text-slate-900 tracking-tight">
                         {selectedReport.report_title}
                       </h2>
@@ -574,6 +597,18 @@ export default function PatientLabReportsPage() {
                         <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-amber-600" />
                           Pending Physician Verification
+                        </span>
+                      )}
+
+                      {selectedReport.lab_feedback || selectedReport.lab_completed_at ? (
+                        <span className="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-teal-50 text-teal-800 border border-teal-200 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                          Lab Verified & Feedback Ready
+                        </span>
+                      ) : (selectedReport.approval_status === "approved" || selectedReport.is_dispatched_to_patient) && (
+                        <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
+                          <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                          Routed to Lab Queue
                         </span>
                       )}
                     </div>
@@ -625,6 +660,93 @@ export default function PatientLabReportsPage() {
                       <span>Delete</span>
                     </button>
                   </div>
+                </div>
+
+                {/* 2-Column Clinical Review & Laboratory Verification Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Card 1: Physician Clinical Review & Advice */}
+                  {selectedReport.physician_notes ? (
+                    <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-indigo-900">
+                        <div className="flex items-center gap-1.5">
+                          <Stethoscope className="w-4 h-4 text-indigo-600" />
+                          <span>Physician Clinical Advice</span>
+                        </div>
+                        {selectedReport.reviewed_by_name && (
+                          <span className="text-[11px] text-indigo-700 font-semibold">
+                            Dr. {selectedReport.reviewed_by_name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                        &ldquo;{selectedReport.physician_notes}&rdquo;
+                      </p>
+                      {selectedReport.reviewed_at && (
+                        <div className="text-[10px] text-slate-500 pt-0.5">
+                          Reviewed: {new Date(selectedReport.reviewed_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                        <Clock className="w-4 h-4 text-amber-600" />
+                        <span>Physician Review Pending</span>
+                      </div>
+                      <p className="text-[11px] text-amber-800 leading-relaxed">
+                        Awaiting doctor verification. Once verified, clinical notes and recommendations will appear here.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Card 2: Laboratory Findings & Technologist Remarks */}
+                  {selectedReport.lab_feedback ? (
+                    <div className="p-4 rounded-2xl bg-teal-50/80 border border-teal-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-teal-900">
+                        <div className="flex items-center gap-1.5">
+                          <FlaskConical className="w-4 h-4 text-teal-600" />
+                          <span>Laboratory Feedback & Findings</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[10px] font-extrabold uppercase">
+                          Lab Verified
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                        &ldquo;{selectedReport.lab_feedback}&rdquo;
+                      </p>
+                      <div className="text-[10px] text-teal-700 font-semibold flex items-center justify-between pt-0.5">
+                        <span>{selectedReport.lab_name}</span>
+                        {selectedReport.lab_completed_at && (
+                          <span>{new Date(selectedReport.lab_completed_at).toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : selectedReport.approval_status === "approved" || selectedReport.is_dispatched_to_patient ? (
+                    <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-bold text-blue-900">
+                        <div className="flex items-center gap-1.5">
+                          <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+                          <span>Forwarded to Laboratory Queue</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase">
+                          Processing
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-blue-800 leading-relaxed">
+                        Your doctor has approved this test. It has been routed directly into the diagnostic laboratory for verification without requiring you to visit. Laboratory technologist feedback will appear here once complete.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                        <FlaskConical className="w-4 h-4 text-slate-500" />
+                        <span>Laboratory Verification</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        Following physician approval, this investigation routes directly to the laboratory queue without in-person submission.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* View Switcher Tabs: Original Document vs Clinical Biomarkers */}
