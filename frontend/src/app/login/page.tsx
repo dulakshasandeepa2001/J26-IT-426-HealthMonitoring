@@ -14,26 +14,40 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
+
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user has an existing session, but DO NOT auto-redirect automatically
     const storedUser = localStorage.getItem("meditrack_user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        if (user.role === "admin") {
-          router.push("/admin/dashboard");
-        } else if (user.role === "doctor") {
-          router.push("/doctor/dashboard");
-        } else if (user.role === "lab") {
-          router.push("/lab/dashboard");
-        } else {
-          router.push("/patient/dashboard");
+        if (user && user.username) {
+          setCurrentUser(user);
         }
       } catch {
         localStorage.removeItem("meditrack_user");
       }
     }
-  }, [router]);
+  }, []);
+
+  const handleClearSession = () => {
+    localStorage.removeItem("meditrack_user");
+    setCurrentUser(null);
+  };
+
+  const handleGoToDashboard = () => {
+    if (!currentUser) return;
+    if (currentUser.role === "admin") {
+      router.push("/admin/dashboard");
+    } else if (currentUser.role === "doctor") {
+      router.push("/doctor/dashboard");
+    } else if (currentUser.role === "lab") {
+      router.push("/lab/dashboard");
+    } else {
+      router.push("/patient/dashboard");
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +145,35 @@ export default function Login() {
               <span>Patient • Doctor • Admin Portal</span>
             </div>
           </div>
+
+          {/* Active Session Notice */}
+          {currentUser && (
+            <div className="mb-6 p-4 bg-blue-50/90 border border-blue-200 rounded-2xl text-xs shadow-sm">
+              <div className="text-slate-600 font-medium">Currently signed in as:</div>
+              <div className="font-extrabold text-slate-900 capitalize text-sm mt-0.5 flex items-center justify-between">
+                <span>{currentUser.username}</span>
+                <span className="text-[11px] text-blue-700 font-bold bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full uppercase">
+                  {currentUser.role}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-blue-200/60">
+                <button
+                  type="button"
+                  onClick={handleGoToDashboard}
+                  className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer text-center shadow-sm"
+                >
+                  Go to Dashboard
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearSession}
+                  className="py-2 px-3 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 font-bold text-xs transition cursor-pointer"
+                >
+                  Sign Out / Switch
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Error Alert */}
           {error && (

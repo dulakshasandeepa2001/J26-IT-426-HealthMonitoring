@@ -167,7 +167,7 @@ const SAMPLE_QUEUE: Patient[] = [
         id: "RX-2026-190",
         receiptNumber: "REC-0190",
         date: "15 Feb 2026",
-        doctor: "Dr. W.G. Dulaksha",
+        doctor: "Dr. Specialist",
         clinic: "MediTrack Outpatient Clinic",
         diagnosis: "Tension Headache",
         medicines: [
@@ -207,7 +207,7 @@ const SAMPLE_QUEUE: Patient[] = [
         id: "RX-2026-550",
         receiptNumber: "REC-0550",
         date: "12 Jun 2026",
-        doctor: "Dr. W.G. Dulaksha",
+        doctor: "Dr. Specialist",
         clinic: "MediTrack OPD",
         diagnosis: "Diabetic Neuropathy Early Signs",
         medicines: [
@@ -265,7 +265,7 @@ export default function DoctorDashboard() {
   const router = useRouter();
 
   // Doctor session state
-  const [doctorName, setDoctorName] = useState("Dr. W.G. Dulaksha");
+  const [doctorName, setDoctorName] = useState("Doctor");
   const [hospital, setHospital] = useState("MediTrack General Hospital");
 
   // Patient Queue & Active Patient State

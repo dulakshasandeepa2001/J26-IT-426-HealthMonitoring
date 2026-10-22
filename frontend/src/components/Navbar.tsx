@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Plus, 
@@ -9,11 +9,42 @@ import {
   Menu, 
   X, 
   ShieldCheck, 
-  Clock
+  Clock,
+  User,
+  LogOut
 } from "lucide-react";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("meditrack_user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.username) {
+          setCurrentUser(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("meditrack_user");
+    setCurrentUser(null);
+    window.location.href = "/";
+  };
+
+  const getDashboardHref = () => {
+    if (!currentUser) return "/login";
+    if (currentUser.role === "admin") return "/admin/dashboard";
+    if (currentUser.role === "doctor") return "/doctor/dashboard";
+    if (currentUser.role === "lab") return "/lab/dashboard";
+    return "/patient/dashboard";
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all">
@@ -39,9 +70,22 @@ export default function Navbar() {
               <span>Accredited Healthcare Center</span>
             </span>
             <span className="hidden sm:inline-block">•</span>
-            <Link href="/login" className="hover:text-white underline font-semibold transition">
-              Portal Sign In
-            </Link>
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span>Signed in: <strong className="text-white capitalize">{currentUser.username}</strong></span>
+                <span>•</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-amber-300 hover:text-white underline font-semibold transition cursor-pointer"
+                >
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="hover:text-white underline font-semibold transition">
+                Portal Sign In
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -102,12 +146,33 @@ export default function Navbar() {
 
         {/* Right Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-xs font-bold text-slate-700 hover:text-blue-600 px-4 py-2.5 rounded-full hover:bg-slate-100 transition"
-          >
-            Sign In
-          </Link>
+          {currentUser ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={getDashboardHref()}
+                className="text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-4 py-2.5 rounded-full transition flex items-center gap-1.5"
+              >
+                <User className="w-3.5 h-3.5 text-blue-600" />
+                <span className="capitalize">{currentUser.username}</span>
+                <span className="text-[10px] text-blue-500 font-semibold uppercase">({currentUser.role})</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 px-3.5 py-2.5 rounded-full transition cursor-pointer flex items-center gap-1"
+                title="Sign out of current account"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs font-bold text-slate-700 hover:text-blue-600 px-4 py-2.5 rounded-full hover:bg-slate-100 transition"
+            >
+              Sign In
+            </Link>
+          )}
 
           <Link
             href="/register"
@@ -190,21 +255,45 @@ export default function Navbar() {
             </a>
 
             <div className="pt-4 flex flex-col gap-3">
-              <Link
-                href="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white py-3 text-sm font-bold shadow-md shadow-blue-600/30"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Book Online Now</span>
-              </Link>
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 text-xs font-bold text-slate-600 hover:text-blue-600"
-              >
-                Sign In to Portal
-              </Link>
+              {currentUser ? (
+                <>
+                  <Link
+                    href={getDashboardHref()}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white py-3 text-sm font-bold shadow-md shadow-blue-600/30"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Go to Dashboard ({currentUser.username})</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-center py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-full border border-rose-200"
+                  >
+                    Sign Out ({currentUser.username})
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white py-3 text-sm font-bold shadow-md shadow-blue-600/30"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Book Online Now</span>
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 text-xs font-bold text-slate-600 hover:text-blue-600"
+                  >
+                    Sign In to Portal
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

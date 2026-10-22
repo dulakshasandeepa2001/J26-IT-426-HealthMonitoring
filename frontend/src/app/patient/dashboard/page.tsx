@@ -103,7 +103,7 @@ const DEFAULT_DOCTORS: Doctor[] = [
 
 export default function PatientDashboard() {
   const router = useRouter();
-  const [userSession, setUserSession] = useState<{ username: string; role: string; doctorID: string } | null>(null);
+  const [userSession, setUserSession] = useState<{ id?: number; username: string; role: string; doctorID?: string } | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>(DEFAULT_DOCTORS);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -324,10 +324,12 @@ export default function PatientDashboard() {
               {userSession?.username?.charAt(0).toUpperCase() || "P"}
             </div>
             <div className="text-left hidden sm:block">
-              <span className="text-xs font-bold text-slate-900 leading-tight">
-                {userSession?.username || "Dulaksha Sandeepa"}
+              <span className="text-xs font-bold text-slate-900 leading-tight capitalize">
+                {userSession?.username || "Patient"}
               </span>
-              <span className="text-[10px] text-slate-500 block">ID: PAT-2026-088</span>
+              <span className="text-[10px] text-slate-500 block">
+                ID: {userSession?.id ? `PAT-2026-${String(userSession.id).padStart(3, "0")}` : "PAT-USER"}
+              </span>
             </div>
           </div>
 
@@ -371,8 +373,8 @@ export default function PatientDashboard() {
                   <User className="w-8 h-8" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900">
-                    {userSession?.username || "Dulaksha Sandeepa"}
+                  <h2 className="text-xl font-extrabold text-slate-900 capitalize">
+                    {userSession?.username || "Patient"}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium mt-1">
                     <span><strong>Age:</strong> 24 Yrs</span>
