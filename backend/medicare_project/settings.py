@@ -2,6 +2,7 @@
 Django settings for medicare_project project.
 """
 
+import os
 from pathlib import Path
 from decouple import config
 import socket
@@ -81,20 +82,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'medicare_project.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env_config('SUPABASE_DB_NAME', default='postgres'),
-        'USER': env_config('SUPABASE_DB_USER', default='postgres.wixgbvdcwteghicynwvz'),
-        'PASSWORD': env_config('SUPABASE_DB_PASSWORD', default='Ddugiborn@2001'),
-        'HOST': env_config('SUPABASE_DB_HOST', default='aws-1-ap-southeast-2.pooler.supabase.com'),
-        'PORT': env_config('SUPABASE_DB_PORT', default='6543'),
-        'CONN_MAX_AGE': 0,
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+# Set USE_LOCAL_DB=True in .env (or as an env var) to use SQLite instead of Supabase.
+# Useful when there is no internet connection / Supabase is unreachable.
+_use_local_db = os.environ.get('USE_LOCAL_DB', env_config('USE_LOCAL_DB', default='False')).strip().lower() in ('true', '1', 'yes')
+
+if _use_local_db:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env_config('SUPABASE_DB_NAME', default='postgres'),
+            'USER': env_config('SUPABASE_DB_USER', default='postgres.wixgbvdcwteghicynwvz'),
+            'PASSWORD': env_config('SUPABASE_DB_PASSWORD', default='Ddugiborn@2001'),
+            'HOST': env_config('SUPABASE_DB_HOST', default='aws-1-ap-southeast-2.pooler.supabase.com'),
+            'PORT': env_config('SUPABASE_DB_PORT', default='6543'),
+            'CONN_MAX_AGE': 0,
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
 
 # -----------------------------------------
 # PASSWORD VALIDATION
