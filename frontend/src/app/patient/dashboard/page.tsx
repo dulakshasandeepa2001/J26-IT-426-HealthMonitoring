@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 import { 
   User, 
   Clock, 
@@ -187,24 +188,18 @@ export default function PatientDashboard() {
 
   // Initialize Session
   useEffect(() => {
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (!storedUser) {
+    const user = getStoredUser();
+    if (!user) {
       router.push("/login");
       return;
     }
     
-    try {
-      const parsed = JSON.parse(storedUser);
-      setUserSession(parsed);
-      
-      const today = new Date();
-      const offset = today.getTimezoneOffset();
-      const localToday = new Date(today.getTime() - (offset * 60 * 1000));
-      setAvailabilityDate(localToday.toISOString().split("T")[0]);
-    } catch {
-      localStorage.removeItem("meditrack_user");
-      router.push("/login");
-    }
+    setUserSession(user);
+    
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const localToday = new Date(today.getTime() - (offset * 60 * 1000));
+    setAvailabilityDate(localToday.toISOString().split("T")[0]);
   }, [router]);
 
   // Load registered doctors from backend API
@@ -255,7 +250,7 @@ export default function PatientDashboard() {
   }, [selectedDoctor, availabilityDate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     router.push("/login");
   };
 

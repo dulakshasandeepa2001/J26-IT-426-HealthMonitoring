@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser, setStoredUser, clearStoredUser } from "@/lib/auth";
 import { Lock, User, AlertCircle, ArrowLeft, Plus, ShieldCheck, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -17,22 +18,15 @@ export default function Login() {
   const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
 
   useEffect(() => {
-    // Check if user has an existing session, but DO NOT auto-redirect automatically
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        if (user && user.username) {
-          setCurrentUser(user);
-        }
-      } catch {
-        localStorage.removeItem("meditrack_user");
-      }
+    // Check if user has an existing session in current tab/session
+    const user = getStoredUser();
+    if (user) {
+      setCurrentUser(user);
     }
   }, []);
 
   const handleClearSession = () => {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     setCurrentUser(null);
   };
 
@@ -66,19 +60,16 @@ export default function Login() {
         body: JSON.stringify({ username, password }),
       });
 
-      // Save user session details
-      localStorage.setItem(
-        "meditrack_user",
-        JSON.stringify({
-          id: data.id,
-          username: data.username,
-          role: data.role,
-          doctorID: data.doctorID,
-          lab_name: data.lab_name,
-          license_id: data.license_id,
-          lab_address: data.lab_address,
-        })
-      );
+      // Save user session details in sessionStorage
+      setStoredUser({
+        id: data.id,
+        username: data.username,
+        role: data.role,
+        doctorID: data.doctorID,
+        lab_name: data.lab_name,
+        license_id: data.license_id,
+        lab_address: data.lab_address,
+      });
 
       if (data.role === "admin") {
         router.push("/admin/dashboard");

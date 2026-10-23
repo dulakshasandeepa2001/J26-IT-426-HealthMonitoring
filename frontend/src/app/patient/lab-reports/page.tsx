@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
 import {
   FileText,
   ArrowLeft,
@@ -100,15 +101,9 @@ export default function PatientLabReportsPage() {
   const [userSession, setUserSession] = useState<{ id?: number; username: string; role: string } | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem("meditrack_user");
-    let user = null;
-    if (raw) {
-      try {
-        user = JSON.parse(raw);
-        setUserSession(user);
-      } catch (err) {
-        console.error("Error parsing user session:", err);
-      }
+    const user = getStoredUser();
+    if (user) {
+      setUserSession(user);
     }
     fetchReports(user);
   }, []);

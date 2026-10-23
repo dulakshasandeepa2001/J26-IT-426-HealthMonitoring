@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
 import {
   Activity,
   ArrowLeft,
@@ -115,13 +116,9 @@ export default function DiseaseIntelligencePage() {
   const [activeTab, setActiveTab] = useState<"provinces" | "districts" | "trends">("provinces");
 
   useEffect(() => {
-    const raw = localStorage.getItem("meditrack_user");
-    if (raw) {
-      try {
-        setUserSession(JSON.parse(raw));
-      } catch (e) {
-        console.error(e);
-      }
+    const user = getStoredUser();
+    if (user) {
+      setUserSession(user);
     }
     loadSurveillanceData(selectedCondition);
   }, [selectedCondition]);

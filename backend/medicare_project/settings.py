@@ -83,7 +83,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'medicare_project.wsgi.application'
 
 # Set USE_LOCAL_DB=True in .env (or as an env var) to use SQLite instead of Supabase.
-# Useful when there is no internet connection / Supabase is unreachable.
+# Supabase PostgreSQL is the primary database
 _use_local_db = os.environ.get('USE_LOCAL_DB', env_config('USE_LOCAL_DB', default='False')).strip().lower() in ('true', '1', 'yes')
 
 if _use_local_db:

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 import { 
   Stethoscope, 
   LogOut, 
@@ -465,21 +466,16 @@ export default function DoctorDashboard() {
   // Initialize doctor session
   useEffect(() => {
     let currentDocId = "DOC-0001";
-    const stored = localStorage.getItem("meditrack_user");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.username) {
-          const raw = parsed.username.replace(/^dr[._\s]*/i, "");
-          const cleanName = raw.charAt(0).toUpperCase() + raw.slice(1);
-          setDoctorName(`Dr. ${cleanName}`);
-        }
-        if (parsed.doctorID) {
-          currentDocId = parsed.doctorID;
-          setDoctorId(parsed.doctorID);
-        }
-      } catch (e) {
-        // use default
+    const user = getStoredUser();
+    if (user) {
+      if (user.username) {
+        const raw = user.username.replace(/^dr[._\s]*/i, "");
+        const cleanName = raw.charAt(0).toUpperCase() + raw.slice(1);
+        setDoctorName(`Dr. ${cleanName}`);
+      }
+      if (user.doctorID) {
+        currentDocId = user.doctorID;
+        setDoctorId(user.doctorID);
       }
     }
     getTasks(selectedTaskDate, currentDocId);
@@ -495,7 +491,7 @@ export default function DoctorDashboard() {
 
   // Handle Logout
   const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     router.push("/login");
   };
 

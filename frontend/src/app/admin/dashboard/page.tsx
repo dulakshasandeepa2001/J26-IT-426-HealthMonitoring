@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 import {
   ShieldAlert,
   CheckCircle,
@@ -52,19 +53,8 @@ export default function AdminDashboard() {
 
   // Load pending doctors on page load & route protection check
   useEffect(() => {
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (!storedUser) {
-      router.push("/login");
-      return;
-    }
-
-    try {
-      const user = JSON.parse(storedUser);
-      if (user.role !== "admin") {
-        router.push("/login");
-        return;
-      }
-    } catch {
+    const user = getStoredUser();
+    if (!user || user.role !== "admin") {
       router.push("/login");
       return;
     }
@@ -122,7 +112,7 @@ export default function AdminDashboard() {
   }
 
   function handleLogout() {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     router.push("/login");
   }
 

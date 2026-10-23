@@ -13,27 +13,21 @@ import {
   User,
   LogOut
 } from "lucide-react";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ username: string; role: string } | null>(null);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("meditrack_user");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.username) {
-          setCurrentUser(parsed);
-        }
-      }
-    } catch {
-      // ignore
+    const user = getStoredUser();
+    if (user) {
+      setCurrentUser(user);
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     setCurrentUser(null);
     window.location.href = "/";
   };

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 import {
   FileText,
   Upload,
@@ -163,7 +164,9 @@ export default function DoctorLabReviewPage() {
   const handleImportRealDataset = async (useCustomFile: boolean) => {
     try {
       setRetrainingLoading(true);
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = typeof window !== "undefined" 
+        ? (sessionStorage.getItem("token") || localStorage.getItem("token")) 
+        : null;
       const headers: any = token ? { Authorization: `Bearer ${token}` } : {};
 
       let body: any;
@@ -290,20 +293,13 @@ export default function DoctorLabReviewPage() {
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (!storedUser) {
+    const user = getStoredUser();
+    if (!user) {
       router.push("/login");
       return;
     }
-    try {
-      const parsed = JSON.parse(storedUser);
-      if (parsed.role !== "doctor" && parsed.role !== "admin") {
-        router.push("/patient/dashboard");
-        return;
-      }
-    } catch (e) {
-      localStorage.removeItem("meditrack_user");
-      router.push("/login");
+    if (user.role !== "doctor" && user.role !== "admin") {
+      router.push("/patient/dashboard");
       return;
     }
 
@@ -335,10 +331,9 @@ export default function DoctorLabReviewPage() {
       let reviewerId: number | undefined = undefined;
       let reviewerName: string | undefined = undefined;
       try {
-        const storedUser = localStorage.getItem("meditrack_user");
-        if (storedUser) {
-          const u = JSON.parse(storedUser);
-          reviewerId = u.id;
+        const u = getStoredUser();
+        if (u) {
+          reviewerId = typeof u.id === "number" ? u.id : undefined;
           reviewerName = u.username;
         }
       } catch (e) {}

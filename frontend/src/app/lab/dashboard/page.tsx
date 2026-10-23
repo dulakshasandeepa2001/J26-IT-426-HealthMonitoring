@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api";
+import { getStoredUser, clearStoredUser } from "@/lib/auth";
 import {
   FlaskConical,
   Activity,
@@ -163,16 +164,11 @@ export default function LabDashboard() {
   const [paramFlag, setParamFlag] = useState<"Normal" | "High" | "Low">("Normal");
   const [savingParam, setSavingParam] = useState(false);
 
-  // Load User from LocalStorage and Fetch Dashboard from Backend
+  // Load User from SessionStorage and Fetch Dashboard from Backend
   useEffect(() => {
-    const storedUser = localStorage.getItem("meditrack_user");
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-      } catch {
-        // Fallback
-      }
+    const user = getStoredUser();
+    if (user) {
+      setUser(user);
     }
 
     fetchDashboardData();
@@ -228,7 +224,7 @@ export default function LabDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("meditrack_user");
+    clearStoredUser();
     router.push("/login");
   };
 
