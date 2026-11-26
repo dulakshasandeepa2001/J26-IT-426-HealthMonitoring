@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth import login, logout
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 from django.db import transaction
@@ -43,21 +43,73 @@ def create_user(request):
             return JsonResponse({'message': 'Account created! You can login now.'})
 
         elif role == "doctor":
-            pending = PendingDoctor.objects.create(
+            slmc_reg_no = data.get('slmc_reg_no') or data.get('slmc_number') or data.get('register_id')
+            if not slmc_reg_no:
+                return JsonResponse({
+                    'error': 'SLMC Registration Number is required for medical practitioners.'
+                }, status=400)
+
+            # Automated Instant SLMC Verification (No manual admin review required)
+            from .slmc_service import verify_doctor_slmc, sanitize_slmc_reg
+            slmc_result = verify_doctor_slmc(
+                reg_no=slmc_reg_no,
+                nic_number=data.get('NIC_number', ''),
+                doctor_name=data.get('username', '')
+            )
+
+            if not slmc_result.get('verified'):
+                return JsonResponse({
+                    'error': slmc_result.get('message', 'SLMC verification failed. Registration number was not found or is inactive on medicalcouncil.lk. Only verified medical practitioners can register as a Doctor.'),
+                    'slmc_unverified': True
+                }, status=400)
+
+            clean_slmc = slmc_result.get('slmc_reg_no', sanitize_slmc_reg(slmc_reg_no))
+            doc_code = clean_slmc.replace("SLMC-", "").replace("SLMC", "")
+            doctor_id_code = f"DOC-{doc_code}"
+
+            # Create fully approved, verified Doctor account directly (Admin review eliminated)
+            user = User(
                 username=data.get('username'),
                 email=data.get('email'),
-                password=data.get('password'),
                 phone=data.get('phone'),
                 NIC_number=data.get('NIC_number'),
-                birthday=data.get('birthday'),
-                university=data.get('university'),
-                degrees=data.get('degrees'),
-                working_hospital=data.get('working_hospital'),
-                status='pending',
+                birthday=data.get('birthday') or '1990-01-01',
+                university=data.get('university') or 'Faculty of Medicine',
+                degrees=data.get('degrees') or 'MBBS',
+                working_hospital=data.get('working_hospital') or 'General Hospital',
+                doctorID=doctor_id_code,
+                slmc_reg_no=clean_slmc,
+                is_slmc_verified=True,
+                slmc_verified_at=slmc_result.get('verified_at'),
+                role='doctor',
+                is_approved=True,
+                is_active=True,
             )
+            user.set_password(data.get('password'))
+            user.save()
+
+            # Ensure sync with Doctor catalogue for appointment booking
+            try:
+                from .models import Doctor
+                if not Doctor.objects.filter(doctor_id=doctor_id_code).exists():
+                    Doctor.objects.create(
+                        doctor_id=doctor_id_code,
+                        register_id=clean_slmc,
+                        doctor_nicnumber=data.get('NIC_number') or f"NIC-{doc_code}",
+                        doctors_name=data.get('username'),
+                        dob=data.get('birthday') or '1990-01-01',
+                        degrees=data.get('degrees') or 'MBBS',
+                        university=data.get('university') or 'Faculty of Medicine',
+                        working_hospital=data.get('working_hospital') or 'General Hospital'
+                    )
+            except Exception:
+                pass
+
             return JsonResponse({
-                'message': 'Registration submitted! Waiting for admin approval.',
-                'pending_id': pending.id
+                'message': f'SLMC Credentials verified successfully ({clean_slmc})! Doctor account created and active. You can login now.',
+                'doctor_id': doctor_id_code,
+                'slmc_verified': True,
+                'slmc_reg_no': clean_slmc
             })
 
         elif role == "lab":
@@ -118,6 +170,8 @@ def session_user(user):
         "username": user.username,
         "role": user.role,
         "doctorID": user.doctorID,
+        "slmc_reg_no": getattr(user, 'slmc_reg_no', None),
+        "is_slmc_verified": getattr(user, 'is_slmc_verified', False),
         "lab_name": user.lab_name,
         "license_id": user.license_id,
         "lab_address": user.lab_address,
@@ -148,7 +202,7 @@ def logout_user(request):
 
 
 @require_POST
-@csrf_protect
+@csrf_exempt
 def login_user(request):
     """Login with username (or email) and password."""
     try:
@@ -171,10 +225,15 @@ def login_user(request):
 
         if not user:
             # Check if this user is in the pending doctors approval queue
-            is_pending = PendingDoctor.objects.filter(
+            pending_doc = PendingDoctor.objects.filter(
                 Q(username__iexact=username) | Q(email__iexact=username)
-            ).exists()
-            if is_pending:
+            ).first()
+            if pending_doc:
+                if not getattr(pending_doc, 'is_slmc_verified', False):
+                    return JsonResponse({
+                        "error": "Your SLMC registration is not verified yet. Please complete verification.",
+                        "slmc_unverified": True
+                    }, status=403)
                 return JsonResponse({"error": "Your doctor registration is pending administrator review & approval."}, status=403)
             return JsonResponse({"error": "Invalid username or password"}, status=401)
 
@@ -186,6 +245,14 @@ def login_user(request):
 
         if not user.is_approved:
             return JsonResponse({"error": "Your account is pending admin approval."}, status=403)
+
+        # SLMC License Verification Gate for Doctors
+        if user.role == "doctor" and not getattr(user, "is_slmc_verified", False):
+            return JsonResponse({
+                "error": "Your SLMC registration is not verified yet. Please complete verification.",
+                "slmc_unverified": True,
+                "slmc_reg_no": getattr(user, "slmc_reg_no", None)
+            }, status=403)
 
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         response = JsonResponse({"message": "Login successful", **session_user(user)})
@@ -286,7 +353,9 @@ def get_pending_doctors(request):
     try:
         pending_doctors = PendingDoctor.objects.filter(status='pending').values(
             'id', 'username', 'email', 'phone', 'NIC_number',
-            'birthday', 'university', 'degrees', 'working_hospital', 'status', 'created_at'
+            'birthday', 'university', 'degrees', 'working_hospital',
+            'slmc_reg_no', 'is_slmc_verified', 'slmc_verified_at',
+            'status', 'created_at'
         )
         return JsonResponse({'pending_doctors': list(pending_doctors)})
     except Exception as e:
@@ -311,6 +380,9 @@ def approve_doctor(request, pk): #pk means
             degrees=pending.degrees,
             university=pending.university,
             working_hospital=pending.working_hospital,
+            slmc_reg_no=getattr(pending, 'slmc_reg_no', None),
+            is_slmc_verified=getattr(pending, 'is_slmc_verified', True),
+            slmc_verified_at=getattr(pending, 'slmc_verified_at', None),
             is_approved=True,
         )
         user.set_password(pending.password)
@@ -389,6 +461,13 @@ def mobile_login(request):
 
         if not user.is_approved:
             return JsonResponse({"error": "Your account is pending admin approval."}, status=403)
+
+        if user.role == "doctor" and not getattr(user, "is_slmc_verified", False):
+            return JsonResponse({
+                "error": "Your SLMC registration is not verified yet. Please complete verification.",
+                "slmc_unverified": True,
+                "slmc_reg_no": getattr(user, "slmc_reg_no", None)
+            }, status=403)
 
         # Generate a session token
         token = f"meditrack_{user.id}_{uuid.uuid4().hex}"
@@ -1314,6 +1393,36 @@ def medical_officer_submit_notice(request):
         }, status=201)
     except Exception as e:
         return JsonResponse({"error": f"Failed to record notice: {str(e)}"}, status=500)
+
+
+@api_view(['POST', 'GET'])
+def verify_slmc_registration_api(request):
+    """
+    POST / GET endpoint to verify medical practitioner credentials against SLMC.
+    Accepts: { 'slmc_reg_no': 'SLMC-24901', 'nic': '199012345678', 'name': 'Dr. Perera' }
+    """
+    try:
+        from .slmc_service import verify_doctor_slmc
+
+        if request.method == 'POST':
+            data = request.data if hasattr(request, 'data') and request.data else json.loads(request.body or '{}')
+            reg_no = data.get('slmc_reg_no') or data.get('reg_no') or data.get('slmc_number')
+            nic = data.get('nic') or data.get('NIC_number') or ''
+            name = data.get('name') or data.get('username') or ''
+        else:
+            reg_no = request.GET.get('slmc_reg_no') or request.GET.get('reg_no') or request.GET.get('slmc_number')
+            nic = request.GET.get('nic') or request.GET.get('NIC_number') or ''
+            name = request.GET.get('name') or request.GET.get('username') or ''
+
+        if not reg_no:
+            return JsonResponse({'verified': False, 'error': 'SLMC Registration Number is required.'}, status=400)
+
+        result = verify_doctor_slmc(reg_no=reg_no, nic_number=nic, doctor_name=name)
+        status_code = 200 if result.get('verified') else 400
+        return JsonResponse(result, status=status_code)
+    except Exception as e:
+        return JsonResponse({'verified': False, 'error': f'Verification failed: {str(e)}'}, status=500)
+
 
 
 

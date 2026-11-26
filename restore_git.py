@@ -1,3 +1,4 @@
+# pyrefly: ignore[missing-import]
 from dulwich.repo import Repo
 import os
 

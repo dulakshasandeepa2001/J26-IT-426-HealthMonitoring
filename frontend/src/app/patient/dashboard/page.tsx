@@ -406,9 +406,9 @@ export default function PatientDashboard() {
   };
 
   const filteredDoctors = doctors.filter((doc) =>
-    doc.doctors_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.degrees.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.working_hospital.toLowerCase().includes(searchQuery.toLowerCase())
+    (doc.doctors_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (doc.degrees || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (doc.working_hospital || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

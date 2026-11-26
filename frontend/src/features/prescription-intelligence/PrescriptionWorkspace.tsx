@@ -185,6 +185,7 @@ export default function PrescriptionWorkspace({ requestedConsultation }: { reque
           <div className="mt-4 pt-4 border-t border-indigo-100/80 animate-fadeIn">
             <SmartMedicineRanker
               condition={padState.activeDiagnosis}
+              patientId={rx.activePatient?.id}
               patientAge={rx.activePatient?.age_years}
               severity={
                 rx.activeAnalysis?.payload

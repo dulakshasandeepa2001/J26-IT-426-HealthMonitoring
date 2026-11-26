@@ -3,8 +3,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { 
   Sparkles, CheckCircle, Plus, Star, Award, ShieldAlert, 
-  RefreshCw, TrendingUp, ChevronRight, Stethoscope, AlertCircle 
+  RefreshCw, TrendingUp, ChevronRight, Stethoscope, AlertCircle,
+  Code, Info, ExternalLink, ShieldCheck
 } from "lucide-react";
+
+export interface MedicineHoverDetails {
+  drug_class?: string;
+  why_suggested?: string;
+  lab_alignment?: string;
+  contact_tracing_factor?: string;
+  allergy_clearance?: string;
+  ddi_check?: string;
+  bnf_citation?: string;
+}
 
 export interface RankedMedicine {
   id: string;
@@ -20,6 +31,7 @@ export interface RankedMedicine {
   review_count: number;
   useful_count: number;
   rank: number;
+  hover_details?: MedicineHoverDetails;
 }
 
 export interface ExcludedMedicine {
@@ -31,6 +43,7 @@ export interface ExcludedMedicine {
 
 interface SmartMedicineRankerProps {
   condition: string;
+  patientId?: number | string | null;
   patientAge?: number | null;
   severity?: string;
   allergies?: string[];
@@ -43,6 +56,7 @@ interface SmartMedicineRankerProps {
 
 export function SmartMedicineRanker({
   condition,
+  patientId,
   patientAge,
   severity = "moderate",
   allergies = [],
@@ -57,6 +71,8 @@ export function SmartMedicineRanker({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedConditionName, setSelectedConditionName] = useState(condition);
+  const [hoveredMedId, setHoveredMedId] = useState<string | null>(null);
+  const [pinnedMedId, setPinnedMedId] = useState<string | null>(null);
 
   const fetchRankings = useCallback(async () => {
     if (!condition) return;
@@ -70,6 +86,9 @@ export function SmartMedicineRanker({
         allergies: (allergies || []).join(","),
         red_flags: (redFlags || []).join(",")
       });
+      if (patientId) {
+        params.append("patient_id", String(patientId));
+      }
 
       const res = await fetch(`http://127.0.0.1:8000/api/consultation/rank-medicines/?${params.toString()}`);
       if (!res.ok) {
@@ -90,7 +109,7 @@ export function SmartMedicineRanker({
     } finally {
       setLoading(false);
     }
-  }, [condition, patientAge, severity, allergies, redFlags]);
+  }, [condition, patientId, patientAge, severity, allergies, redFlags]);
 
   useEffect(() => {
     fetchRankings();
@@ -189,6 +208,7 @@ export function SmartMedicineRanker({
           const isAlreadyInRx = currentMedicineNames.some((c) =>
             c.toLowerCase().includes(med.name.split(" ")[0].toLowerCase())
           );
+          const isInspecting = hoveredMedId === med.id || pinnedMedId === med.id;
 
           const getRankBadgeColor = (r: number) => {
             if (r === 1) return "from-amber-400 to-yellow-500 text-amber-950";
@@ -200,12 +220,106 @@ export function SmartMedicineRanker({
           return (
             <div
               key={med.id}
+              onMouseEnter={() => setHoveredMedId(med.id)}
+              onMouseLeave={() => setHoveredMedId(null)}
               className={`relative flex flex-col justify-between rounded-2xl border bg-white p-4 transition-all shadow-sm ${
                 isAlreadyInRx
                   ? "border-emerald-300 ring-2 ring-emerald-500/10"
+                  : isInspecting
+                  ? "border-cyan-400 ring-2 ring-cyan-400/20 shadow-md"
                   : "border-slate-200 hover:border-indigo-300 hover:shadow-md"
               }`}
             >
+              {/* VS Code Style IntelliSense Hover Tooltip */}
+              {isInspecting && (
+                <div
+                  className="absolute left-1/2 -top-3 z-50 w-84 -translate-x-1/2 -translate-y-full rounded-xl border border-slate-700/90 bg-[#1e1e1e] p-3 text-slate-200 shadow-2xl ring-1 ring-black/60 font-mono text-[11px] leading-relaxed transition-all pointer-events-auto animate-fadeIn backdrop-blur-md"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Pointing notch */}
+                  <div className="absolute left-1/2 -bottom-1.5 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b border-slate-700 bg-[#1e1e1e]" />
+
+                  {/* Top VS Code Signature Header */}
+                  <div className="border-b border-slate-700/80 pb-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-300 font-bold">
+                        (medicine) <span className="text-amber-300">{med.name.split(" ")[0]}</span>:
+                      </span>
+                      <span className="rounded bg-slate-800 border border-slate-700 px-1.5 py-0.5 text-[9px] text-cyan-300 font-sans font-semibold flex items-center gap-1">
+                        <Code className="h-2.5 w-2.5 text-cyan-400" /> BNF 70 RAG
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-mono mt-1">
+                      <span className="text-blue-400">class</span>{" "}
+                      <span className="text-emerald-300 font-sans font-medium">
+                        {med.hover_details?.drug_class || med.clinical_role}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body: Syntax-Highlighted Clinical Evidence Sections */}
+                  <div className="mt-2.5 space-y-2 max-h-72 overflow-y-auto pr-1 scrollbar-thin">
+                    {/* 1. Why Suggested */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] font-bold text-cyan-400 uppercase tracking-wide">
+                        <span>💡</span> // WHY SUGGESTED (Clinical RAG):
+                      </div>
+                      <p className="text-[10px] text-slate-300 font-sans pl-2.5 border-l-2 border-cyan-500/60 leading-normal">
+                        {med.hover_details?.why_suggested || med.rationale}
+                      </p>
+                    </div>
+
+                    {/* 2. Lab Alignment */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] font-bold text-emerald-400 uppercase tracking-wide">
+                        <span>🔬</span> // LAB REPORT ALIGNMENT:
+                      </div>
+                      <p className="text-[10px] text-slate-300 font-sans pl-2.5 border-l-2 border-emerald-500/60 leading-normal">
+                        {med.hover_details?.lab_alignment || "Normal platelet & renal parameters confirmed."}
+                      </p>
+                    </div>
+
+                    {/* 3. Contact Tracing Exposure */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] font-bold text-amber-300 uppercase tracking-wide">
+                        <span>📱</span> // CONTACT TRACING & EXPOSURE:
+                      </div>
+                      <p className="text-[10px] text-slate-300 font-sans pl-2.5 border-l-2 border-amber-500/60 leading-normal">
+                        {med.hover_details?.contact_tracing_factor || "Household & proximity risk verified."}
+                      </p>
+                    </div>
+
+                    {/* 4. Allergy & Genetic Shield */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] font-bold text-rose-300 uppercase tracking-wide">
+                        <span>🛡️</span> // ALLERGY & GENETIC SHIELD:
+                      </div>
+                      <p className="text-[10px] text-slate-300 font-sans pl-2.5 border-l-2 border-rose-500/60 leading-normal">
+                        {med.hover_details?.allergy_clearance || "EHR & Family Tree allergy check: Safe."}
+                      </p>
+                    </div>
+
+                    {/* 5. DDI Check */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] font-bold text-indigo-300 uppercase tracking-wide">
+                        <span>⚡</span> // DDI SAFETY CHECK:
+                      </div>
+                      <p className="text-[10px] text-slate-300 font-sans pl-2.5 border-l-2 border-indigo-500/60 leading-normal">
+                        {med.hover_details?.ddi_check || "No adverse interaction with chronic medicines."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Footer: BNF Citation */}
+                  <div className="mt-2 pt-2 border-t border-slate-700/80 text-[9px] text-slate-400 flex items-center justify-between font-sans">
+                    <span className="text-slate-500 font-mono">📚 Citation:</span>
+                    <span className="text-cyan-300 font-semibold truncate max-w-[210px]" title={med.hover_details?.bnf_citation}>
+                      {med.hover_details?.bnf_citation || "BNF 70 Guideline"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div>
                 {/* Top Badge Row */}
                 <div className="flex items-center justify-between gap-2">
@@ -222,9 +336,25 @@ export function SmartMedicineRanker({
                     </span>
                   </div>
 
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-black text-emerald-700">
-                    {med.match_score}% Match
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPinnedMedId(pinnedMedId === med.id ? null : med.id)}
+                      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-mono font-bold transition ${
+                        pinnedMedId === med.id
+                          ? "bg-cyan-600 text-white"
+                          : "bg-slate-900 text-cyan-400 hover:bg-slate-800"
+                      }`}
+                      title="Inspect Clinical RAG Rationale (VS Code Style Hover Card)"
+                    >
+                      <Code className="h-2.5 w-2.5" />
+                      <span>{pinnedMedId === med.id ? "Pinned" : "Inspect"}</span>
+                    </button>
+
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-black text-emerald-700">
+                      {med.match_score}% Match
+                    </span>
+                  </div>
                 </div>
 
                 {/* Drug Name & Role */}

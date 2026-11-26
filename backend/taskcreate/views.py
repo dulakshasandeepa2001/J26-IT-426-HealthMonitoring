@@ -78,7 +78,7 @@ def get_tasks(request):
                 doctor_id = data.get('doctor_id')
                 task_date = data.get('task_date')
 
-        print(f"🔍 Fetching tasks for Doctor ID: {doctor_id} on Date: {task_date}")
+        print(f"[Task] Fetching tasks for Doctor ID: {doctor_id} on Date: {task_date}")
 
         if not doctor_id:
             return JsonResponse({'error': 'Doctor ID is required'}, status=400)
@@ -101,7 +101,7 @@ def get_tasks(request):
             'is_completed'
         ).order_by('task_date', 'start_time')
 
-        print(f"✅ Found {len(tasks)} tasks")
+        print(f"[Task] Found {len(tasks)} tasks")
 
         return JsonResponse({
             'success': True,
@@ -114,7 +114,7 @@ def get_tasks(request):
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
     except Exception as e:
-        print(f"❌ Error fetching tasks: {str(e)}")
+        print(f"[Task Error] Error fetching tasks: {str(e)}")
         return JsonResponse(
             {'error': f'Failed to fetch tasks: {str(e)}'},
             status=500

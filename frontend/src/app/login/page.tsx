@@ -69,17 +69,17 @@ export default function Login() {
         })
       );
 
+      let targetRoute = "/patient/dashboard";
       if (data.role === "admin") {
-        router.push("/admin/dashboard");
+        targetRoute = "/admin/dashboard";
       } else if (data.role === "doctor") {
-        router.push("/doctor/dashboard");
+        targetRoute = "/doctor/dashboard";
       } else if (data.role === "lab") {
-        router.push("/lab/dashboard");
+        targetRoute = "/lab/dashboard";
       } else if (data.role === "medical_officer" || data.role === "phi") {
-        router.push("/medical-officer/dashboard");
-      } else {
-        router.push("/patient/dashboard");
+        targetRoute = "/medical-officer/dashboard";
       }
+      window.location.href = targetRoute;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Invalid username or password");
@@ -139,9 +139,25 @@ export default function Login() {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-medium text-rose-700 flex items-start gap-2.5 shadow-sm">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-medium text-rose-700 space-y-2 shadow-sm">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span className="font-semibold">{error}</span>
+              </div>
+              {error.toLowerCase().includes("slmc") && (
+                <div className="pt-2 border-t border-rose-200/80 flex items-center justify-between text-[11px]">
+                  <span className="text-rose-600">Need to check your SLMC status?</span>
+                  <a
+                    href="https://medicalcouncil.lk/renewal/verify/registration"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold underline text-rose-800 hover:text-rose-950 flex items-center gap-1"
+                  >
+                    <span>SLMC Verify Portal</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
@@ -204,16 +220,7 @@ export default function Login() {
           </form>
 
           {/* Quick Demo Logins */}
-          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2 justify-center">
-            <button
-              type="button"
-              onClick={() => { setUsername("phi_officer"); setPassword("Password@123"); }}
-              className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>🛡️ Fill Medical Officer / PHI Demo</span>
-            </button>
-          </div>
-
+        
           {/* Card Footer Link */}
           <div className="text-center mt-4 text-xs text-slate-500 font-medium">
             Don&apos;t have an account yet?{" "}

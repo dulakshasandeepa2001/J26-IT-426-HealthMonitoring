@@ -11,10 +11,19 @@ from accounts.views import (
     set_doctor_availability, get_doctor_live_availability,
     get_doctor_queue, update_appointment_status, cancel_appointment,
     get_patient_appointments,
-    medical_officer_login_api, medical_officer_dashboard_data, medical_officer_submit_notice
+    medical_officer_login_api, medical_officer_dashboard_data, medical_officer_submit_notice,
+    verify_slmc_registration_api
 )
 from taskcreate.views import create_task, health_check, get_tasks, delete_task
-from model.api_views import analyze_voice_consultation_api
+from model.api_views import analyze_voice_consultation_api, rank_medicines_api, rag_recommend_medicines_api
+from accounts.family_views import (
+    save_family_profile_api,
+    get_family_tree_api,
+    sync_location_tracking_api,
+    get_location_exposure_api,
+    add_lab_record_api,
+    get_patient_lab_records_api,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,15 +57,27 @@ urlpatterns = [
     # Doctor Live Availability & Queue Management
     path("api/doctor/set-availability/", set_doctor_availability),
     path("api/doctor/get-availability/", get_doctor_live_availability),
+    path("api/doctor/availability/", get_doctor_live_availability),
     path("api/doctor/queue/", get_doctor_queue),
+    path("api/doctor/verify-slmc/", verify_slmc_registration_api),
 
-    # AI Voice Analysis Endpoint
+    # AI Voice Analysis & Clinical RAG Medicine Recommendation Endpoints
     path('api/consultation/analyze-voice/', analyze_voice_consultation_api, name='analyze_voice_consultation'),
+    path('api/consultation/rank-medicines/', rank_medicines_api, name='rank_medicines'),
+    path('api/consultation/rag-recommend/', rag_recommend_medicines_api, name='rag_recommend_medicines'),
 
     # Medical Officer / Public Health Inspector (PHI) Endpoints
     path("api/medical-officer/login/", medical_officer_login_api),
     path("api/medical-officer/dashboard-data/", medical_officer_dashboard_data),
     path("api/medical-officer/submit-notice/", medical_officer_submit_notice),
+
+    # Family Tree, Location Tracking & Laboratory Data Endpoints
+    path("api/patient/family-tree/save/", save_family_profile_api),
+    path("api/patient/family-tree/<int:patient_id>/", get_family_tree_api),
+    path("api/mobile/location/sync/", sync_location_tracking_api),
+    path("api/mobile/location/exposure/<int:patient_id>/", get_location_exposure_api),
+    path("api/lab/records/add/", add_lab_record_api),
+    path("api/lab/records/<int:patient_id>/", get_patient_lab_records_api),
 
     # Ransara's Prescription Intelligence Endpoints
     path("api/prescription/", include("prescription_context.urls")),

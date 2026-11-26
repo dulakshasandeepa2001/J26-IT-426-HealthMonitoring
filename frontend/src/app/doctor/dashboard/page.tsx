@@ -35,7 +35,10 @@ import {
   X,
   Power,
   Radio,
-  Upload
+  Upload,
+  Heart,
+  Thermometer,
+  Wind
 } from "lucide-react";
 import { apiRequest, apiBaseUrl } from "@/lib/api";
 
@@ -305,12 +308,26 @@ export default function DoctorDashboard() {
   const audioChunksRef = React.useRef<Blob[]>([]);
   const recordingTimerRef = React.useRef<any>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const speechRecognitionRef = React.useRef<any>(null);
+  const capturedLiveTextRef = React.useRef<string>("");
+  const [consultationLanguage, setConsultationLanguage] = useState<"si" | "en" | "auto">("si");
 
   const [transcript, setTranscript] = useState(
     "Doctor, the patient reports high fever, severe headache, and nausea for 3 days."
   );
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [selectedCondition, setSelectedCondition] = useState<any>(null);
   const [analyzingAi, setAnalyzingAi] = useState(false);
+
+  // Doctor Physical Examination & Clinical Vitals Desk (Heart Rate, BP, Temp, SpO2, Auscultation)
+  const [doctorVitals, setDoctorVitals] = useState({
+    heart_rate: "",
+    blood_pressure: "",
+    temperature: "",
+    spo2: "",
+    respiratory_rate: "",
+    stethoscope_auscultation: "Normal Vesicular (Clear)",
+  });
 
   // Sidebar tab switcher: Queue vs Tasks
   const [sidebarTab, setSidebarTab] = useState<"queue" | "tasks">("queue");
@@ -673,7 +690,7 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 1. Audio Recording with MediaRecorder (Streams Audio directly to OpenAI Whisper)
+  // 1. Audio Recording with MediaRecorder + Real-Time Browser Speech Recognition (Chrome si-LK)
   const toggleListening = async () => {
     if (!isListening) {
       try {
@@ -691,6 +708,7 @@ export default function DoctorDashboard() {
 
         const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
         audioChunksRef.current = [];
+        capturedLiveTextRef.current = "";
 
         recorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) {
@@ -698,17 +716,73 @@ export default function DoctorDashboard() {
           }
         };
 
+        // Initialize Web Speech API for real-time speech dictation in Chrome
+        const SpeechRec =
+          typeof window !== "undefined"
+            ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+            : null;
+
+        if (SpeechRec) {
+          try {
+            const recognizer = new SpeechRec();
+            recognizer.continuous = true;
+            recognizer.interimResults = true;
+            recognizer.lang =
+              consultationLanguage === "si" ? "si-LK" : consultationLanguage === "en" ? "en-US" : "si-LK";
+
+            recognizer.onresult = (event: any) => {
+              let finalTranscript = "";
+              let interimTranscript = "";
+              for (let i = 0; i < event.results.length; i++) {
+                const item = event.results[i];
+                if (item.isFinal) {
+                  finalTranscript += item[0].transcript + " ";
+                } else {
+                  interimTranscript += item[0].transcript;
+                }
+              }
+              const currentSpeech = (finalTranscript + interimTranscript).trim();
+              if (currentSpeech) {
+                capturedLiveTextRef.current = currentSpeech;
+                setTranscript(currentSpeech);
+              }
+            };
+
+            recognizer.onerror = (e: any) => {
+              console.warn("Real-time browser speech recognition error, will use Whisper backend:", e);
+            };
+
+            recognizer.start();
+            speechRecognitionRef.current = recognizer;
+          } catch (recErr) {
+            console.warn("Could not start Web Speech Recognition:", recErr);
+          }
+        }
+
         recorder.onstop = async () => {
           stream.getTracks().forEach((track) => track.stop());
           clearInterval(recordingTimerRef.current);
           setRecordingSeconds(0);
 
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: recorder.mimeType || "audio/webm",
-          });
+          if (speechRecognitionRef.current) {
+            try {
+              speechRecognitionRef.current.stop();
+            } catch (_) {}
+            speechRecognitionRef.current = null;
+          }
 
-          if (audioBlob.size > 0) {
-            await handleSendAudioToWhisper(audioBlob);
+          const liveText = capturedLiveTextRef.current.trim();
+          // If browser speech recognition captured high-accuracy live text, analyze immediately:
+          if (liveText && liveText.length > 5) {
+            await handleAnalyzeVoiceConsultationWithText(liveText);
+          } else {
+            // Otherwise, send recorded audio directly to backend Whisper ASR:
+            const audioBlob = new Blob(audioChunksRef.current, {
+              type: recorder.mimeType || "audio/webm",
+            });
+            if (audioBlob.size > 0) {
+              await handleSendAudioToWhisper(audioBlob);
+            }
           }
         };
 
@@ -724,7 +798,16 @@ export default function DoctorDashboard() {
         alert("Microphone access was denied or is unavailable. Please allow mic permissions or upload an audio file.");
       }
     } else {
+      if (speechRecognitionRef.current) {
+        try {
+          speechRecognitionRef.current.stop();
+        } catch (_) {}
+        speechRecognitionRef.current = null;
+      }
       if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        try {
+          mediaRecorder.requestData();
+        } catch (_) {}
         mediaRecorder.stop();
       }
       setIsListening(false);
@@ -742,6 +825,8 @@ export default function DoctorDashboard() {
       formData.append("patient_id", String(currentPatient?.id || 12));
       formData.append("doctor_id", String(doctorId || 2));
       formData.append("location", currentPatient?.location || "Colombo District");
+      formData.append("language", consultationLanguage);
+      formData.append("vitals", JSON.stringify(doctorVitals));
 
       const res = await fetch(`${apiBaseUrl()}/api/consultation/analyze-voice/`, {
         method: "POST",
@@ -756,6 +841,19 @@ export default function DoctorDashboard() {
         }
         if (data.payload) {
           setAiAnalysis(data.payload);
+          const detectedV = data.payload.clinical_vitals || data.payload.extracted_clinical_notes?.vital_signs_mentioned;
+          if (detectedV) {
+            setDoctorVitals(prev => ({
+              heart_rate: prev.heart_rate || detectedV.heart_rate || "",
+              blood_pressure: prev.blood_pressure || detectedV.blood_pressure || "",
+              temperature: prev.temperature || detectedV.temperature || "",
+              spo2: prev.spo2 || detectedV.spo2 || "",
+              respiratory_rate: prev.respiratory_rate || detectedV.respiratory_rate || "",
+              stethoscope_auscultation: prev.stethoscope_auscultation && prev.stethoscope_auscultation !== "Normal Vesicular (Clear)"
+                ? prev.stethoscope_auscultation
+                : (detectedV.stethoscope_auscultation || "Normal Vesicular (Clear)"),
+            }));
+          }
         }
       } else {
         alert(data.message || data.error || "Failed to process audio with Whisper.");
@@ -778,8 +876,8 @@ export default function DoctorDashboard() {
   };
 
   // Analyze Voice Consultation with Backend AI Model
-  const handleAnalyzeVoiceConsultation = async () => {
-    if (!transcript.trim()) {
+  const handleAnalyzeVoiceConsultationWithText = async (textToAnalyze: string) => {
+    if (!textToAnalyze.trim()) {
       alert("Please record or enter consultation notes first.");
       return;
     }
@@ -789,15 +887,30 @@ export default function DoctorDashboard() {
       const data = await apiRequest("/api/consultation/analyze-voice/", {
         method: "POST",
         body: JSON.stringify({
-          transcript: transcript,
+          transcript: textToAnalyze,
           patient_id: currentPatient?.id || 12,
           doctor_id: doctorId || 2,
           location: currentPatient?.location || "Colombo District",
+          language: consultationLanguage,
+          vitals: doctorVitals,
         }),
       });
 
       if (data && (data.status === "success" || data.status === "warning" || data.payload)) {
         setAiAnalysis(data.payload);
+        const detectedV = data.payload.clinical_vitals || data.payload.extracted_clinical_notes?.vital_signs_mentioned;
+        if (detectedV) {
+          setDoctorVitals(prev => ({
+            heart_rate: prev.heart_rate || detectedV.heart_rate || "",
+            blood_pressure: prev.blood_pressure || detectedV.blood_pressure || "",
+            temperature: prev.temperature || detectedV.temperature || "",
+            spo2: prev.spo2 || detectedV.spo2 || "",
+            respiratory_rate: prev.respiratory_rate || detectedV.respiratory_rate || "",
+            stethoscope_auscultation: prev.stethoscope_auscultation && prev.stethoscope_auscultation !== "Normal Vesicular (Clear)"
+              ? prev.stethoscope_auscultation
+              : (detectedV.stethoscope_auscultation || "Normal Vesicular (Clear)"),
+          }));
+        }
       } else {
         alert(data.message || data.error || "AI Model could not identify clinical symptoms from this text.");
       }
@@ -809,11 +922,15 @@ export default function DoctorDashboard() {
     }
   };
 
+  const handleAnalyzeVoiceConsultation = async () => {
+    await handleAnalyzeVoiceConsultationWithText(transcript);
+  };
+
   // Filter past prescriptions based on search input
   const filteredPastPrescriptions = (currentPatient?.pastPrescriptions || []).filter((rx) =>
-    rx.diagnosis.toLowerCase().includes(historySearch.toLowerCase()) ||
-    rx.doctor.toLowerCase().includes(historySearch.toLowerCase()) ||
-    rx.medicines.some((m) => m.name.toLowerCase().includes(historySearch.toLowerCase()))
+    (rx.diagnosis || "").toLowerCase().includes(historySearch.toLowerCase()) ||
+    (rx.doctor || "").toLowerCase().includes(historySearch.toLowerCase()) ||
+    (rx.medicines || []).some((m) => (m.name || "").toLowerCase().includes(historySearch.toLowerCase()))
   );
 
   return (
@@ -1240,7 +1357,7 @@ export default function DoctorDashboard() {
                       high: "bg-amber-100 text-amber-800 border-amber-200",
                       medium: "bg-blue-100 text-blue-800 border-blue-200",
                       low: "bg-slate-100 text-slate-700 border-slate-200",
-                    }[task.priority.toLowerCase()] || "bg-slate-100 text-slate-700";
+                    }[(task.priority || "medium").toLowerCase()] || "bg-slate-100 text-slate-700";
 
                     return (
                       <div
@@ -1425,9 +1542,47 @@ export default function DoctorDashboard() {
               <Sparkles className="w-4 h-4 text-purple-600" />
               Live Consultation Voice Diagnostic Engine
             </span>
-            <p className="text-xs text-slate-500 max-w-md mb-6">
+            <p className="text-xs text-slate-500 max-w-md mb-4">
               Click the microphone to record clinical dialogue. AI automatically captures symptoms and medication requests.
             </p>
+
+            {/* Consultation Language Selector Pill */}
+            <div className="mb-5 flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-inner">
+              <span className="text-[11px] font-semibold text-slate-500 px-2">Speech Lang:</span>
+              <button
+                type="button"
+                onClick={() => setConsultationLanguage("si")}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                  consultationLanguage === "si"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                }`}
+              >
+                🇱🇰 සිංහල (Sinhala)
+              </button>
+              <button
+                type="button"
+                onClick={() => setConsultationLanguage("en")}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                  consultationLanguage === "en"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                }`}
+              >
+                🇬🇧 English
+              </button>
+              <button
+                type="button"
+                onClick={() => setConsultationLanguage("auto")}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                  consultationLanguage === "auto"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                }`}
+              >
+                🌐 Auto
+              </button>
+            </div>
 
             {/* Central Animated Mic Button & Recording Controls */}
             <div className="relative mb-5 flex flex-col items-center">
@@ -1512,12 +1667,17 @@ export default function DoctorDashboard() {
                   <Activity className="w-3.5 h-3.5 text-purple-600" />
                   Real-Time Clinical Transcript
                 </span>
-                {isListening && (
-                  <span className="flex items-center gap-1.5 text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-full">
-                    <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping"></span>
-                    Capturing Audio
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                    Auto Speaker &amp; Symptoms Detection
                   </span>
-                )}
+                  {isListening && (
+                    <span className="flex items-center gap-1.5 text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-full">
+                      <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping"></span>
+                      Capturing Audio
+                    </span>
+                  )}
+                </div>
               </div>
               <textarea
                 value={transcript}
@@ -1561,96 +1721,205 @@ export default function DoctorDashboard() {
             </div>
 
             {/* AI DIAGNOSTIC & CLINICAL INTELLIGENCE RESULTS CARD */}
-            {aiAnalysis && (
+            {aiAnalysis && (() => {
+              const activeDiagnosis = selectedCondition || aiAnalysis.primary_diagnosis;
+              const isValidCondition = activeDiagnosis &&
+                activeDiagnosis.condition_code !== "NO_SPEECH_DETECTED" &&
+                activeDiagnosis.condition_code !== "UNCLASSIFIED_OUT_OF_SCOPE";
+
+              return (
               <div className="w-full mt-4 bg-gradient-to-br from-purple-50/90 via-white to-indigo-50/90 border border-purple-200 rounded-3xl p-5 text-left shadow-md space-y-4 animate-in fade-in slide-in-from-top-3 duration-300">
                 
-                {/* Header Row: Primary Prediction, ICD-10, Severity & Confidence */}
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-purple-100">
-                  <div>
+                {/* 1. TOP SECTION: Potential Clinical Conditions (Candidate Cards at the Very Top) */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-purple-100">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-purple-600 bg-purple-100/80 px-2 py-0.5 rounded-full">
-                        AI Clinical Diagnostic Assessment
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-purple-600 bg-purple-100/80 px-2.5 py-0.5 rounded-full">
+                        Potential Clinical Conditions
                       </span>
-                      {aiAnalysis.primary_diagnosis?.icd_10_code && (
-                        <span className="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-md">
-                          ICD-10: {aiAnalysis.primary_diagnosis.icd_10_code}
-                        </span>
-                      )}
+                      <span className="text-[11px] font-bold text-slate-500">
+                        (Select 1 to Confirm &amp; Proceed)
+                      </span>
                     </div>
-                    <h4 className="text-lg font-black text-slate-900 mt-1">
-                      {aiAnalysis.primary_diagnosis?.condition_label}
-                    </h4>
-                    {aiAnalysis.primary_diagnosis?.clinical_description && (
-                      <p className="text-xs text-slate-600 leading-relaxed mt-1">
-                        {aiAnalysis.primary_diagnosis?.clinical_description}
-                      </p>
+                    {selectedCondition ? (
+                      <span className="text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 shadow-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Doctor Selected: {selectedCondition.condition_label}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-md">
+                        Auto-Selected: {activeDiagnosis?.condition_label}
+                      </span>
                     )}
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="inline-block text-xs font-black bg-purple-600 text-white px-3 py-1 rounded-xl shadow-xs">
-                      {Math.round((aiAnalysis.primary_diagnosis?.confidence || 0) * 100)}% Confidence
-                    </span>
-                    <span className={`block text-[10px] font-extrabold uppercase tracking-wider mt-1.5 ${
-                      aiAnalysis.primary_diagnosis?.severity_level === "Severe"
-                        ? "text-rose-600"
-                        : aiAnalysis.primary_diagnosis?.severity_level === "Moderate"
-                        ? "text-amber-600"
-                        : "text-emerald-600"
-                    }`}>
-                      Risk: {aiAnalysis.primary_diagnosis?.severity_level} (Score: {aiAnalysis.primary_diagnosis?.total_severity_score ?? 0})
-                    </span>
+
+                  {/* Candidate Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Primary Prediction Card */}
+                    {aiAnalysis.primary_diagnosis && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCondition(aiAnalysis.primary_diagnosis)}
+                        className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                          activeDiagnosis?.condition_code === aiAnalysis.primary_diagnosis.condition_code
+                            ? "bg-purple-600 text-white border-purple-700 shadow-md ring-2 ring-purple-300"
+                            : "bg-white text-slate-800 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                            activeDiagnosis?.condition_code === aiAnalysis.primary_diagnosis.condition_code
+                              ? "bg-white/25 text-white"
+                              : "bg-purple-100 text-purple-800"
+                          }`}>
+                            AI Top Match
+                          </span>
+                          <span className="text-xs font-black">
+                            {Math.round((aiAnalysis.primary_diagnosis.confidence || 0) * 100)}%
+                          </span>
+                        </div>
+                        <p className="font-extrabold text-sm mt-1.5 leading-snug">{aiAnalysis.primary_diagnosis.condition_label}</p>
+                        <span className="text-[10px] opacity-80 block mt-1">
+                          ICD-10: {aiAnalysis.primary_diagnosis.icd_10_code || "R69"} &bull; {aiAnalysis.primary_diagnosis.severity_level || "Standard"}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Differential Candidate Cards */}
+                    {aiAnalysis.differential_diagnoses?.map((diff: any, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedCondition(diff)}
+                        className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                          activeDiagnosis?.condition_code === diff.condition_code
+                            ? "bg-purple-600 text-white border-purple-700 shadow-md ring-2 ring-purple-300"
+                            : "bg-white text-slate-800 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                            activeDiagnosis?.condition_code === diff.condition_code
+                              ? "bg-white/25 text-white"
+                              : "bg-slate-100 text-slate-700"
+                          }`}>
+                            Alternative #{idx + 1}
+                          </span>
+                          <span className="text-xs font-black">
+                            {Math.round((diff.confidence || 0) * 100)}%
+                          </span>
+                        </div>
+                        <p className="font-extrabold text-sm mt-1.5 leading-snug">{diff.condition_label}</p>
+                        <span className="text-[10px] opacity-80 block mt-1">
+                          ICD-10: {diff.icd_10_code || "R69"}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Regional Location & Outbreak Surveillance Banner */}
-                {aiAnalysis.patient_location && (
-                  <div className="p-3.5 bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/80 border border-blue-200/80 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-lg bg-blue-100 text-blue-700">
-                          <Activity className="w-3.5 h-3.5" />
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 block">
-                            Regional Outbreak Surveillance &bull; {aiAnalysis.patient_location.province || "Western Province"}
+                {/* 2. Extracted Clinical Symptoms Badges */}
+                <div className="pt-2 border-t border-purple-100/70 space-y-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                    Extracted Clinical Symptoms ({aiAnalysis.extracted_symptoms?.length || 0}):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {aiAnalysis.extracted_symptoms?.length > 0 ? (
+                      aiAnalysis.extracted_symptoms.map((sym: any, idx: number) => (
+                        <span
+                          key={idx}
+                          className="text-[11px] font-semibold bg-white border border-purple-200 text-slate-800 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-xs"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                          {sym.symptom_label}
+                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md ${
+                            sym.severity === "severe"
+                              ? "bg-rose-100 text-rose-700"
+                              : sym.severity === "moderate"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-slate-100 text-slate-600"
+                          }`}>
+                            {sym.severity}
                           </span>
-                          <span className="text-xs font-bold text-slate-800">
-                            Location: {aiAnalysis.patient_location.matched_query || aiAnalysis.patient_location.district}
-                          </span>
-                        </div>
-                      </div>
-                      <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                        aiAnalysis.patient_location.alert_level === "High Risk"
-                          ? "bg-rose-100 text-rose-700 border-rose-300"
-                          : aiAnalysis.patient_location.alert_level === "Moderate-to-High Risk"
-                          ? "bg-amber-100 text-amber-800 border-amber-300"
-                          : "bg-emerald-100 text-emerald-700 border-emerald-300"
-                      }`}>
-                        {aiAnalysis.patient_location.alert_level || "Active Surveillance"}
-                      </span>
+                          {sym.duration && sym.duration !== "unspecified" && (
+                            <span className="text-[9px] text-slate-500">
+                              ({sym.duration})
+                            </span>
+                          )}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">No recognizable symptoms extracted yet.</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. Negated Symptoms Excluded */}
+                {aiAnalysis.negated_symptoms_excluded?.length > 0 && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Negated / Excluded:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {aiAnalysis.negated_symptoms_excluded.map((neg: string, idx: number) => (
+                        <span key={idx} className="text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md line-through">
+                          {neg.replace(/_/g, " ")}
+                        </span>
+                      ))}
                     </div>
-
-                    {aiAnalysis.regional_outbreak_surveillance?.active_clusters?.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-blue-100/80">
-                        <span className="text-[10px] font-bold text-slate-500">Active Viral Clusters:</span>
-                        {aiAnalysis.regional_outbreak_surveillance.active_clusters.map((cluster: string, idx: number) => (
-                          <span key={idx} className="text-[10px] font-semibold bg-white text-indigo-700 border border-blue-200 px-2 py-0.5 rounded-md shadow-2xs">
-                            &bull; {cluster}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {aiAnalysis.patient_location.regional_advisory && (
-                      <p className="text-[11px] text-slate-600 leading-relaxed font-medium bg-white/70 p-2 rounded-xl border border-blue-100">
-                        <strong>Regional Advisory:</strong> {aiAnalysis.patient_location.regional_advisory}
-                      </p>
-                    )}
                   </div>
                 )}
 
-                {/* Clinical Allergies & Safety Warnings Alert */}
-                {aiAnalysis.extracted_clinical_notes?.patient_reported_allergies?.length > 0 ? (
+                {/* 4. Doctor Inquiries & Questions Saved */}
+                {aiAnalysis.doctor_questions?.length > 0 && (
+                  <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-1.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wide text-blue-800 flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-blue-600" />
+                      Doctor Inquiries &amp; Questions Saved:
+                    </span>
+                    <ul className="text-xs text-blue-950 font-medium space-y-1">
+                      {aiAnalysis.doctor_questions.map((q: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="font-bold text-blue-600">&bull;</span>
+                          <span>{q}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 5. Doctor vs Patient Dialogue Breakdown */}
+                {aiAnalysis.clinical_dialogue_turns?.length > 0 && (
+                  <div className="pt-2 border-t border-purple-100/70 space-y-1.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-purple-600" />
+                      Doctor vs Patient Dialogue Breakdown:
+                    </span>
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                      {aiAnalysis.clinical_dialogue_turns.map((turn: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className={`flex items-start gap-2 p-2 rounded-xl text-xs ${
+                            turn.speaker === "doctor"
+                              ? "bg-blue-50/80 border border-blue-100 text-blue-950"
+                              : "bg-emerald-50/80 border border-emerald-100 text-emerald-950"
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md shrink-0 ${
+                              turn.speaker === "doctor"
+                                ? "bg-blue-600 text-white"
+                                : "bg-emerald-600 text-white"
+                            }`}
+                          >
+                            {turn.speaker === "doctor" ? "🩺 Doctor" : "👤 Patient"}
+                          </span>
+                          <span className="leading-relaxed font-medium">{turn.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. Clinical Allergies & Safety Warnings Alert */}
+                {aiAnalysis.extracted_clinical_notes?.patient_reported_allergies?.length > 0 && (
                   <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -1663,7 +1932,6 @@ export default function DoctorDashboard() {
                         Doctor Attention Required
                       </span>
                     </div>
-                    
                     <div className="flex flex-wrap gap-1.5">
                       <span className="text-[10px] font-bold text-rose-800 self-center">Reported Drug Allergens:</span>
                       {aiAnalysis.extracted_clinical_notes.patient_reported_allergies.map((allergen: string, idx: number) => (
@@ -1672,113 +1940,10 @@ export default function DoctorDashboard() {
                         </span>
                       ))}
                     </div>
-
-                    {aiAnalysis.extracted_clinical_notes?.allergy_contraindications?.length > 0 && (
-                      <ul className="text-[11px] text-rose-900 font-medium space-y-1 bg-white/60 p-2 rounded-xl border border-rose-100">
-                        {aiAnalysis.extracted_clinical_notes.allergy_contraindications.map((warning: string, idx: number) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
-                            <span>{warning}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ) : aiAnalysis.extracted_clinical_notes?.allergy_status === "No Known Drug Allergies (NKDA)" ? (
-                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2 text-xs font-bold text-emerald-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>No Known Drug Allergies (NKDA) reported by patient in dialogue.</span>
-                  </div>
-                ) : null}
-
-                {/* Current Ongoing Medications & Vitals Mentioned Row */}
-                {(aiAnalysis.extracted_clinical_notes?.patient_current_medications?.length > 0 || 
-                  (aiAnalysis.extracted_clinical_notes?.vital_signs_mentioned && Object.keys(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).length > 0)) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                    {/* Current Meds */}
-                    {aiAnalysis.extracted_clinical_notes?.patient_current_medications?.length > 0 && (
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                          Current Ongoing Medications:
-                        </span>
-                        <div className="flex flex-wrap gap-1">
-                          {aiAnalysis.extracted_clinical_notes.patient_current_medications.map((med: string, idx: number) => (
-                            <span key={idx} className="text-[11px] font-semibold bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                              <Pill className="w-3 h-3 text-purple-600" />
-                              {med}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Vitals */}
-                    {aiAnalysis.extracted_clinical_notes?.vital_signs_mentioned && Object.keys(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).length > 0 && (
-                      <div className="p-3 bg-purple-50/60 border border-purple-200/80 rounded-2xl space-y-1.5">
-                        <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">
-                          Reported Vital Signs:
-                        </span>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          {Object.entries(aiAnalysis.extracted_clinical_notes.vital_signs_mentioned).map(([k, v]) => (
-                            <span key={k} className="bg-white border border-purple-200 px-2 py-0.5 rounded-md text-slate-800 font-semibold">
-                              <span className="capitalize text-slate-500">{k.replace('_', ' ')}:</span> {String(v)}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 
-                {/* Detected Symptoms Badges */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
-                    Extracted Clinical Symptoms ({aiAnalysis.extracted_symptoms?.length || 0}):
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {aiAnalysis.extracted_symptoms?.map((sym: any, idx: number) => (
-                      <span
-                        key={idx}
-                        className="text-[11px] font-semibold bg-white border border-purple-200 text-slate-800 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-xs"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
-                        {sym.symptom_label}
-                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md ${
-                          sym.severity === "severe"
-                            ? "bg-rose-100 text-rose-700"
-                            : sym.severity === "moderate"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}>
-                          {sym.severity}
-                        </span>
-                        {sym.duration && sym.duration !== "unspecified" && (
-                          <span className="text-[9px] text-slate-500">
-                            ({sym.duration})
-                          </span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Differential Diagnoses if present */}
-                {aiAnalysis.differential_diagnoses?.length > 0 && (
-                  <div className="pt-2 border-t border-purple-100/70">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
-                      Differential Diagnoses (Alternatives):
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {aiAnalysis.differential_diagnoses.map((diff: any, idx: number) => (
-                        <span key={idx} className="text-xs bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-lg font-medium border border-slate-200">
-                          {diff.condition_label} ({Math.round(diff.confidence * 100)}%)
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Recommended Precautions */}
+                {/* 7. Recommended Precautions */}
                 {aiAnalysis.recommended_precautions?.length > 0 && (
                   <div className="pt-2 border-t border-purple-100/70">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
@@ -1795,28 +1960,45 @@ export default function DoctorDashboard() {
                   </div>
                 )}
 
-                {/* 1-Click Action Button: Send to Component 3 Prescription Workspace */}
+                {/* 8. 1-Click Action Button: Send to Component 3 Prescription Workspace */}
                 <div className="pt-3 border-t border-purple-200 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-xs font-bold text-slate-800 block">
-                      Ready for Prescription Decision Support
+                      {isValidCondition
+                        ? `Ready for Prescription Decision Support (${activeDiagnosis?.condition_label})`
+                        : "Diagnosis Selection Required"}
                     </span>
                     <span className="text-[10px] text-slate-500">
-                      Transfers verified diagnosis, allergies, and location to Component 3
+                      {isValidCondition
+                        ? "Transfers confirmed diagnosis, patient symptoms, and allergies to Component 3"
+                        : "Please select a candidate condition above or record clinical notes"}
                     </span>
                   </div>
-                  <Link
-                    href={`/doctor/prescription-workspace?patientId=${currentPatient?.id || 12}&condition=${aiAnalysis.primary_diagnosis?.condition_code || ''}&location=${encodeURIComponent(aiAnalysis.patient_location?.district || '')}`}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold flex items-center gap-2 shadow-sm shadow-purple-600/20 transition-all cursor-pointer"
-                  >
-                    <Pill className="w-3.5 h-3.5" />
-                    Proceed to Prescription Workspace
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
+                  {isValidCondition ? (
+                    <Link
+                      href={`/doctor/prescription-workspace?patientId=${currentPatient?.id || 12}&condition=${activeDiagnosis?.condition_code || ''}&location=${encodeURIComponent(aiAnalysis.patient_location?.district || '')}`}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold flex items-center gap-2 shadow-sm shadow-purple-600/20 transition-all cursor-pointer"
+                    >
+                      <Pill className="w-3.5 h-3.5" />
+                      Accept &amp; Proceed to Prescription Workspace
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="px-4 py-2 rounded-xl bg-slate-200 text-slate-400 text-xs font-extrabold flex items-center gap-2 cursor-not-allowed"
+                    >
+                      <Pill className="w-3.5 h-3.5" />
+                      Select Condition to Proceed
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
 
               </div>
-            )}
+              );
+            })()}
 
           </section>
 

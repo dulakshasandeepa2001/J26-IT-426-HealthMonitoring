@@ -192,12 +192,21 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
+    r"^http://192\.168\.\d+\.\d+(:\d+)?$",
+    r"^http://10\.\d+\.\d+\.\d+(:\d+)?$",
+    r"^http://172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     *LOCAL_DEV_ORIGINS,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.56.1:3000",
+    "http://192.168.56.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
     "http://localhost:8081",
     "http://127.0.0.1:8081",
     "http://localhost:8082",
@@ -205,7 +214,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://yuemlsjtzdpgclgnlogg.supabase.co",
 ]
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+SESSION_COOKIE_SECURE = False
 
 # Component 1 worker receiver. Keep its key in backend/.env, never in the frontend.
 # An existing active approved admin account can be the service identity; no staff
